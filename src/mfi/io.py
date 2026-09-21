@@ -92,8 +92,15 @@ def _read_on_grid(href: str, grid: Grid, resampling: Resampling) -> tuple[np.nda
 
     The mask comes from the VRT itself, so it is right for every nodata
     convention: explicit nodata value, NaN, alpha band, or plain out-of-extent.
+
+    A float source with no declared nodata (Copernicus DEM on Planetary
+    Computer) is given NaN as nodata; otherwise GDAL cannot mark out-of-extent
+    pixels and the VRT reports the whole grid as valid, filled with 0.
     """
     with rasterio.open(href) as src:
+        nodata = src.nodata
+        if nodata is None and np.issubdtype(np.dtype(src.dtypes[0]), np.floating):
+            nodata = float("nan")
         with WarpedVRT(
             src,
             crs=grid.crs,
@@ -101,6 +108,7 @@ def _read_on_grid(href: str, grid: Grid, resampling: Resampling) -> tuple[np.nda
             width=grid.width,
             height=grid.height,
             resampling=resampling,
+            nodata=nodata,
         ) as vrt:
             return vrt.read(1), vrt.read_masks(1) > 0
 
