@@ -1,0 +1,296 @@
+{
+  "train": {
+    "open_water": {
+      "vv": {
+        "n_flood": 2687401,
+        "n_dry": 433771,
+        "flood_p10": -24.75,
+        "flood_median": -19.75,
+        "flood_p90": -11.25,
+        "dry_median": -12.25,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.14302331509142105,
+        "frac_flood_at_or_above_dry_median": 0.16620295966251408
+      },
+      "vh": {
+        "n_flood": 2687401,
+        "n_dry": 433771,
+        "flood_p10": -34.25,
+        "flood_median": -27.25,
+        "flood_p90": -22.75,
+        "dry_median": -19.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.02649734818138417,
+        "frac_flood_at_or_above_dry_median": 0.030651547722130044
+      }
+    },
+    "cropland": {
+      "vv": {
+        "n_flood": 1887610,
+        "n_dry": 20470496,
+        "flood_p10": -20.75,
+        "flood_median": -12.75,
+        "flood_p90": -7.75,
+        "dry_median": -9.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.4367162708398451,
+        "frac_flood_at_or_above_dry_median": 0.2593999819878047
+      },
+      "vh": {
+        "n_flood": 1887610,
+        "n_dry": 20470496,
+        "flood_p10": -28.75,
+        "flood_median": -21.25,
+        "flood_p90": -15.75,
+        "dry_median": -16.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.3468725001456869,
+        "frac_flood_at_or_above_dry_median": 0.16795471522189434
+      }
+    },
+    "vegetation": {
+      "vv": {
+        "n_flood": 2009731,
+        "n_dry": 50866484,
+        "flood_p10": -20.25,
+        "flood_median": -12.75,
+        "flood_p90": -7.25,
+        "dry_median": -9.25,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.4279532932516839,
+        "frac_flood_at_or_above_dry_median": 0.23738002747631398
+      },
+      "vh": {
+        "n_flood": 2009731,
+        "n_dry": 50866484,
+        "flood_p10": -28.75,
+        "flood_median": -22.25,
+        "flood_p90": -16.25,
+        "dry_median": -15.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.2850132679448145,
+        "frac_flood_at_or_above_dry_median": 0.09644972386851773
+      }
+    },
+    "built": {
+      "vv": {
+        "n_flood": 6541,
+        "n_dry": 995429,
+        "flood_p10": -16.25,
+        "flood_median": -10.75,
+        "flood_p90": -3.25,
+        "dry_median": -9.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.6003669163736431,
+        "frac_flood_at_or_above_dry_median": 0.4178260204861642
+      },
+      "vh": {
+        "n_flood": 6541,
+        "n_dry": 995429,
+        "flood_p10": -25.25,
+        "flood_median": -18.25,
+        "flood_p90": -12.25,
+        "dry_median": -16.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.6057177801559395,
+        "frac_flood_at_or_above_dry_median": 0.39841002904754624
+      }
+    }
+  },
+  "valid": {
+    "open_water": {
+      "vv": {
+        "n_flood": 531143,
+        "n_dry": 32937,
+        "flood_p10": -29.25,
+        "flood_median": -24.25,
+        "flood_p90": -18.75,
+        "dry_median": -12.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.01340881834082347,
+        "frac_flood_at_or_above_dry_median": 0.019872237796600915
+      },
+      "vh": {
+        "n_flood": 531143,
+        "n_dry": 32937,
+        "flood_p10": -43.75,
+        "flood_median": -32.25,
+        "flood_p90": -25.75,
+        "dry_median": -19.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.01450268571740567,
+        "frac_flood_at_or_above_dry_median": 0.017539532668226825
+      }
+    },
+    "cropland": {
+      "vv": {
+        "n_flood": 765131,
+        "n_dry": 2595875,
+        "flood_p10": -24.25,
+        "flood_median": -19.25,
+        "flood_p90": -10.25,
+        "dry_median": -10.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.1564111243695524,
+        "frac_flood_at_or_above_dry_median": 0.11970107079702691
+      },
+      "vh": {
+        "n_flood": 765131,
+        "n_dry": 2595875,
+        "flood_p10": -34.25,
+        "flood_median": -26.75,
+        "flood_p90": -19.25,
+        "dry_median": -17.25,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.11703616766279239,
+        "frac_flood_at_or_above_dry_median": 0.05100825871648123
+      }
+    },
+    "vegetation": {
+      "vv": {
+        "n_flood": 506882,
+        "n_dry": 4109763,
+        "flood_p10": -23.25,
+        "flood_median": -15.75,
+        "flood_p90": -9.75,
+        "dry_median": -9.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.25353632600881465,
+        "frac_flood_at_or_above_dry_median": 0.12253542244546067
+      },
+      "vh": {
+        "n_flood": 506882,
+        "n_dry": 4109763,
+        "flood_p10": -31.75,
+        "flood_median": -22.25,
+        "flood_p90": -15.25,
+        "dry_median": -15.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.3409846867712801,
+        "frac_flood_at_or_above_dry_median": 0.1298310060329623
+      }
+    },
+    "built": {
+      "vv": {
+        "n_flood": 9375,
+        "n_dry": 1011983,
+        "flood_p10": -16.25,
+        "flood_median": -9.75,
+        "flood_p90": -1.75,
+        "dry_median": -8.25,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.6781866666666667,
+        "frac_flood_at_or_above_dry_median": 0.4282666666666667
+      },
+      "vh": {
+        "n_flood": 9375,
+        "n_dry": 1011983,
+        "flood_p10": -25.75,
+        "flood_median": -19.25,
+        "flood_p90": -12.75,
+        "dry_median": -15.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.5342933333333333,
+        "frac_flood_at_or_above_dry_median": 0.2660266666666667
+      }
+    }
+  },
+  "test": {
+    "open_water": {
+      "vv": {
+        "n_flood": 516519,
+        "n_dry": 5200,
+        "flood_p10": -26.75,
+        "flood_median": -22.25,
+        "flood_p90": -19.25,
+        "dry_median": -19.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.006721921168437173,
+        "frac_flood_at_or_above_dry_median": 0.1816796671564841
+      },
+      "vh": {
+        "n_flood": 516519,
+        "n_dry": 5200,
+        "flood_p10": -39.75,
+        "flood_median": -30.25,
+        "flood_p90": -25.25,
+        "dry_median": -25.25,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.00936461195038324,
+        "frac_flood_at_or_above_dry_median": 0.10049581912766035
+      }
+    },
+    "cropland": {
+      "vv": {
+        "n_flood": 654764,
+        "n_dry": 817696,
+        "flood_p10": -23.75,
+        "flood_median": -19.75,
+        "flood_p90": -12.75,
+        "dry_median": -8.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.08082912316498769,
+        "frac_flood_at_or_above_dry_median": 0.02864085380381328
+      },
+      "vh": {
+        "n_flood": 654764,
+        "n_dry": 817696,
+        "flood_p10": -36.25,
+        "flood_median": -28.75,
+        "flood_p90": -20.75,
+        "dry_median": -16.25,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.07300340275274755,
+        "frac_flood_at_or_above_dry_median": 0.023032726295275856
+      }
+    },
+    "vegetation": {
+      "vv": {
+        "n_flood": 504608,
+        "n_dry": 4426689,
+        "flood_p10": -22.75,
+        "flood_median": -17.25,
+        "flood_p90": -10.25,
+        "dry_median": -8.25,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.18911313336292726,
+        "frac_flood_at_or_above_dry_median": 0.049489901071723
+      },
+      "vh": {
+        "n_flood": 504608,
+        "n_dry": 4426689,
+        "flood_p10": -32.25,
+        "flood_median": -24.25,
+        "flood_p90": -16.25,
+        "dry_median": -14.25,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.2537098103874691,
+        "frac_flood_at_or_above_dry_median": 0.03600022195446763
+      }
+    },
+    "built": {
+      "vv": {
+        "n_flood": 1317,
+        "n_dry": 32741,
+        "flood_p10": -17.25,
+        "flood_median": -8.75,
+        "flood_p90": -2.75,
+        "dry_median": -7.75,
+        "global_threshold": -11.9140625,
+        "frac_flood_above_threshold": 0.7198177676537585,
+        "frac_flood_at_or_above_dry_median": 0.4472285497342445
+      },
+      "vh": {
+        "n_flood": 1317,
+        "n_dry": 32741,
+        "flood_p10": -25.75,
+        "flood_median": -16.75,
+        "flood_p90": -12.25,
+        "dry_median": -14.75,
+        "global_threshold": -19.6484375,
+        "frac_flood_above_threshold": 0.6772968868640851,
+        "frac_flood_at_or_above_dry_median": 0.3234624145785877
+      }
+    }
+  }
+}
