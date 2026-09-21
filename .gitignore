@@ -24,3 +24,6 @@ outputs/
 *.pt
 *.pth
 *.ckpt
+
+# results: keep metrics/logs/configs, drop predictions
+results/**/pred/

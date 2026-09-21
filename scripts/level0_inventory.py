@@ -21,23 +21,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, io, strata  # noqa: E402
 
 OUT_DIR = catalog.DATA / "interim"
-WC_DIR = OUT_DIR / "worldcover_chips"
 CSV = catalog.ROOT / "docs" / "level0_inventory.csv"
-
-
-def worldcover_cached(chip_id: str, grid: io.Grid) -> np.ndarray:
-    p = WC_DIR / f"{chip_id}_WorldCover2020.tif"
-    if p.exists():
-        with rasterio.open(p) as src:
-            return src.read(1)
-    wc = io.worldcover_on_grid(grid, year=2020)
-    WC_DIR.mkdir(parents=True, exist_ok=True)
-    with rasterio.open(
-        p, "w", driver="GTiff", height=grid.height, width=grid.width, count=1, dtype="uint8",
-        crs=grid.crs, transform=grid.transform, compress="deflate", nodata=0,
-    ) as dst:
-        dst.write(wc, 1)
-    return wc
 
 
 def main():
@@ -53,7 +37,7 @@ def main():
 
     def prefetch(chip):
         _, _, grid = io.read_s1f11_chip(chip)
-        worldcover_cached(chip, grid)
+        io.worldcover_chip(chip, grid)
 
     with cf.ThreadPoolExecutor(8) as ex:
         list(tqdm(ex.map(prefetch, chips), total=len(chips), desc="worldcover"))
@@ -61,7 +45,7 @@ def main():
     rows = []
     for chip in tqdm(chips, desc="chips"):
         s1, label, grid = io.read_s1f11_chip(chip)
-        wc = worldcover_cached(chip, grid)
+        wc = io.worldcover_chip(chip, grid)
         c = strata.counts(label, strata.land_type(wc))
         vv, vh = s1[0], s1[1]
         valid = label >= 0

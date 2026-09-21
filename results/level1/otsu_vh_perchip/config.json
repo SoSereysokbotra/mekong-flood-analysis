@@ -1,0 +1,7 @@
+{
+  "method": "otsu_vh_perchip",
+  "global_thresholds": {
+    "vv": -11.9140625,
+    "vh": -19.6484375
+  }
+}

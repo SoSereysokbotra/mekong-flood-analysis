@@ -14,7 +14,6 @@ import sys
 
 import matplotlib
 import numpy as np
-import rasterio
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -24,7 +23,6 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, io, strata  # noqa: E402
 
 FIG_DIR = catalog.ROOT / "docs" / "figures"
-WC_DIR = catalog.DATA / "interim" / "worldcover_chips"
 
 
 def richest_mekong_chip() -> str:
@@ -36,8 +34,7 @@ def richest_mekong_chip() -> str:
 def main(chip: str | None):
     chip = chip or richest_mekong_chip()
     s1, lab, grid = io.read_s1f11_chip(chip)
-    with rasterio.open(WC_DIR / f"{chip}_WorldCover2020.tif") as src:
-        wc = src.read(1)
+    wc = io.worldcover_chip(chip, grid)
     land = strata.land_type(wc)
     n_crop = int(((lab == 1) & (land == strata.CROPLAND)).sum())
 

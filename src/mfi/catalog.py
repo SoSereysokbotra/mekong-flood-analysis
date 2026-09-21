@@ -153,6 +153,13 @@ S1F11_WEAK = S1F11 / "data" / "flood_events" / "WeaklyLabeled"
 # Events whose hand-labelled chips are held out entirely (rule 8, no leakage).
 HELD_OUT_EVENTS = ("Mekong",)
 
+# Validation is also split by *event*: every Sen1Floods11 event is one S1 scene,
+# so a chip-level split would put neighbouring pixels of the same scene in both
+# train and valid. Rule used to pick these two (from Level 0 counts, not from
+# any score): the non-held-out events whose cropland share of flood pixels is
+# closest to Mekong's 38.1 % -> Spain 38.3 %, Nigeria 39.6 %.
+VALID_EVENTS = ("Spain", "Nigeria")
+
 
 def s1f11_hand_chips() -> list[str]:
     """Chip ids like 'Mekong_123456' for every hand-labelled chip on disk."""
@@ -175,31 +182,24 @@ def s1f11_paths(chip_id: str) -> dict[str, pathlib.Path]:
 
 
 def s1f11_split() -> dict[str, list[str]]:
-    """Project split, by event, not by random chip.
+    """Project split, by event, never by chip.
 
     - test:  every chip from HELD_OUT_EVENTS (Cambodia)
-    - valid: the official valid+test chips of the remaining events
-    - train: the official train chips of the remaining events (+ Bolivia)
-    The official CSVs are only used to keep a valid/train partition within
-    non-held-out events; they never decide what goes into test.
+    - valid: every chip from VALID_EVENTS
+    - train: every chip from all other events (incl. Bolivia)
+    The official Sen1Floods11 CSVs are not used: they mix chips of one scene
+    across train/valid/test, which is exactly the overlap this project forbids.
     """
-    splits_dir = S1F11 / "splits" / "flood_handlabeled"
-
-    def read(name):
-        with open(splits_dir / f"flood_{name}_data.csv") as f:
-            return [line.split(",")[0].removesuffix("_S1Hand.tif") for line in f.read().split() if line]
-
-    official = {k: read(k) for k in ("train", "valid", "test", "bolivia")}
     out = {"train": [], "valid": [], "test": []}
-    for name, chips in official.items():
-        for c in chips:
-            if s1f11_event(c) in HELD_OUT_EVENTS:
-                out["test"].append(c)
-            elif name in ("valid", "test"):
-                out["valid"].append(c)
-            else:
-                out["train"].append(c)
-    return {k: sorted(v) for k, v in out.items()}
+    for c in s1f11_hand_chips():
+        e = s1f11_event(c)
+        if e in HELD_OUT_EVENTS:
+            out["test"].append(c)
+        elif e in VALID_EVENTS:
+            out["valid"].append(c)
+        else:
+            out["train"].append(c)
+    return out
 
 
 def s1f11_weak_chips() -> list[str]:

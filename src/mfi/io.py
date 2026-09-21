@@ -85,6 +85,29 @@ def read_s1f11_s2(chip_id: str) -> np.ndarray:
         return src.read()
 
 
+def worldcover_chip(chip_id: str, grid: Grid | None = None) -> np.ndarray:
+    """ESA WorldCover 2020 on a Sen1Floods11 chip grid, cached under data/interim.
+
+    Fetches from Planetary Computer on first use; afterwards reads the cached
+    GeoTIFF so every level uses the identical land-cover raster per chip.
+    """
+    p = catalog.DATA / "interim" / "worldcover_chips" / f"{chip_id}_WorldCover2020.tif"
+    if p.exists():
+        with rasterio.open(p) as src:
+            return src.read(1)
+    if grid is None:
+        with rasterio.open(catalog.s1f11_paths(chip_id)["s1"]) as src:
+            grid = Grid.of(src)
+    wc = worldcover_on_grid(grid, year=2020)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with rasterio.open(
+        p, "w", driver="GTiff", height=grid.height, width=grid.width, count=1, dtype="uint8",
+        crs=grid.crs, transform=grid.transform, compress="deflate", nodata=0,
+    ) as dst:
+        dst.write(wc, 1)
+    return wc
+
+
 # --- Ancillary rasters resampled onto a target grid -------------------------
 
 def _read_on_grid(href: str, grid: Grid, resampling: Resampling) -> tuple[np.ndarray, np.ndarray]:
