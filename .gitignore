@@ -1,0 +1,26 @@
+# data never goes in git
+data/raw/
+data/interim/
+data/labels/*.tif
+*.tif
+*.tiff
+*.nc
+*.zip
+*.tar
+*.tar.gz
+
+# python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+notebooks/*.ipynb_checkpoints
+
+# outputs
+runs/
+outputs/
+*.pt
+*.pth
+*.ckpt
