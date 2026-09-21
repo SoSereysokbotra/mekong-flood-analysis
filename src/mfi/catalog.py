@@ -20,10 +20,15 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 AOI_FILE = DATA / "aoi" / "banteay_meanchey_adm1.geojson"
 
-# Anchor event: Oct 2020 Cambodia floods. Relative orbit 26 ascending is the
-# same track as the Sen1Floods11 Cambodia event, so we prefer it.
-ANCHOR_REL_ORBIT = 26
-ANCHOR_ORBIT_STATE = "ascending"
+# Anchor event: Oct 2020 Cambodia floods. Two tracks cover 100% of Banteay
+# Meanchey: 164 descending (one slice per date, passes on the 14 Oct peak) and
+# 99 ascending (Oct 4/10/16/22). Track 164 is the default; 99 is the second,
+# independent viewing geometry for held-out checks. (Rel. orbit 26, the
+# Sen1Floods11 Cambodia track, does not touch this province.)
+ANCHOR_REL_ORBIT = 164
+ANCHOR_ORBIT_STATE = "descending"
+SECOND_REL_ORBIT = 99
+SECOND_ORBIT_STATE = "ascending"
 
 
 def aoi_geometry() -> dict:
@@ -73,8 +78,18 @@ class Scene:
             platform=p.get("platform", ""),
             href_vv=item.assets["vv"].href,
             href_vh=item.assets["vh"].href,
-            epsg=int(p["proj:epsg"]),
+            epsg=_epsg(p),
         )
+
+
+def _epsg(props: dict) -> int:
+    """Items carry either the old 'proj:epsg' or the newer 'proj:code' ('EPSG:32648')."""
+    if "proj:epsg" in props:
+        return int(props["proj:epsg"])
+    code = props.get("proj:code", "")
+    if code.upper().startswith("EPSG:"):
+        return int(code.split(":")[1])
+    return 0
 
 
 def s1_rtc_scenes(
@@ -87,7 +102,7 @@ def s1_rtc_scenes(
 ) -> list[Scene]:
     """Sentinel-1 RTC scenes over the AOI between two ISO dates (inclusive).
 
-    Defaults to the anchor track (rel. orbit 26 ascending). Pass
+    Defaults to the anchor track (rel. orbit 164 descending). Pass
     ``rel_orbit=None, orbit_state=None`` to get every track.
     Hrefs are signed and valid for roughly an hour; re-query rather than cache.
     """

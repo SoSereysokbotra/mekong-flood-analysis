@@ -10,7 +10,7 @@ All checks were made programmatically against live APIs on the date above.
 
 | Check | Result | Notes |
 | --- | --- | --- |
-| Sentinel-1 RTC (ARD) over AOI, Sep–Nov 2020 | **Obtained** | Microsoft Planetary Computer `sentinel-1-rtc`: 97 scenes, VV+VH, gamma-nought, 10 m, EPSG:32648 |
+| Sentinel-1 RTC (ARD) over AOI, Sep–Nov 2020 | **Obtained** | Microsoft Planetary Computer `sentinel-1-rtc`: two tracks with 100 % province coverage every 6 days each, VV+VH, gamma-nought, 10 m, EPSG:32648 |
 | Sentinel-1 GRD (raw) over AOI | Available | 93 scenes on Planetary Computer; also on Copernicus Data Space. Not needed if RTC works |
 | Sen1Floods11 benchmark | **Obtained** | Public GCS bucket `gs://sen1floods11/v1.1`. Hand-labelled subset downloaded (446 chips). Contains a **Cambodia event** |
 | ESA WorldCover 10 m | **Obtained** | Planetary Computer: 2020 v1.0 and 2021 v2.0 tiles cover AOI |
@@ -27,21 +27,23 @@ All checks were made programmatically against live APIs on the date above.
 
 ## Sentinel-1 acquisition calendar over the AOI
 
-Relative orbit **26, ascending** passes every 6 days (alternating S1A / S1B). This is the same track as the Sen1Floods11 Cambodia event (rel. orbit 26, ascending, 5 Aug 2018), so benchmark chips and the Oct 2020 scenes share viewing geometry.
+Checked against the province *polygon* (not a bounding box). Two tracks each cover 100 % of Banteay Meanchey; a third (91 descending) covers only the eastern 26 %. Relative orbit 26 — the Sen1Floods11 Cambodia track — does **not** touch this province, so benchmark chips and the Oct 2020 scenes will have different viewing geometry. That is a known held-out condition, not a problem.
+
+**Primary track: relative orbit 164, descending** (single full slice per date, ~23:00 UTC = ~06:00 local):
 
 | Date | Satellite | Role (flood 1–21 Oct, peak ~14 Oct) |
 | --- | --- | --- |
-| 2020-09-17 | S1A | pre |
-| 2020-09-23 | S1B | pre |
-| 2020-09-29 | S1A | **pre (reference)** |
-| 2020-10-05 | S1B | early flood |
-| 2020-10-11 | S1A | **during** |
-| 2020-10-17 | S1B | **during / peak** |
-| 2020-10-23 | S1A | receding |
-| 2020-10-29 | S1B | receding |
-| 2020-11-04 | S1A | **post** |
+| 2020-09-20 | S1B | pre |
+| 2020-09-26 | S1A | **pre (reference)** |
+| 2020-10-02 | S1B | onset |
+| 2020-10-08 | S1A | during |
+| 2020-10-14 | S1B | **during / peak** |
+| 2020-10-20 | S1A | during / receding |
+| 2020-10-26 | S1B | receding |
+| 2020-11-01 | S1A | **post** |
+| 2020-11-07 | S1B | post |
 
-Other tracks over the AOI (also VV+VH): rel. orbit 99 ascending (Oct 4, 10, 16, 22, 28), rel. orbit 164 and 91 descending. Available as extra held-out geometry if needed.
+**Second track: relative orbit 99, ascending** (two slices on S1B dates, ~11:20 UTC = ~18:20 local): Sep 22, Sep 28, Oct 4, Oct 10, Oct 16, Oct 22, Oct 28, Nov 3. Interleaved with track 164 this gives a ~3-day revisit and an independent look direction for Level 4 held-out checks.
 
 Each RTC item is a full slice (~28,000 × 21,500 px); the AOI will be windowed out with rasterio using the polygon above.
 
