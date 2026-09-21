@@ -148,6 +148,7 @@ def dem_items():
 
 S1F11 = DATA / "raw" / "sen1floods11"
 S1F11_HAND = S1F11 / "data" / "flood_events" / "HandLabeled"
+S1F11_WEAK = S1F11 / "data" / "flood_events" / "WeaklyLabeled"
 
 # Events whose hand-labelled chips are held out entirely (rule 8, no leakage).
 HELD_OUT_EVENTS = ("Mekong",)
@@ -199,3 +200,14 @@ def s1f11_split() -> dict[str, list[str]]:
             else:
                 out["train"].append(c)
     return {k: sorted(v) for k, v in out.items()}
+
+
+def s1f11_weak_chips() -> list[str]:
+    """Weakly-labelled chip ids on disk, with held-out events removed.
+
+    This is the only sanctioned way to list weak chips: it guarantees the model
+    never sees Cambodian imagery before test time, even via weak labels.
+    Weak labels are for optional training experiments only, never evaluation.
+    """
+    chips = sorted(p.stem.removesuffix("_S1Weak") for p in (S1F11_WEAK / "S1Weak").glob("*_S1Weak.tif"))
+    return [c for c in chips if s1f11_event(c) not in HELD_OUT_EVENTS]

@@ -21,11 +21,18 @@ DB_FLOOR = -50.0  # gamma-nought below this is treated as no signal (zero power)
 
 
 def to_db(power: np.ndarray) -> np.ndarray:
-    """Linear power -> dB with a floor, so log(0) cannot produce -inf."""
+    """Linear power -> dB. Zero power floors at DB_FLOOR; NaN (nodata) stays NaN.
+
+    Nodata must not become a very dark pixel: a dark pixel is what a flood
+    detector looks for, so RTC scene collars would otherwise be "flooded".
+    """
     p = np.asarray(power, dtype=np.float32)
+    nodata = np.isnan(p)
     with np.errstate(divide="ignore", invalid="ignore"):
         db = 10.0 * np.log10(p)
-    return np.where(np.isfinite(db), db, DB_FLOOR).clip(min=DB_FLOOR).astype(np.float32)
+    db = np.where(np.isfinite(db), db, DB_FLOOR).clip(min=DB_FLOOR).astype(np.float32)
+    db[nodata] = np.nan
+    return db
 
 
 class Grid:
@@ -66,13 +73,26 @@ def read_s1f11_chip(chip_id: str) -> tuple[np.ndarray, np.ndarray, Grid]:
 
 def read_s1f11_layer(chip_id: str, layer: str) -> np.ndarray:
     """One of 'otsu', 'jrc' (int8) for a chip. Never use these as labels."""
+    if layer not in ("otsu", "jrc"):
+        raise ValueError(f"layer must be 'otsu' or 'jrc', not {layer!r}; use read_s1f11_s2 for optical")
     with rasterio.open(catalog.s1f11_paths(chip_id)[layer]) as src:
         return src.read(1).astype(np.int8)
 
 
+def read_s1f11_s2(chip_id: str) -> np.ndarray:
+    """Sentinel-2 L1C reflectance chip, uint16 (13, H, W). Visual checks only."""
+    with rasterio.open(catalog.s1f11_paths(chip_id)["s2"]) as src:
+        return src.read()
+
+
 # --- Ancillary rasters resampled onto a target grid -------------------------
 
-def _read_on_grid(href: str, grid: Grid, resampling: Resampling, nodata=None) -> np.ndarray:
+def _read_on_grid(href: str, grid: Grid, resampling: Resampling) -> tuple[np.ndarray, np.ndarray]:
+    """(values, valid_mask) of band 1 warped onto `grid`.
+
+    The mask comes from the VRT itself, so it is right for every nodata
+    convention: explicit nodata value, NaN, alpha band, or plain out-of-extent.
+    """
     with rasterio.open(href) as src:
         with WarpedVRT(
             src,
@@ -81,9 +101,8 @@ def _read_on_grid(href: str, grid: Grid, resampling: Resampling, nodata=None) ->
             width=grid.width,
             height=grid.height,
             resampling=resampling,
-            nodata=nodata if nodata is not None else src.nodata,
         ) as vrt:
-            return vrt.read(1)
+            return vrt.read(1), vrt.read_masks(1) > 0
 
 
 def _items_covering(items, grid: Grid):
@@ -103,11 +122,7 @@ def _mosaic_on_grid(items, asset: str, grid: Grid, resampling: Resampling, fill)
     """Read one asset from every covering item and mosaic (first valid wins)."""
     out = None
     for it in _items_covering(items, grid):
-        arr = _read_on_grid(it.assets[asset].href, grid, resampling)
-        nodata = it.assets[asset].extra_fields.get("nodata")
-        with rasterio.open(it.assets[asset].href) as src:
-            nodata = src.nodata if src.nodata is not None else nodata
-        valid = np.ones(arr.shape, bool) if nodata is None else arr != nodata
+        arr, valid = _read_on_grid(it.assets[asset].href, grid, resampling)
         if out is None:
             out = np.full(arr.shape, fill, dtype=arr.dtype)
             filled = np.zeros(arr.shape, bool)

@@ -5,8 +5,8 @@ For every hand-labelled chip:
   2. fetch ESA WorldCover 2020 onto the chip grid (cached to data/interim/worldcover_chips/)
   3. stratify and count pixels per stratum
 
-Writes data/interim/level0_inventory.csv (one row per chip) and prints a
-per-event and per-split summary. This is the deliverable that says whether the
+Writes docs/level0_inventory.csv (one row per chip, tracked in git) and prints
+a per-event and per-split summary. This is the deliverable that says whether the
 flooded-vegetation hypothesis test is powered at all.
 """
 import csv
@@ -22,7 +22,7 @@ from mfi import catalog, io, strata  # noqa: E402
 
 OUT_DIR = catalog.DATA / "interim"
 WC_DIR = OUT_DIR / "worldcover_chips"
-CSV = OUT_DIR / "level0_inventory.csv"
+CSV = catalog.ROOT / "docs" / "level0_inventory.csv"
 
 
 def worldcover_cached(chip_id: str, grid: io.Grid) -> np.ndarray:
@@ -62,8 +62,7 @@ def main():
     for chip in tqdm(chips, desc="chips"):
         s1, label, grid = io.read_s1f11_chip(chip)
         wc = worldcover_cached(chip, grid)
-        st = strata.stratify(label, wc)
-        c = strata.counts(st)
+        c = strata.counts(label, strata.land_type(wc))
         vv, vh = s1[0], s1[1]
         valid = label >= 0
         rows.append({
@@ -78,7 +77,7 @@ def main():
             "vh_min": float(vh[valid].min()) if valid.any() else np.nan,
             "vh_max": float(vh[valid].max()) if valid.any() else np.nan,
             "wc_nodata_frac": float((wc == 0).mean()),
-            **{name: c.get(name, 0) for name in strata.NAMES.values()},
+            **{k: c[k] for k in strata.COUNT_KEYS},
         })
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -89,7 +88,7 @@ def main():
     print(f"\nwrote {CSV} ({len(rows)} chips)")
 
     # --- summaries ---------------------------------------------------------
-    names = [n for n in strata.NAMES.values() if n != "ignore"]
+    names = [k for k in strata.COUNT_KEYS if k.startswith("flood_")]
 
     def summarise(key):
         groups = {}
@@ -103,7 +102,7 @@ def main():
         print(hdr)
         for k in sorted(groups):
             g = groups[k]
-            flood = sum(g[n] for n in names if n.startswith("flood"))
+            flood = sum(g[n] for n in names)
             crop_pct = 100 * g["flood_cropland"] / flood if flood else 0
             print(f"{k:12s} {g['chips']:5d} " + " ".join(f"{g[n]:16,d}" for n in names) + f" {crop_pct:9.1f}%")
 

@@ -1,6 +1,7 @@
 """Download the Sen1Floods11 v1.1 hand-labelled subset from the public GCS bucket.
 
-Only the HandLabeled folders are fetched by default (~735 MB). The WeaklyLabeled
+The HandLabeled folders, split CSVs and event metadata are fetched by
+default (~1.75 GB, of which S2Hand is ~1 GB). The WeaklyLabeled
 set (~7.3 GB, radar-Otsu / S2-index generated labels) is opt-in via --weak,
 because those labels carry the "dark = water" bias this project studies and
 must never be used for evaluation.
@@ -27,6 +28,8 @@ HAND = [
     "v1.1/data/flood_events/HandLabeled/S1OtsuLabelHand/",
     "v1.1/data/flood_events/HandLabeled/JRCWaterHand/",
     "v1.1/data/flood_events/HandLabeled/S2Hand/",
+    "v1.1/splits/flood_handlabeled/",
+    "v1.1/Sen1Floods11_Metadata.geojson",
 ]
 WEAK = [
     "v1.1/data/flood_events/WeaklyLabeled/S1Weak/",

@@ -1,34 +1,33 @@
-"""Land-type stratification. Turns a flood label + a land-cover map into the
-per-pixel stratum every score in this project is reported against.
+"""Land-type stratification. Every score in this project is reported per
+land type, so every pixel — flooded or dry — needs a land type. Land type and
+flood label are kept as two separate arrays; the joint (label, land_type) is
+what metrics are computed over.
 
-Strata (int8):
-    0  NON_FLOOD          label == 0, any land cover
-    1  FLOOD_OPEN_WATER   label == 1, WorldCover permanent water (80)
-    2  FLOOD_CROPLAND     label == 1, WorldCover cropland (40)      <- the hypothesis lives here
-    3  FLOOD_VEGETATION   label == 1, tree / shrub / grass / wetland / mangrove (10, 20, 30, 90, 95)
-    4  FLOOD_BUILT        label == 1, built-up (50)
-    5  FLOOD_OTHER        label == 1, bare / snow / moss (60, 70, 100)
-   -1  IGNORE             label == -1
+Land types (int8), from ESA WorldCover codes:
+    0  OPEN_WATER   permanent water (80)
+    1  CROPLAND     cropland (40)                                   <- the hypothesis lives here
+    2  VEGETATION   tree / shrub / grass / wetland / mangrove (10, 20, 30, 90, 95)
+    3  BUILT        built-up (50)
+    4  OTHER        bare / snow / moss (60, 70, 100)
+    5  UNKNOWN      WorldCover nodata (0)
 
 Caveat recorded in the evaluation plan: WorldCover "cropland" is not "rice".
 In Banteay Meanchey it is overwhelmingly paddy; elsewhere in Sen1Floods11 it is
-not, so per-event numbers for stratum 2 mean "flooded cropland", nothing more.
+not, so per-event numbers for CROPLAND mean "cropland", nothing more.
 """
 from __future__ import annotations
 
 import numpy as np
 
-NON_FLOOD, FLOOD_OPEN_WATER, FLOOD_CROPLAND, FLOOD_VEGETATION, FLOOD_BUILT, FLOOD_OTHER = range(6)
-IGNORE = -1
+OPEN_WATER, CROPLAND, VEGETATION, BUILT, OTHER, UNKNOWN = range(6)
 
-NAMES = {
-    NON_FLOOD: "non_flood",
-    FLOOD_OPEN_WATER: "flood_open_water",
-    FLOOD_CROPLAND: "flood_cropland",
-    FLOOD_VEGETATION: "flood_vegetation",
-    FLOOD_BUILT: "flood_built",
-    FLOOD_OTHER: "flood_other",
-    IGNORE: "ignore",
+LAND_NAMES = {
+    OPEN_WATER: "open_water",
+    CROPLAND: "cropland",
+    VEGETATION: "vegetation",
+    BUILT: "built",
+    OTHER: "other",
+    UNKNOWN: "unknown",
 }
 
 # ESA WorldCover v100/v200 class codes
@@ -36,33 +35,40 @@ WC_TREE, WC_SHRUB, WC_GRASS, WC_CROP, WC_BUILT, WC_BARE, WC_SNOW, WC_WATER, WC_W
     10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100,
 )
 
-_WC_TO_FLOOD_STRATUM = {
-    WC_WATER: FLOOD_OPEN_WATER,
-    WC_CROP: FLOOD_CROPLAND,
-    WC_TREE: FLOOD_VEGETATION,
-    WC_SHRUB: FLOOD_VEGETATION,
-    WC_GRASS: FLOOD_VEGETATION,
-    WC_WETLAND: FLOOD_VEGETATION,
-    WC_MANGROVE: FLOOD_VEGETATION,
-    WC_BUILT: FLOOD_BUILT,
-    WC_BARE: FLOOD_OTHER,
-    WC_SNOW: FLOOD_OTHER,
-    WC_MOSS: FLOOD_OTHER,
+_WC_TO_LAND = {
+    WC_WATER: OPEN_WATER,
+    WC_CROP: CROPLAND,
+    WC_TREE: VEGETATION,
+    WC_SHRUB: VEGETATION,
+    WC_GRASS: VEGETATION,
+    WC_WETLAND: VEGETATION,
+    WC_MANGROVE: VEGETATION,
+    WC_BUILT: BUILT,
+    WC_BARE: OTHER,
+    WC_SNOW: OTHER,
+    WC_MOSS: OTHER,
 }
 
 
-def stratify(label: np.ndarray, worldcover: np.ndarray) -> np.ndarray:
-    """Per-pixel stratum from a {-1,0,1} label and a WorldCover code raster."""
-    out = np.full(label.shape, IGNORE, dtype=np.int8)
-    out[label == 0] = NON_FLOOD
-    flood = label == 1
-    out[flood] = FLOOD_OTHER  # WorldCover nodata (0) under a flood pixel -> other
-    for code, stratum in _WC_TO_FLOOD_STRATUM.items():
-        out[flood & (worldcover == code)] = stratum
+def land_type(worldcover: np.ndarray) -> np.ndarray:
+    """Per-pixel land type (int8) from a WorldCover code raster. Every pixel gets one."""
+    out = np.full(worldcover.shape, UNKNOWN, dtype=np.int8)
+    for code, lt in _WC_TO_LAND.items():
+        out[worldcover == code] = lt
     return out
 
 
-def counts(strata: np.ndarray) -> dict[str, int]:
-    """Pixel count per stratum name, for inventories."""
-    vals, n = np.unique(strata, return_counts=True)
-    return {NAMES[int(v)]: int(c) for v, c in zip(vals, n)}
+def counts(label: np.ndarray, land: np.ndarray) -> dict[str, int]:
+    """Pixel counts of the joint (label, land type), for inventories.
+
+    Keys: 'flood_<land>', 'dry_<land>', and 'ignore' (label == -1).
+    """
+    out = {"ignore": int((label == -1).sum())}
+    for lt, name in LAND_NAMES.items():
+        m = land == lt
+        out[f"flood_{name}"] = int((m & (label == 1)).sum())
+        out[f"dry_{name}"] = int((m & (label == 0)).sum())
+    return out
+
+
+COUNT_KEYS = ["ignore"] + [f"{k}_{n}" for n in LAND_NAMES.values() for k in ("flood", "dry")]
