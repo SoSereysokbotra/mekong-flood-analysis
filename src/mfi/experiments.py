@@ -27,6 +27,25 @@ from . import catalog, metrics
 RESULTS = catalog.ROOT / "results"
 LOG = RESULTS / "experiment_log.csv"
 
+
+def level3_dir() -> str:
+    """Level-3 results directory for the active pipeline.
+
+    evaluation_plan v1.0 (sigma0, Sen1Floods11 as shipped) -> "level3"
+    evaluation_plan v1.1 (Planetary Computer RTC gamma0)   -> "level3_rtc"
+    Keeping them apart means a v1.1 run can never overwrite or be confused with
+    a v1.0 result, and both stay reportable.
+    """
+    from . import data
+
+    return "level3_rtc" if data.PIPELINE == "rtc" else "level3"
+
+
+def plan_version() -> str:
+    from . import data
+
+    return "v1.1" if data.PIPELINE == "rtc" else "v1.0"
+
 LOG_FIELDS = [
     "timestamp", "level", "run_id", "split", "method", "params", "git_commit", "n_chips",
     *[f"{g}_{k}" for g in metrics.GROUPS for k in ("iou", "recall", "precision")],

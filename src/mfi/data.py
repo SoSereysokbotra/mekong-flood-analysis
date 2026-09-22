@@ -24,7 +24,16 @@ DB_CLIP = (-50.0, 10.0)
 CHANNELS = ("vv", "vh", "ratio", "slope")
 
 
-CACHE = catalog.DATA / "interim" / "chip_cache"
+# Which pre-processing the chips come from. evaluation_plan v1.0 used the
+# Sen1Floods11 chips as shipped (sigma0, GEE); v1.1 uses Planetary Computer RTC
+# (gamma0) for every split so training and Cambodia share one pipeline.
+# MFI_PIPELINE=sigma0 reproduces v1.0 results.
+import os
+
+PIPELINE = os.environ.get("MFI_PIPELINE", "rtc")
+CACHE_SIGMA0 = catalog.DATA / "interim" / "chip_cache"
+CACHE_RTC = catalog.DATA / "interim" / "chip_cache_rtc"
+CACHE = CACHE_RTC if PIPELINE == "rtc" else CACHE_SIGMA0
 
 
 def _build_cache(chip: str) -> pathlib.Path:
@@ -49,6 +58,8 @@ def raw_channels(chip: str) -> tuple[dict[str, np.ndarray], np.ndarray, np.ndarr
     """
     p = CACHE / f"{chip}.npz"
     if not p.exists():
+        if PIPELINE == "rtc":
+            raise FileNotFoundError(f"{p} missing - run scripts/build_rtc_chips.py (plan v1.1 input pipeline)")
         _build_cache(chip)
     z = np.load(p)
     x = z["x"].astype(np.float32)
@@ -62,7 +73,10 @@ def fit_norm_stats(chips: list[str], sample_per_chip: int = 20_000, seed: int = 
     acc = {c: [] for c in CHANNELS}
     for chip in chips:
         ch, label, _, _ = raw_channels(chip)
-        idx = np.flatnonzero(label >= 0)
+        finite = np.all([np.isfinite(ch[c]) for c in CHANNELS], axis=0)
+        idx = np.flatnonzero((label >= 0) & finite)
+        if idx.size == 0:
+            continue
         if idx.size > sample_per_chip:
             idx = rng.choice(idx, sample_per_chip, replace=False)
         for c in CHANNELS:
@@ -87,6 +101,12 @@ class ChipDataset(Dataset):
         # cast before np.where: under NumPy 2 promotion an int8 label array would
         # keep IGNORE=255 as int8 and wrap it to -1 (invalid class index on GPU)
         y = np.where(label < 0, IGNORE, label.astype(np.int64))
+        # RTC chips are NaN outside the slice footprint: those pixels carry no
+        # radar, so they are not trainable and not scorable.
+        nodata = ~np.isfinite(x).all(axis=0)
+        if nodata.any():
+            x = np.nan_to_num(x, nan=0.0)
+            y = np.where(nodata, IGNORE, y)
         vh = ch["vh"].astype(np.float32)  # raw VH kept for the bright sub-strata
         if self.crop:
             H, W = y.shape

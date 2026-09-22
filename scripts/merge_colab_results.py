@@ -16,20 +16,20 @@ import zipfile
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments  # noqa: E402
 
-ZIP = catalog.ROOT / "data" / "colab" / "level3_checkpoints.zip"
+ZIP = catalog.ROOT / "data" / "colab" / f"{experiments.level3_dir()}_checkpoints.zip"
 
 
 def main():
     if not ZIP.exists():
-        sys.exit(f"missing {ZIP} (download from Drive: MyDrive/mfi/level3_checkpoints.zip)")
+        sys.exit(f"missing {ZIP} (download it from Drive: MyDrive/mfi/)")
     placed, skipped = [], []
     with zipfile.ZipFile(ZIP) as z:
         for name in z.namelist():
-            parts = pathlib.PurePosixPath(name).parts  # level3/<run>/best.pt
+            parts = pathlib.PurePosixPath(name).parts  # <level dir>/<run>/best.pt
             if len(parts) != 3 or parts[-1] != "best.pt":
                 continue
             run = parts[1]
-            dst_dir = experiments.RESULTS / "level3" / run
+            dst_dir = experiments.RESULTS / experiments.level3_dir() / run
             if not (dst_dir / "metrics_valid.json").exists():
                 skipped.append((run, "no metrics_valid.json locally - git pull first?"))
                 continue

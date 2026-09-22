@@ -20,7 +20,7 @@ import torch
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import data, experiments, metrics, models  # noqa: E402
 
-LEVEL = "level3"
+LEVEL = experiments.level3_dir()
 CONTROLS = {"pixel_logreg", "pixel_mlp", "unet_vv_ce"}  # section 6.2 and 6.3
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level3_train import NORM_PATH, evaluate, fmt, selection_score  # noqa: E402
@@ -47,7 +47,7 @@ def select():
     for (sc, tb), r in rows:
         print(f"  {r:20s} score {sc:.3f}  tie {tb:.3f}")
     best = rows[0][1]
-    experiments.record_selection(LEVEL, best, "evaluation_plan v1.0 section 5: min(cropland_bright, vegetation_bright) recall on valid, "
+    experiments.record_selection(LEVEL, best, f"evaluation_plan {experiments.plan_version()} section 5: min(cropland_bright, vegetation_bright) recall on valid, "
                                               "subject to valid cropland precision >= 0.48; tie-break cropland IoU")
     print(f"\nrecorded selection: {best}\nNow commit results/experiment_log.csv, then run --run {best} and the controls.")
 
@@ -68,7 +68,7 @@ def score_test(run_id: str):
         obj = load(run_dir / "model.joblib")
         conf, rows = px_eval(obj["clf"], obj["scaler"], sp["test"], save_dir=run_dir / "pred_test")
         m = experiments.save_split_results(LEVEL, run_id, "test", conf, rows)
-        params = {"features": obj["feats"], "plan": "v1.0"}
+        params = {"features": obj["feats"], "plan": experiments.plan_version()}
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         ck = torch.load(run_dir / "best.pt", map_location=device)
@@ -79,7 +79,7 @@ def score_test(run_id: str):
         conf = metrics.Confusion()
         conf.tp, conf.fp, conf.fn, conf.tn = ({g: cm[g][k] for g in metrics.GROUPS} for k in ("tp", "fp", "fn", "tn"))
         m = experiments.save_split_results(LEVEL, run_id, "test", conf, rows)
-        params = {k: ck["cfg"][k] for k in ck["cfg"] if k != "seed"} | {"best_epoch": ck["epoch"], "plan": "v1.0"}
+        params = {k: ck["cfg"][k] for k in ck["cfg"] if k != "seed"} | {"best_epoch": ck["epoch"], "plan": experiments.plan_version()}
     role = "selected" if run_id == selected else "control"
     experiments.log_row(LEVEL, run_id, "test", run_id, params, len(sp["test"]), m, note=f"held-out Mekong, {role}")
     per_chip_bright = [r["cropland_bright_recall"] for r in rows if r["cropland_bright_n_pos"] > 500]

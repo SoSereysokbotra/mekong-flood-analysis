@@ -25,7 +25,7 @@ from tqdm import tqdm
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, data, experiments, metrics, models  # noqa: E402
 
-LEVEL = "level3"
+LEVEL = experiments.level3_dir()
 FREEZE_MSG = "Freeze evaluation plan v1"
 NORM_PATH = experiments.RESULTS / LEVEL / "_norm_stats.json"
 # Section 5 of evaluation_plan.md (frozen v1.0)
@@ -154,7 +154,7 @@ def train_one(cfg_path: pathlib.Path):
     conf = metrics.Confusion()  # rebuild for save_split_results signature
     conf.tp, conf.fp, conf.fn, conf.tn = ({g: conf_m[g][k] for g in metrics.GROUPS} for k in ("tp", "fp", "fn", "tn"))
     m = experiments.save_split_results(LEVEL, run_id, "valid", conf, rows)
-    params = {k: cfg[k] for k in cfg if k not in ("seed",)} | {"best_epoch": ck["epoch"], "plan": "v1.0"}
+    params = {k: cfg[k] for k in cfg if k not in ("seed",)} | {"best_epoch": ck["epoch"], "plan": experiments.plan_version()}
     experiments.log_row(LEVEL, run_id, "valid", cfg["model"], params, len(sp["valid"]), m,
                         note=f"best epoch {ck['epoch']} by frozen selection score {selection_score(m)[0]:.3f}")
     print(f"\n{run_id}: best epoch {ck['epoch']}  valid {fmt(m)}  score {selection_score(m)[0]:.3f}")

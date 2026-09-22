@@ -19,10 +19,10 @@ NODATA = -1
 def load_unet(run_id: str, device: torch.device | None = None):
     """(model, channels, norm, device) for a level3 run's best checkpoint."""
     device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    ck = torch.load(experiments.run_dir("level3", run_id) / "best.pt", map_location=device)
+    ck = torch.load(experiments.run_dir(experiments.level3_dir(), run_id) / "best.pt", map_location=device)
     model = models.build_model(ck["cfg"]["model"], len(ck["channels"]), False).to(device).eval()
     model.load_state_dict(ck["model"])
-    with open(experiments.RESULTS / "level3" / "_norm_stats.json") as f:
+    with open(experiments.RESULTS / experiments.level3_dir() / "_norm_stats.json") as f:
         norm = json.load(f)
     return model, ck["channels"], norm, device
 

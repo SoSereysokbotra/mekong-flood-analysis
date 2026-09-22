@@ -1,0 +1,122 @@
+{
+  "events": {
+    "Bolivia": {
+      "date": "2018-02-15",
+      "track": "156D",
+      "items": [
+        "S1B_IW_GRDH_1SDV_20180215T095810_20180215T095835_009632_0115DE_rtc",
+        "S1B_IW_GRDH_1SDV_20180215T095745_20180215T095810_009632_0115DE_rtc",
+        "S1B_IW_GRDH_1SDV_20180215T095720_20180215T095745_009632_0115DE_rtc"
+      ],
+      "chips_written": 15,
+      "mean_coverage": 0.9929054805210659,
+      "min_coverage": 0.9219894409179688
+    },
+    "Ghana": {
+      "date": "2018-09-18",
+      "track": "147A",
+      "items": [
+        "S1B_IW_GRDH_1SDV_20180918T181833_20180918T181908_012773_017943_rtc",
+        "S1B_IW_GRDH_1SDV_20180918T181808_20180918T181833_012773_017943_rtc"
+      ],
+      "chips_written": 53,
+      "mean_coverage": 0.9927934610618735,
+      "min_coverage": 0.6180534362792969
+    },
+    "India": {
+      "date": "2016-08-12",
+      "track": "77D",
+      "items": [
+        "S1A_IW_GRDH_1SDV_20160812T234651_20160812T234716_012574_013B43_rtc",
+        "S1A_IW_GRDH_1SDV_20160812T234622_20160812T234651_012574_013B43_rtc"
+      ],
+      "chips_written": 68,
+      "mean_coverage": 0.9916859234080595,
+      "min_coverage": 0.7302474975585938
+    },
+    "Mekong": {
+      "date": "2018-08-05",
+      "track": "26A",
+      "items": [
+        "S1B_IW_GRDH_1SDV_20180805T111127_20180805T111152_012127_016547_rtc",
+        "S1B_IW_GRDH_1SDV_20180805T111057_20180805T111127_012127_016547_rtc"
+      ],
+      "chips_written": 30,
+      "mean_coverage": 1.0,
+      "min_coverage": 1.0
+    },
+    "Nigeria": {
+      "date": "2018-09-21",
+      "track": "103A",
+      "items": [
+        "S1A_IW_GRDH_1SDV_20180921T175422_20180921T175447_023800_0298AE_rtc",
+        "S1A_IW_GRDH_1SDV_20180921T175357_20180921T175422_023800_0298AE_rtc"
+      ],
+      "chips_written": 18,
+      "mean_coverage": 0.9664022657606337,
+      "min_coverage": 0.5970954895019531
+    },
+    "Pakistan": {
+      "date": "2017-06-28",
+      "track": "5D",
+      "items": [
+        "S1A_IW_GRDH_1SDV_20170628T011634_20170628T011659_017227_01CBD9_rtc",
+        "S1A_IW_GRDH_1SDV_20170628T011609_20170628T011634_017227_01CBD9_rtc",
+        "S1A_IW_GRDH_1SDV_20170628T011544_20170628T011609_017227_01CBD9_rtc",
+        "S1A_IW_GRDH_1SDV_20170628T011519_20170628T011544_017227_01CBD9_rtc"
+      ],
+      "chips_written": 28,
+      "mean_coverage": 1.0,
+      "min_coverage": 1.0
+    },
+    "Somalia": {
+      "date": "2018-05-07",
+      "track": "116A",
+      "items": [
+        "S1B_IW_GRDH_1SDV_20180507T151605_20180507T151630_010817_013C63_rtc",
+        "S1B_IW_GRDH_1SDV_20180507T151540_20180507T151605_010817_013C63_rtc",
+        "S1B_IW_GRDH_1SDV_20180507T151511_20180507T151540_010817_013C63_rtc"
+      ],
+      "chips_written": 26,
+      "mean_coverage": 1.0,
+      "min_coverage": 1.0
+    },
+    "Spain": {
+      "date": "2019-09-17",
+      "track": "110D",
+      "items": [
+        "S1A_IW_GRDH_1SDV_20190917T060222_20190917T060247_029057_034C21_rtc",
+        "S1A_IW_GRDH_1SDV_20190917T060212_20190917T060237_029057_034C21_rtc"
+      ],
+      "chips_written": 30,
+      "mean_coverage": 1.0,
+      "min_coverage": 1.0
+    },
+    "Sri-Lanka": {
+      "date": "2017-05-30",
+      "track": "19D",
+      "items": [
+        "S1B_IW_GRDH_1SDV_20170530T002430_20170530T002501_005820_00A340_rtc",
+        "S1B_IW_GRDH_1SDV_20170530T002405_20170530T002430_005820_00A340_rtc"
+      ],
+      "chips_written": 42,
+      "mean_coverage": 0.9999958219982329,
+      "min_coverage": 0.9999046325683594
+    },
+    "USA": {
+      "date": "2019-05-22",
+      "track": "136A",
+      "items": [
+        "S1A_IW_GRDH_1SDV_20190522T002126_20190522T002151_027333_031530_rtc",
+        "S1A_IW_GRDH_1SDV_20190522T002101_20190522T002126_027333_031530_rtc",
+        "S1A_IW_GRDH_1SDV_20190522T002036_20190522T002101_027333_031530_rtc"
+      ],
+      "chips_written": 69,
+      "mean_coverage": 0.999523439269135,
+      "min_coverage": 0.9671173095703125
+    }
+  },
+  "skipped_events": [
+    "Paraguay"
+  ]
+}

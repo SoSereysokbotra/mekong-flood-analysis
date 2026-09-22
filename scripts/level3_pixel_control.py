@@ -27,7 +27,7 @@ from tqdm import tqdm
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, data, experiments, metrics  # noqa: E402
 
-LEVEL = "level3"
+LEVEL = experiments.level3_dir()
 FEATS = ["vv", "vh", "ratio", "slope"]
 N_TRAIN_PX = 3_000_000
 
@@ -98,7 +98,7 @@ def main():
                                                 "params": clf.get_params(), "control": "per-pixel, no spatial context"})
         conf, rows = evaluate(clf, scaler, sp["valid"], save_dir=run_dir / "pred_valid")
         m = experiments.save_split_results(LEVEL, run_id, "valid", conf, rows)
-        experiments.log_row(LEVEL, run_id, "valid", run_id, {"features": FEATS, "plan": "v1.0"}, len(sp["valid"]), m,
+        experiments.log_row(LEVEL, run_id, "valid", run_id, {"features": FEATS, "plan": experiments.plan_version()}, len(sp["valid"]), m,
                             note="per-pixel control (evaluation_plan section 6.2)")
         print(f"{run_id:13s} valid: allIoU {m['all']['iou']:.3f} | crop IoU {m['cropland']['iou']:.3f} rec {m['cropland']['recall']:.3f} "
               f"prec {m['cropland']['precision']:.3f} | bright crop {m['cropland_bright']['recall']:.3f} veg {m['vegetation_bright']['recall']:.3f} "
