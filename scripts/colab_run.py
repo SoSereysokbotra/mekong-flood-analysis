@@ -100,15 +100,11 @@ def push(level_dir: str):
         except Exception:  # noqa: BLE001
             tok = None
     if not tok:
-        print("no GITHUB_TOKEN available - skipping push.
-"
-              "In the notebook cell (not a subprocess) do:
-"
-              "    from google.colab import userdata; import os
-"
-              "    os.environ['GITHUB_TOKEN'] = userdata.get('GITHUB_TOKEN')
-"
-              "then re-run this script.")
+        print("no GITHUB_TOKEN available - skipping push.")
+        print("In a notebook cell (not a subprocess) run:")
+        print("    from google.colab import userdata; import os")
+        print("    os.environ['GITHUB_TOKEN'] = userdata.get('GITHUB_TOKEN')")
+        print("then re-run this script.")
         return
     repo = "github.com/SoSereysokbotra/mekong-flood-analysis.git"
     sh("git config user.name 'Sobotra'")
