@@ -162,8 +162,16 @@ VALID_EVENTS = ("Spain", "Nigeria")
 
 
 def s1f11_hand_chips() -> list[str]:
-    """Chip ids like 'Mekong_123456' for every hand-labelled chip on disk."""
-    return sorted(p.stem.removesuffix("_S1Hand") for p in (S1F11_HAND / "S1Hand").glob("*_S1Hand.tif"))
+    """Chip ids like 'Mekong_123456' for every hand-labelled chip on disk.
+
+    Lists the raw GeoTIFFs when present; otherwise (e.g. on Colab, where only
+    the preprocessed chip cache is uploaded) lists data/interim/chip_cache.
+    """
+    raw = sorted(p.stem.removesuffix("_S1Hand") for p in (S1F11_HAND / "S1Hand").glob("*_S1Hand.tif"))
+    if raw:
+        return raw
+    cache = DATA / "interim" / "chip_cache"
+    return sorted(p.stem for p in cache.glob("*.npz"))
 
 
 def s1f11_event(chip_id: str) -> str:
