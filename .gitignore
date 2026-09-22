@@ -32,3 +32,4 @@ results/**/pred_test/
 results/**/*.pt
 results/**/*.joblib
 results/level3/_logs/
+data/colab/
