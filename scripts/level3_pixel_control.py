@@ -68,11 +68,15 @@ def evaluate(clf, scaler, chips, save_dir=None):
                      **{f"{g}_{k}": cm[g][k] for g in ("all", "cropland", "cropland_bright", "vegetation_bright", "open_water") for k in ("iou", "recall", "precision", "n_pos")}})
         if save_dir is not None:
             save_dir.mkdir(parents=True, exist_ok=True)
-            with rasterio.open(catalog.s1f11_paths(chip)["label"]) as src:
-                prof = src.profile
-            prof.update(dtype="uint8", count=1, compress="deflate", nodata=None)
-            with rasterio.open(save_dir / f"{chip}.tif", "w", **prof) as dst:
-                dst.write(pred.astype(np.uint8), 1)
+            label_tif = catalog.s1f11_paths(chip)["label"]
+            if label_tif.exists():
+                with rasterio.open(label_tif) as src:
+                    prof = src.profile
+                prof.update(dtype="uint8", count=1, compress="deflate", nodata=None)
+                with rasterio.open(save_dir / f"{chip}.tif", "w", **prof) as dst:
+                    dst.write(pred.astype(np.uint8), 1)
+            else:
+                np.save(save_dir / f"{chip}.npy", pred.astype(np.uint8))
     return conf, rows
 
 

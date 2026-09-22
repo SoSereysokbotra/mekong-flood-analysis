@@ -70,11 +70,15 @@ def evaluate(model, chips, channels, norm, device, save_pred_dir: pathlib.Path |
                      **{f"{g}_{k}": cm[g][k] for g in ("all", "cropland", "cropland_bright", "vegetation_bright", "open_water") for k in ("iou", "recall", "precision", "n_pos")}})
         if save_pred_dir is not None:
             save_pred_dir.mkdir(parents=True, exist_ok=True)
-            with rasterio.open(catalog.s1f11_paths(b["chip"])["label"]) as src:
-                prof = src.profile
-            prof.update(dtype="uint8", count=1, compress="deflate", nodata=None)
-            with rasterio.open(save_pred_dir / f"{b['chip']}.tif", "w", **prof) as dst:
-                dst.write(pred.astype(np.uint8), 1)
+            label_tif = catalog.s1f11_paths(b["chip"])["label"]
+            if label_tif.exists():  # georeferenced GeoTIFF when the raw chip is on disk
+                with rasterio.open(label_tif) as src:
+                    prof = src.profile
+                prof.update(dtype="uint8", count=1, compress="deflate", nodata=None)
+                with rasterio.open(save_pred_dir / f"{b['chip']}.tif", "w", **prof) as dst:
+                    dst.write(pred.astype(np.uint8), 1)
+            else:  # Colab: only the cache exists; keep a plain array instead
+                np.save(save_pred_dir / f"{b['chip']}.npy", pred.astype(np.uint8))
     return conf.metrics(), rows
 
 
