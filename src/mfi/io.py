@@ -108,6 +108,47 @@ def worldcover_chip(chip_id: str, grid: Grid | None = None) -> np.ndarray:
     return wc
 
 
+def dem_chip(chip_id: str, grid: Grid | None = None, items=None) -> np.ndarray:
+    """Copernicus DEM GLO-30 (m, float32) on a Sen1Floods11 chip grid, cached like worldcover_chip.
+
+    `items`: optional pre-fetched STAC items covering the chip (one search per
+    event instead of one per chip keeps the STAC API happy).
+    """
+    p = catalog.DATA / "interim" / "dem_chips" / f"{chip_id}_CopDEM30.tif"
+    if p.exists():
+        with rasterio.open(p) as src:
+            return src.read(1)
+    if grid is None:
+        with rasterio.open(catalog.s1f11_paths(chip_id)["s1"]) as src:
+            grid = Grid.of(src)
+    dem = dem_on_grid(grid, items=items)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with rasterio.open(
+        p, "w", driver="GTiff", height=grid.height, width=grid.width, count=1, dtype="float32",
+        crs=grid.crs, transform=grid.transform, compress="deflate", nodata=np.nan,
+    ) as dst:
+        dst.write(dem, 1)
+    return dem
+
+
+def slope_deg(dem: np.ndarray, grid: Grid) -> np.ndarray:
+    """Slope in degrees from a DEM on `grid`.
+
+    Chip grids are geographic (EPSG:4326), so pixel spacing is in degrees and
+    must be converted to metres before differencing: 1 deg lat ~ 111,320 m,
+    1 deg lon ~ 111,320 * cos(lat) m. Projected grids use their native spacing.
+    """
+    t = grid.transform
+    if grid.crs and grid.crs.is_geographic:
+        lat = t.f + t.e * grid.height / 2  # centre latitude (e is negative for north-up)
+        dy = abs(t.e) * 111_320.0
+        dx = abs(t.a) * 111_320.0 * np.cos(np.deg2rad(lat))
+    else:
+        dx, dy = abs(t.a), abs(t.e)
+    gy, gx = np.gradient(dem.astype(np.float32), dy, dx)
+    return np.degrees(np.arctan(np.hypot(gx, gy))).astype(np.float32)
+
+
 # --- Ancillary rasters resampled onto a target grid -------------------------
 
 def _read_on_grid(href: str, grid: Grid, resampling: Resampling) -> tuple[np.ndarray, np.ndarray]:
@@ -191,10 +232,11 @@ def jrc_occurrence_on_grid(grid: Grid) -> np.ndarray:
     return _mosaic_on_grid(items, "occurrence", grid, Resampling.nearest, fill=0).astype(np.uint8)
 
 
-def dem_on_grid(grid: Grid) -> np.ndarray:
-    """Copernicus DEM GLO-30 elevation (m), bilinear onto `grid`."""
+def dem_on_grid(grid: Grid, items=None) -> np.ndarray:
+    """Copernicus DEM GLO-30 elevation (m), bilinear onto `grid`. `items` may be pre-fetched."""
     from rasterio.warp import transform_bounds
 
-    bbox = list(transform_bounds(grid.crs, "EPSG:4326", *grid.bounds))
-    items = list(catalog._client().search(collections=["cop-dem-glo-30"], bbox=bbox).items())
+    if items is None:
+        bbox = list(transform_bounds(grid.crs, "EPSG:4326", *grid.bounds))
+        items = list(catalog._client().search(collections=["cop-dem-glo-30"], bbox=bbox).items())
     return _mosaic_on_grid(items, "data", grid, Resampling.bilinear, fill=np.nan).astype(np.float32)

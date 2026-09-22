@@ -23,7 +23,7 @@ LANDS = list(strata.LAND_NAMES.values())  # open_water, cropland, vegetation, bu
 # precision on dry cropland. The constant is the Level 1 train-fit threshold,
 # frozen (results/level1/_global_thresholds/config.json), not recomputed.
 BRIGHT_VH_DB = -19.65
-SUBSTRATA = ["cropland_bright", "cropland_dark"]
+SUBSTRATA = ["cropland_bright", "cropland_dark", "vegetation_bright"]
 GROUPS = ["all"] + LANDS + SUBSTRATA
 
 
@@ -47,11 +47,14 @@ class Confusion:
         p, y = pred.astype(bool) & valid, label == 1
         masks = {"all": valid} | {name: valid & (land == code) for code, name in strata.LAND_NAMES.items()}
         crop_flood = valid & y & (land == strata.CROPLAND)
+        veg_flood = valid & y & (land == strata.VEGETATION)
         if vh is not None:
             masks["cropland_bright"] = crop_flood & (vh >= BRIGHT_VH_DB)
             masks["cropland_dark"] = crop_flood & (vh < BRIGHT_VH_DB)
+            masks["vegetation_bright"] = veg_flood & (vh >= BRIGHT_VH_DB)
         else:
-            masks["cropland_bright"] = masks["cropland_dark"] = np.zeros(label.shape, bool)
+            for g in SUBSTRATA:
+                masks[g] = np.zeros(label.shape, bool)
         for g, m in masks.items():
             self.tp[g] += int((p & y & m).sum())
             self.fp[g] += int((p & ~y & m).sum())
