@@ -1,6 +1,6 @@
 # Evaluation plan — pre-registered
 
-**Status: FROZEN v1.0, 22 September 2026.** Frozen from draft v0.2 with no other change.
+**Status: FROZEN v1.1, 22 September 2026.** v1.0 frozen from draft v0.2; v1.1 changes the input pipeline only (§2), for the measured reason in the changelog. Results are reported against the version in force when the run was made: the Level 3 results in `docs/level3_results.md` are v1.0 results and stay as they are.
 Freezing = a dedicated commit titled `Freeze evaluation plan v1` that changes only this status line. No Level 3 training run may be logged before that commit exists; `scripts/level3_train.py` checks `git log` for it and refuses to start otherwise. After freezing, any change is a new version with a dated changelog entry and a written reason, and results are reported against the version that was in force when the run was made.
 
 Every number here comes from `results/experiment_log.csv` and the per-run metrics files it points to (Level 1 commit `d6f4f3a`, Level 2 commit — see git log). Nothing was taken from other projects or from any AI's expectation (plan rule 10).
@@ -16,7 +16,8 @@ Level 2 established that per-pixel intensity does **not** separate bright floode
 - Benchmark: Sen1Floods11 v1.1, **hand labels only** (`LabelHand`). Otsu-derived and weak labels are never used for evaluation (plan rules 2, 7).
 - Split by event (`catalog.s1f11_split()`): train = Bolivia, Ghana, India, Pakistan, Paraguay, Somalia, Sri-Lanka, USA (368 chips); valid = Spain, Nigeria (48); **test = Mekong / Cambodia (30), held out entirely** (rules 5, 8).
 - Land type from ESA WorldCover 2020 (`strata.land_type`). Sub-strata: `cropland_bright` / `cropland_dark` / `vegetation_bright` = labelled flood on that land type with VH ≥ / < **−19.65 dB** (the Level 1 train-fit threshold, frozen in `metrics.BRIGHT_VH_DB`).
-- Pre-processing: Sen1Floods11 chips as shipped (σ⁰, dB, GEE). The Level 4 Cambodia pipeline (Planetary Computer RTC, γ⁰) is different; the switch effect is measured before any Level 4 conclusion (rule 9, plan §5).
+- Pre-processing (**changed in v1.1**): **one pipeline everywhere — Planetary Computer Sentinel-1 RTC, γ⁰, linear → dB** (`mfi.rtc`), for the benchmark chips *and* for Cambodia. Chips are rebuilt on their own grids from the RTC product for each event's exact acquisition (`scripts/build_rtc_chips.py`); labels, land type and slope are unchanged. Paraguay has no RTC for its 31 Oct 2018 orbit-68 acquisition and is dropped: train becomes 7 events / 301 chips; valid (Spain + Nigeria, 48) and test (Mekong, 30) are unchanged.
+  - v1.0 used the Sen1Floods11 chips as shipped (σ⁰, dB, GEE), with the Cambodia stage on RTC. The measured effect of that mismatch is in `docs/level4_pipeline_switch.md` and is the reason for this change.
 
 ## 3. Baseline (fixed)
 
@@ -83,3 +84,8 @@ Why these values (from Level 1–2 results only):
 
 - v0.1 — 22 Sep 2026 — draft from Level 1–2 results; awaiting freeze.
 - v0.2 — 22 Sep 2026 — §5 selection score changed to min(B, V) so selection cannot pass a model that fails §7 on vegetation (independent review recommendation).
+- v1.0 — 22 Sep 2026 09:04 — frozen (commit `2f33bcf`). Level 3 run and reported against this version (`docs/level3_results.md`, outcome Confirmed).
+- **v1.1 — 22 Sep 2026 — input pipeline changed to Planetary Computer RTC γ⁰ for every split (§2); Paraguay dropped for lack of RTC coverage.**
+  **Reason (measured, not anticipated):** `docs/level4_pipeline_switch.md`. Scoring the same 30 Mekong chips, same acquisition, same labels, rebuilt from RTC: the v1.0-selected model `unet_vvvh_cropw` falls from all-IoU 0.820 to 0.138 (open-water recall 0.011); the VH threshold and the VV-only U-Net lose 4–10 IoU points. Per-band offset calibration recovers only to 0.42–0.51, so it is not a level shift. A model selected under v1.0 therefore cannot be applied to the Cambodia RTC scenes, which is what Level 4 requires.
+  **What is unchanged:** hypothesis, metrics, splits by event, the bright sub-strata definition, the selection rule (§5), the mandatory controls (§6), every threshold in §7, and the rules in §8. Only the radar input changes.
+  **What must be redone under v1.1:** the full Level 3 ladder (all 8 configs + 2 per-pixel controls), the selection on valid, and one test scoring. v1.0 results are kept and reported separately; no v1.1 number is compared against a v1.0 number as if they were the same experiment.
