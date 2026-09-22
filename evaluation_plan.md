@@ -1,6 +1,6 @@
 # Evaluation plan — pre-registered
 
-**Status: DRAFT v0.2, 22 September 2026. Not yet frozen.**
+**Status: FROZEN v1.0, 22 September 2026.** Frozen from draft v0.2 with no other change.
 Freezing = a dedicated commit titled `Freeze evaluation plan v1` that changes only this status line. No Level 3 training run may be logged before that commit exists; `scripts/level3_train.py` checks `git log` for it and refuses to start otherwise. After freezing, any change is a new version with a dated changelog entry and a written reason, and results are reported against the version that was in force when the run was made.
 
 Every number here comes from `results/experiment_log.csv` and the per-run metrics files it points to (Level 1 commit `d6f4f3a`, Level 2 commit — see git log). Nothing was taken from other projects or from any AI's expectation (plan rule 10).
