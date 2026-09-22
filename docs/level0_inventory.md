@@ -15,11 +15,13 @@
 
 | Split | Chips | Flooded open water | **Flooded cropland** | Flooded vegetation | Flooded built | Crop share of flood |
 | --- | --- | --- | --- | --- | --- | --- |
-| train (10 events) | 249 | 1,462,793 | **1,351,530** | 1,559,376 | 5,988 | 29.4 % |
-| valid (same 10 events) | 167 | 1,755,751 | **1,301,211** | 957,237 | 9,928 | 30.1 % |
+| train (8 events) | 368 | 2,687,401 | 1,887,610 | 2,009,731 | 6,541 | 27.1 % |
+| valid (Spain + Nigeria) | 48 | 531,143 | 765,131 | 506,882 | 9,375 | 39.0 % |
 | **test (Mekong, held out)** | 30 | 516,519 | **654,764** | 504,608 | 1,317 | 38.1 % |
 
-**Conclusion: the hypothesis test is powered.** Flooded cropland is not a rare class — it is the single largest flood stratum in the Cambodia test set (38 % of flood pixels, more than open water), and there are 1.35 M training pixels of it across ten other events. There is no need to add Kuro Siwo or UrbanSARFloods for Levels 1–3.
+**Conclusion: the hypothesis test is powered.** Flooded cropland is not a rare class — it is the single largest flood stratum in the Cambodia test set (38 % of flood pixels, more than open water), and there are 1.89 M training pixels of it across eight other events.
+
+*Split note (22 Sep 2026):* the table uses the event-based split adopted at Level 1 (valid = Spain + Nigeria). The first version of this note used the official Sen1Floods11 chip-level partition for train/valid (249 / 167), which shares scenes across splits; test was Mekong in both. There is no need to add Kuro Siwo or UrbanSARFloods for Levels 1–3.
 
 Per event (crop share of flood): Somalia 69 %, Pakistan 53 %, India 42 %, Nigeria 40 %, Spain 38 %, Mekong 38 %, USA 35 %, Ghana 24 %, Sri-Lanka 16 %, Paraguay 3 %, Bolivia 0 %. Bolivia and Paraguay are forest / wetland floodplains — useful as *negative* controls for cropland-specific behaviour.
 

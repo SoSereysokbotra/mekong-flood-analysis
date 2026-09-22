@@ -65,9 +65,24 @@ def save_split_results(level: str, run_id: str, split: str, conf: metrics.Confus
     return m
 
 
+def _migrate_header() -> None:
+    """If GROUPS grew since the log was created, rewrite it with the new columns (old rows get '')."""
+    if not LOG.exists():
+        return
+    rows = read_log()
+    if rows and list(rows[0].keys()) == LOG_FIELDS:
+        return
+    with open(LOG, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=LOG_FIELDS)
+        w.writeheader()
+        for r in rows:
+            w.writerow({k: r.get(k, "") for k in LOG_FIELDS})
+
+
 def log_row(level: str, run_id: str, split: str, method: str, params: dict, n_chips: int,
             m: dict, note: str = "") -> None:
     RESULTS.mkdir(exist_ok=True)
+    _migrate_header()
     new = not LOG.exists()
     row = {
         "timestamp": dt.datetime.now().isoformat(timespec="seconds"),

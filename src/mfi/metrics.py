@@ -15,7 +15,16 @@ import numpy as np
 from . import strata
 
 LANDS = list(strata.LAND_NAMES.values())  # open_water, cropland, vegetation, built, other, unknown
-GROUPS = ["all"] + LANDS
+
+# The hypothesis sub-strata. "Bright" flooded cropland is the double-bounce
+# case: labelled flood, on cropland, with VH at or above the Level 1 global
+# threshold. By construction the Level 1 baseline has recall 0 here; a model
+# that "solves" double bounce must show recall on this group without losing
+# precision on dry cropland. The constant is the Level 1 train-fit threshold,
+# frozen (results/level1/_global_thresholds/config.json), not recomputed.
+BRIGHT_VH_DB = -19.65
+SUBSTRATA = ["cropland_bright", "cropland_dark"]
+GROUPS = ["all"] + LANDS + SUBSTRATA
 
 
 @dataclass
@@ -27,11 +36,22 @@ class Confusion:
     fn: dict[str, int] = field(default_factory=lambda: {g: 0 for g in GROUPS})
     tn: dict[str, int] = field(default_factory=lambda: {g: 0 for g in GROUPS})
 
-    def add(self, pred: np.ndarray, label: np.ndarray, land: np.ndarray) -> "Confusion":
-        """Accumulate one chip. pred is bool, label int8 {-1,0,1}, land int8."""
+    def add(self, pred: np.ndarray, label: np.ndarray, land: np.ndarray, vh: np.ndarray | None = None) -> "Confusion":
+        """Accumulate one chip. pred is bool, label int8 {-1,0,1}, land int8.
+
+        `vh` (dB) enables the cropland_bright / cropland_dark sub-strata. They
+        are defined on *labelled flood* pixels only, so for them FP is always 0
+        and precision is meaningless: read their recall.
+        """
         valid = label >= 0
         p, y = pred.astype(bool) & valid, label == 1
         masks = {"all": valid} | {name: valid & (land == code) for code, name in strata.LAND_NAMES.items()}
+        crop_flood = valid & y & (land == strata.CROPLAND)
+        if vh is not None:
+            masks["cropland_bright"] = crop_flood & (vh >= BRIGHT_VH_DB)
+            masks["cropland_dark"] = crop_flood & (vh < BRIGHT_VH_DB)
+        else:
+            masks["cropland_bright"] = masks["cropland_dark"] = np.zeros(label.shape, bool)
         for g, m in masks.items():
             self.tp[g] += int((p & y & m).sum())
             self.fp[g] += int((p & ~y & m).sum())

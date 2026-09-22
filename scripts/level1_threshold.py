@@ -79,12 +79,12 @@ def run_split(method: str, split: str, chips: list[str], global_t: dict) -> dict
     for chip in tqdm(chips, desc=f"{method:16s} {split}", leave=False):
         s1, label, land, grid = load(chip)
         pred, t = predict(method, chip, s1, label, global_t)
-        c = metrics.Confusion().add(pred, label, land)
+        c = metrics.Confusion().add(pred, label, land, vh=s1[1])
         conf.merge(c)
         m = c.metrics()
         per_chip.append({
             "chip": chip, "event": catalog.s1f11_event(chip), "threshold_db": t,
-            **{f"{g}_{k}": m[g][k] for g in ("all", "cropland", "open_water", "vegetation") for k in ("iou", "recall", "precision", "n_pos")},
+            **{f"{g}_{k}": m[g][k] for g in ("all", "cropland", "open_water", "vegetation", "cropland_bright") for k in ("iou", "recall", "precision", "n_pos")},
         })
         save_pred(run_dir, chip, pred, grid)
     m = experiments.save_split_results(LEVEL, method, split, conf, per_chip)
@@ -100,7 +100,8 @@ def fmt(m: dict) -> str:
     g = lambda grp, k: m[grp][k]  # noqa: E731
     return (f"all IoU {g('all','iou'):.3f} rec {g('all','recall'):.3f} | "
             f"cropland IoU {g('cropland','iou'):.3f} rec {g('cropland','recall'):.3f} prec {g('cropland','precision'):.3f} | "
-            f"open_water rec {g('open_water','recall'):.3f} | vegetation rec {g('vegetation','recall'):.3f}")
+            f"open_water rec {g('open_water','recall'):.3f} | veg rec {g('vegetation','recall'):.3f} | "
+            f"crop-bright rec {g('cropland_bright','recall'):.3f} (n={g('cropland_bright','n_pos'):,})")
 
 
 def main():

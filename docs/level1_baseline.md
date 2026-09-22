@@ -69,7 +69,23 @@ Per-chip Otsu splits every chip's histogram in two even when the chip has no wat
 
 The authors' lower per-event thresholds (Spain −25.1, Nigeria −21.9) buy cropland precision 0.91–0.96 at the cost of recall 0.69–0.84. The choice of X (recall gain) and Y (precision floor) at Level 2 must be made knowing this: a model that "improves recall" by 5 points is worthless if a 2 dB threshold shift does the same.
 
-## Implications for the plan — decision needed before Level 2
+### 5. Route A adopted: the `cropland_bright` sub-stratum (added 22 Sep, backfilled from saved predictions)
+
+`metrics.py` now scores two sub-strata on every run: `cropland_bright` = labelled flood ∧ cropland ∧ VH ≥ −19.65 dB (the frozen Level 1 threshold), and `cropland_dark` = the rest. They contain only labelled-flood pixels, so read their **recall**; precision is undefined. From `results/level1/<method>/metrics_<split>.json` after `scripts/level1_bright_backfill.py`:
+
+| Method | bright recall — train (n = 677,618) | valid (n = 94,295) | **test (n = 49,960)** |
+| --- | --- | --- | --- |
+| otsu_vh_perchip | 0.315 | 0.124 | 0.117 |
+| otsu_vv_perchip | 0.376 | 0.236 | 0.211 |
+| **otsu_vh_global (baseline)** | **0.000** | **0.001** | **0.000** |
+| otsu_vv_global | 0.241 | 0.396 | **0.387** |
+| authors_otsu | 0.067 | 0.114 | 0.142 |
+
+Two things to carry into Level 2 and 3:
+- The baseline's bright recall is 0 *by construction* (its dark recall is 1.000, which is the sanity check). Any Level 3 gain on `cropland_bright` is therefore measured against zero, and must be paired with dry-cropland precision so it cannot be bought by over-detection.
+- A VV threshold recovers 39 % of VH-bright flooded cropland on test. Some double-bounce pixels are bright in VH but still dark in VV: the two polarisations disagree exactly where the hypothesis lives. This is the measured, not assumed, reason to give Level 3 both bands.
+
+## Implications for the plan — decision after Level 1 (Route A adopted; B protocol and C to follow)
 
 Three routes, not mutually exclusive:
 
