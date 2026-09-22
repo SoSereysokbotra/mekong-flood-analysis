@@ -1,0 +1,221 @@
+{
+  "rtc_items": [
+    "S1B_IW_GRDH_1SDV_20180805T111127_20180805T111152_012127_016547_rtc",
+    "S1B_IW_GRDH_1SDV_20180805T111057_20180805T111127_012127_016547_rtc"
+  ],
+  "n_chips": 30,
+  "offset_gamma0_minus_sigma0_db": {
+    "vv": {
+      "median_of_chip_medians": 1.6309268474578857,
+      "mean": 1.824552830060323,
+      "within_chip_std": 2.9534363746643066,
+      "corr": 0.5896236929899679
+    },
+    "vh": {
+      "median_of_chip_medians": 1.7969555854797363,
+      "mean": 2.646552069981893,
+      "within_chip_std": 3.6587626298268634,
+      "corr": 0.602894631733246
+    }
+  },
+  "scores": {
+    "otsu_vh_global": {
+      "sigma0": {
+        "all": {
+          "iou": 0.7650776559497796,
+          "recall": 0.8873899225896928,
+          "precision": 0.8473452260927111
+        },
+        "cropland": {
+          "iou": 0.7403576031992597,
+          "recall": 0.923732825873139,
+          "precision": 0.7885598733771229
+        },
+        "cropland_bright": {
+          "iou": 0.0,
+          "recall": 0.0,
+          "precision": NaN
+        },
+        "vegetation_bright": {
+          "iou": 0.0,
+          "recall": 0.0,
+          "precision": NaN
+        },
+        "cropland_dark": {
+          "iou": 1.0,
+          "recall": 1.0,
+          "precision": 1.0
+        },
+        "open_water": {
+          "iou": 0.9829402428104211,
+          "recall": 0.9903372383203716,
+          "precision": 0.9924585043120592
+        }
+      },
+      "gamma0": {
+        "all": {
+          "iou": 0.7273290781486285,
+          "recall": 0.7852413417786579,
+          "precision": 0.9079356478608782
+        },
+        "cropland": {
+          "iou": 0.7183649279346761,
+          "recall": 0.7997263136030692,
+          "precision": 0.8759464025828468
+        },
+        "cropland_bright": {
+          "iou": 0.34211105993551877,
+          "recall": 0.34211105993551877,
+          "precision": 1.0
+        },
+        "vegetation_bright": {
+          "iou": 0.27989858472716267,
+          "recall": 0.27989858472716267,
+          "precision": 1.0
+        },
+        "cropland_dark": {
+          "iou": 0.8375089075057827,
+          "recall": 0.8375089075057827,
+          "precision": 1.0
+        },
+        "open_water": {
+          "iou": 0.9653796349209098,
+          "recall": 0.9713679458064466,
+          "precision": 0.9936546162468758
+        }
+      }
+    },
+    "unet_vv_ce": {
+      "sigma0": {
+        "all": {
+          "iou": 0.8625496406759845,
+          "recall": 0.8921930362120231,
+          "precision": 0.9629088581621031
+        },
+        "cropland": {
+          "iou": 0.8806603104444627,
+          "recall": 0.9007291176668235,
+          "precision": 0.9753243832336121
+        },
+        "cropland_bright": {
+          "iou": 0.408134249153934,
+          "recall": 0.408134249153934,
+          "precision": 1.0
+        },
+        "vegetation_bright": {
+          "iou": 0.4017709831226822,
+          "recall": 0.4017709831226822,
+          "precision": 1.0
+        },
+        "cropland_dark": {
+          "iou": 0.9413997721662558,
+          "recall": 0.9413997721662558,
+          "precision": 1.0
+        },
+        "open_water": {
+          "iou": 0.9874855303244087,
+          "recall": 0.9958936650926684,
+          "precision": 0.9915226794346911
+        }
+      },
+      "gamma0": {
+        "all": {
+          "iou": 0.7665684904823955,
+          "recall": 0.7962778631173667,
+          "precision": 0.9535871471671366
+        },
+        "cropland": {
+          "iou": 0.78844085457743,
+          "recall": 0.8038468822354314,
+          "precision": 0.9762689103063488
+        },
+        "cropland_bright": {
+          "iou": 0.31697939403648595,
+          "recall": 0.31697939403648595,
+          "precision": 1.0
+        },
+        "vegetation_bright": {
+          "iou": 0.28404601528797396,
+          "recall": 0.28404601528797396,
+          "precision": 1.0
+        },
+        "cropland_dark": {
+          "iou": 0.8440446607046312,
+          "recall": 0.8440446607046312,
+          "precision": 1.0
+        },
+        "open_water": {
+          "iou": 0.9753634638785244,
+          "recall": 0.9823201082632004,
+          "precision": 0.9927916082109922
+        }
+      }
+    },
+    "unet_vvvh_cropw": {
+      "sigma0": {
+        "all": {
+          "iou": 0.8203661730046705,
+          "recall": 0.9619192918765109,
+          "precision": 0.8479034194836923
+        },
+        "cropland": {
+          "iou": 0.7682456979429355,
+          "recall": 0.971478273087708,
+          "precision": 0.7859733275999906
+        },
+        "cropland_bright": {
+          "iou": 0.7139395638504515,
+          "recall": 0.7139395638504515,
+          "precision": 1.0
+        },
+        "vegetation_bright": {
+          "iou": 0.7069628396276394,
+          "recall": 0.7069628396276394,
+          "precision": 1.0
+        },
+        "cropland_dark": {
+          "iou": 0.9927417261464848,
+          "recall": 0.9927417261464848,
+          "precision": 1.0
+        },
+        "open_water": {
+          "iou": 0.988448876542452,
+          "recall": 0.997498639933865,
+          "precision": 0.9909049996538168
+        }
+      },
+      "gamma0": {
+        "all": {
+          "iou": 0.1383325096820485,
+          "recall": 0.14549812026796502,
+          "precision": 0.7374535124271375
+        },
+        "cropland": {
+          "iou": 0.17814584995123822,
+          "recall": 0.18998906476226549,
+          "precision": 0.7407861749450654
+        },
+        "cropland_bright": {
+          "iou": 0.17183651400764963,
+          "recall": 0.17183651400764963,
+          "precision": 1.0
+        },
+        "vegetation_bright": {
+          "iou": 0.18249451297964125,
+          "recall": 0.18249451297964125,
+          "precision": 1.0
+        },
+        "cropland_dark": {
+          "iou": 0.1914878138707432,
+          "recall": 0.1914878138707432,
+          "precision": 1.0
+        },
+        "open_water": {
+          "iou": 0.011269486457456382,
+          "recall": 0.011273544632433657,
+          "precision": 0.9690464303544682
+        }
+      }
+    }
+  }
+}
