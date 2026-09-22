@@ -1,6 +1,6 @@
-"""Build an interactive offline HTML gallery to view training and test chips.
+"""Build an interactive offline HTML gallery to view ALL 446 training, validation, and test chips.
 
-Generates fast lightweight JPG previews in docs/gallery_assets/
+Generates lightweight JPG previews in docs/gallery_assets/
 and builds training_gallery.html in the project root.
 """
 import csv
@@ -22,12 +22,10 @@ def normalize_s2_rgb(s2: np.ndarray) -> np.ndarray:
     # S2 bands: Red=band 3, Green=band 2, Blue=band 1 (0-indexed)
     rgb = np.stack([s2[3], s2[2], s2[1]], axis=-1).astype(np.float32)
     rgb = np.clip(rgb / 2800.0, 0.0, 1.0)
-    # subtle gamma correction
     rgb = np.power(rgb, 0.85)
     return (rgb * 255.0).astype(np.uint8)
 
 def normalize_radar_vv(vv: np.ndarray) -> np.ndarray:
-    # Clip dB between -25 and 0 dB
     clipped = np.clip(vv, -25.0, 0.0)
     norm = (clipped - (-25.0)) / 25.0
     return (norm * 255.0).astype(np.uint8)
@@ -35,7 +33,6 @@ def normalize_radar_vv(vv: np.ndarray) -> np.ndarray:
 def create_overlay(rgb_uint8: np.ndarray, label: np.ndarray) -> np.ndarray:
     out = rgb_uint8.copy()
     flood = label == 1
-    # Tint floodwater electric blue
     out[flood, 0] = (out[flood, 0] * 0.25).astype(np.uint8)
     out[flood, 1] = (out[flood, 1] * 0.5 + 100).astype(np.uint8)
     out[flood, 2] = (out[flood, 2] * 0.3 + 178).astype(np.uint8)
@@ -43,7 +40,6 @@ def create_overlay(rgb_uint8: np.ndarray, label: np.ndarray) -> np.ndarray:
 
 def create_side_by_side(rgb: np.ndarray, radar_gray: np.ndarray, overlay: np.ndarray) -> np.ndarray:
     radar_rgb = np.stack([radar_gray, radar_gray, radar_gray], axis=-1)
-    # Concatenate horizontally
     h, w, _ = rgb.shape
     banner = np.zeros((h, w * 3 + 4, 3), dtype=np.uint8)
     banner[:, :w] = rgb
@@ -54,90 +50,70 @@ def create_side_by_side(rgb: np.ndarray, radar_gray: np.ndarray, overlay: np.nda
 def main():
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     
-    # Read inventory
     with open(ROOT / "docs" / "level0_inventory.csv", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
         
-    by_event = defaultdict(list)
-    for r in rows:
-        by_event[r["event"]].append(r)
-        
-    # Pick top chips per country (sorted by flood area)
-    selected_meta = []
-    
-    # Countries and how many chips to take
-    quotas = {
-        "India": 4, "Pakistan": 4, "Bolivia": 4, "Paraguay": 4,
-        "Ghana": 4, "Sri-Lanka": 4, "Somalia": 4, "USA": 4,
-        "Spain": 2, "Nigeria": 2, "Mekong": 4
-    }
-    
-    for ev, q in quotas.items():
-        event_chips = by_event[ev]
-        # Sort by flooded cropland if available, else total flood
-        event_chips.sort(key=lambda r: int(r["flood_cropland"]) * 2 + int(r["flood_open_water"]), reverse=True)
-        selected_meta.extend(event_chips[:q])
-        
-    print(f"Generating image assets for {len(selected_meta)} curated chips...")
+    print(f"Processing ALL {len(rows)} chips across the entire dataset...")
     
     chips_data = []
     
-    for i, meta in enumerate(selected_meta):
+    for i, meta in enumerate(rows):
         chip_id = meta["chip"]
         ev = meta["event"]
         split = meta["split"]
         
-        try:
-            s1, label, grid = io.read_s1f11_chip(chip_id)
-            s2 = io.read_s1f11_s2(chip_id)
+        comp_path = ASSETS_DIR / f"{chip_id}_comp.jpg"
+        rgb_path = ASSETS_DIR / f"{chip_id}_rgb.jpg"
+        radar_path = ASSETS_DIR / f"{chip_id}_radar.jpg"
+        overlay_path = ASSETS_DIR / f"{chip_id}_overlay.jpg"
+        
+        # Check if assets already exist to speed up re-runs
+        if not (comp_path.exists() and rgb_path.exists() and radar_path.exists() and overlay_path.exists()):
+            try:
+                s1, label, grid = io.read_s1f11_chip(chip_id)
+                s2 = io.read_s1f11_s2(chip_id)
+                
+                rgb = normalize_s2_rgb(s2)
+                radar = normalize_radar_vv(s1[0])
+                overlay = create_overlay(rgb, label)
+                composite = create_side_by_side(rgb, radar, overlay)
+                
+                im_comp = Image.fromarray(composite).resize((768, 256), Image.Resampling.BILINEAR)
+                im_comp.save(comp_path, quality=80)
+                
+                Image.fromarray(rgb).save(rgb_path, quality=85)
+                Image.fromarray(radar).save(radar_path, quality=85)
+                Image.fromarray(overlay).save(overlay_path, quality=85)
+            except Exception as e:
+                print(f"Error on {chip_id}: {e}")
+                continue
+                
+        f_crop = int(meta["flood_cropland"])
+        f_water = int(meta["flood_open_water"])
+        f_veg = int(meta["flood_vegetation"])
+        f_total = f_crop + f_water + f_veg + int(meta["flood_built"]) + int(meta["flood_other"])
+        
+        chips_data.append({
+            "id": chip_id,
+            "event": ev,
+            "split": split,
+            "flood_total": f_total,
+            "flood_crop": f_crop,
+            "flood_water": f_water,
+            "flood_veg": f_veg,
+            "comp_url": f"docs/gallery_assets/{chip_id}_comp.jpg",
+            "rgb_url": f"docs/gallery_assets/{chip_id}_rgb.jpg",
+            "radar_url": f"docs/gallery_assets/{chip_id}_radar.jpg",
+            "overlay_url": f"docs/gallery_assets/{chip_id}_overlay.jpg",
+        })
+        if (i + 1) % 50 == 0 or (i + 1) == len(rows):
+            print(f"Progress: [{i+1}/{len(rows)}] chips ready")
             
-            rgb = normalize_s2_rgb(s2)
-            radar = normalize_radar_vv(s1[0])
-            overlay = create_overlay(rgb, label)
-            composite = create_side_by_side(rgb, radar, overlay)
-            
-            # Save compressed jpgs
-            comp_path = ASSETS_DIR / f"{chip_id}_comp.jpg"
-            rgb_path = ASSETS_DIR / f"{chip_id}_rgb.jpg"
-            radar_path = ASSETS_DIR / f"{chip_id}_radar.jpg"
-            overlay_path = ASSETS_DIR / f"{chip_id}_overlay.jpg"
-            
-            # Resize composite for fast browser loading
-            im_comp = Image.fromarray(composite).resize((768, 256), Image.Resampling.BILINEAR)
-            im_comp.save(comp_path, quality=80)
-            
-            Image.fromarray(rgb).save(rgb_path, quality=85)
-            Image.fromarray(radar).save(radar_path, quality=85)
-            Image.fromarray(overlay).save(overlay_path, quality=85)
-            
-            f_crop = int(meta["flood_cropland"])
-            f_water = int(meta["flood_open_water"])
-            f_veg = int(meta["flood_vegetation"])
-            f_total = f_crop + f_water + f_veg + int(meta["flood_built"]) + int(meta["flood_other"])
-            
-            chips_data.append({
-                "id": chip_id,
-                "event": ev,
-                "split": split,
-                "flood_total": f_total,
-                "flood_crop": f_crop,
-                "flood_water": f_water,
-                "flood_veg": f_veg,
-                "comp_url": f"docs/gallery_assets/{chip_id}_comp.jpg",
-                "rgb_url": f"docs/gallery_assets/{chip_id}_rgb.jpg",
-                "radar_url": f"docs/gallery_assets/{chip_id}_radar.jpg",
-                "overlay_url": f"docs/gallery_assets/{chip_id}_overlay.jpg",
-            })
-            print(f"[{i+1}/{len(selected_meta)}] Processed {chip_id} ({ev})")
-        except Exception as e:
-            print(f"Failed on {chip_id}: {e}")
-            
-    # Write HTML
     html_content = generate_html(chips_data)
     with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(html_content)
         
-    print(f"\nSUCCESS! Created gallery at: {HTML_FILE}")
+    print(f"\nALL DONE! Complete gallery with {len(chips_data)} chips written to: {HTML_FILE}")
 
 def generate_html(chips_data):
     data_json = json.dumps(chips_data)
@@ -146,33 +122,30 @@ def generate_html(chips_data):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mekong Flood Intelligence — Training Data Gallery</title>
+    <title>Mekong Flood Intelligence — Complete 446-Chip Gallery</title>
     <style>
         :root {{
-            --bg: #0f172a;
+            --bg: #0b1120;
             --surface: #1e293b;
             --surface-hover: #334155;
             --border: #334155;
             --primary: #38bdf8;
             --text: #f8fafc;
             --text-dim: #94a3b8;
-            --accent-blue: #0284c7;
-            --accent-green: #22c55e;
-            --accent-yellow: #eab308;
         }}
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
-            padding: 24px;
+            padding: 20px;
             line-height: 1.5;
         }}
         header {{
-            max-width: 1400px;
-            margin: 0 auto 28px;
+            max-width: 1440px;
+            margin: 0 auto 20px;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
+            padding-bottom: 16px;
         }}
         .header-title {{
             display: flex;
@@ -181,19 +154,11 @@ def generate_html(chips_data):
             flex-wrap: wrap;
             gap: 16px;
         }}
-        h1 {{
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--text);
-        }}
+        h1 {{ font-size: 24px; font-weight: 700; }}
         h1 span {{ color: var(--primary); }}
-        .subtitle {{
-            color: var(--text-dim);
-            font-size: 14px;
-            margin-top: 4px;
-        }}
+        .subtitle {{ color: var(--text-dim); font-size: 13px; margin-top: 2px; }}
         .badge {{
-            padding: 4px 10px;
+            padding: 3px 10px;
             border-radius: 9999px;
             font-size: 12px;
             font-weight: 600;
@@ -202,91 +167,94 @@ def generate_html(chips_data):
         .badge-test {{ background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid #ca8a04; }}
         .badge-valid {{ background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #16a34a; }}
 
-        /* Controls */
         .controls {{
-            max-width: 1400px;
-            margin: 0 auto 24px;
+            max-width: 1440px;
+            margin: 0 auto 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             background: var(--surface);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid var(--border);
         }}
         .filter-row {{
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }}
         .filter-label {{
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--text-dim);
-            margin-right: 6px;
-            min-width: 70px;
+            min-width: 60px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }}
         .btn {{
             background: var(--bg);
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 6px 14px;
+            padding: 5px 11px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.12s ease;
         }}
         .btn:hover {{ background: var(--surface-hover); }}
         .btn.active {{
             background: var(--primary);
-            color: #0f172a;
-            font-weight: 600;
+            color: #0b1120;
+            font-weight: 700;
             border-color: var(--primary);
         }}
+        .search-box {{
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            width: 220px;
+            outline: none;
+        }}
+        .search-box:focus {{ border-color: var(--primary); }}
 
-        /* Legend */
-        .legend {{
-            display: flex;
-            gap: 20px;
+        .status-bar {{
             font-size: 13px;
             color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }}
-        .legend-item {{ display: flex; align-items: center; gap: 6px; }}
-        .legend-color {{ width: 12px; height: 12px; border-radius: 3px; }}
 
-        /* Grid */
         .grid {{
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(430px, 1fr));
+            gap: 18px;
         }}
         .card {{
             background: var(--surface);
-            border-radius: 10px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.15s, border-color 0.15s;
         }}
         .card:hover {{
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-            border-color: #475569;
+            border-color: #64748b;
         }}
         .card-header {{
-            padding: 12px 16px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid var(--border);
         }}
-        .card-title {{
-            font-size: 14px;
-            font-weight: 600;
-        }}
+        .card-title {{ font-size: 13px; font-weight: 600; }}
         .card-body {{
             position: relative;
             background: #000;
@@ -302,67 +270,55 @@ def generate_html(chips_data):
         .labels-strip {{
             display: flex;
             justify-content: space-around;
-            padding: 6px;
-            background: #111827;
-            font-size: 11px;
-            font-weight: 600;
-            color: #94a3b8;
+            padding: 4px;
+            background: #090e17;
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
             border-top: 1px solid var(--border);
+            letter-spacing: 0.5px;
         }}
         .card-footer {{
-            padding: 12px 16px;
-            font-size: 12px;
+            padding: 10px 14px;
+            font-size: 11px;
             color: var(--text-dim);
             display: flex;
             justify-content: space-between;
         }}
-        .stat-val {{
-            color: var(--text);
-            font-weight: 600;
-        }}
+        .stat-val {{ color: var(--text); font-weight: 600; }}
 
-        /* Modal */
         .modal {{
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.92);
+            background: rgba(11, 17, 32, 0.94);
             backdrop-filter: blur(4px);
             z-index: 100;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
         }}
         .modal-content {{
-            max-width: 900px;
+            max-width: 960px;
             width: 100%;
             background: var(--surface);
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid var(--border);
             overflow: hidden;
             position: relative;
         }}
         .modal-close {{
             position: absolute;
-            top: 14px;
-            right: 18px;
-            font-size: 24px;
+            top: 10px;
+            right: 16px;
+            font-size: 26px;
             color: var(--text-dim);
             cursor: pointer;
             z-index: 10;
         }}
-        .modal-img-wrap {{
-            background: #000;
-            text-align: center;
-        }}
-        .modal-img {{
-            max-height: 70vh;
-            max-width: 100%;
-            display: inline-block;
-        }}
-        .modal-footer {{
-            padding: 16px 20px;
-        }}
+        .modal-img-wrap {{ background: #000; text-align: center; }}
+        .modal-img {{ max-height: 72vh; max-width: 100%; display: inline-block; }}
+        .modal-footer {{ padding: 14px 18px; font-size: 13px; }}
     </style>
 </head>
 <body>
@@ -370,42 +326,53 @@ def generate_html(chips_data):
     <header>
         <div class="header-title">
             <div>
-                <h1>Mekong Flood Intelligence <span>Training Data Gallery</span></h1>
-                <div class="subtitle">Exploring Sen1Floods11 benchmark scenes across 8 countries & held-out test data</div>
+                <h1>Mekong Flood Intelligence <span>Complete Dataset Browser</span></h1>
+                <div class="subtitle">Every chip in Sen1Floods11: 368 Training, 48 Validation, 30 Cambodia Held-Out Test</div>
             </div>
             <div>
-                <span class="badge badge-train">368 Training Chips</span>
-                <span class="badge badge-valid">48 Valid Chips</span>
-                <span class="badge badge-test">30 Held-Out Test Chips</span>
+                <span class="badge badge-train">368 Train</span>
+                <span class="badge badge-valid">48 Valid</span>
+                <span class="badge badge-test">30 Test</span>
             </div>
         </div>
     </header>
 
     <div class="controls">
         <div class="filter-row">
-            <span class="filter-label">Country:</span>
-            <button class="btn active" onclick="filterCountry('ALL')">All Countries</button>
-            <button class="btn" onclick="filterCountry('India')">India (Train)</button>
-            <button class="btn" onclick="filterCountry('Pakistan')">Pakistan (Train)</button>
-            <button class="btn" onclick="filterCountry('USA')">USA (Train)</button>
-            <button class="btn" onclick="filterCountry('Bolivia')">Bolivia (Train)</button>
-            <button class="btn" onclick="filterCountry('Paraguay')">Paraguay (Train)</button>
-            <button class="btn" onclick="filterCountry('Ghana')">Ghana (Train)</button>
-            <button class="btn" onclick="filterCountry('Sri-Lanka')">Sri Lanka (Train)</button>
-            <button class="btn" onclick="filterCountry('Somalia')">Somalia (Train)</button>
-            <button class="btn" onclick="filterCountry('Mekong')">Cambodia (Held-out Test)</button>
+            <span class="filter-label">Split:</span>
+            <button class="btn active" onclick="filterSplit('ALL')">All (446)</button>
+            <button class="btn" onclick="filterSplit('train')">Training (368)</button>
+            <button class="btn" onclick="filterSplit('valid')">Validation (48)</button>
+            <button class="btn" onclick="filterSplit('test')">Held-Out Test (30)</button>
         </div>
         <div class="filter-row">
-            <span class="filter-label">Display:</span>
-            <button class="btn active" onclick="switchView('comp')">3-in-1 Composite (Optical | Radar | Flood)</button>
-            <button class="btn" onclick="switchView('rgb')">Optical RGB Only</button>
-            <button class="btn" onclick="switchView('radar')">Radar VV Only</button>
-            <button class="btn" onclick="switchView('overlay')">Flood Overlay (Blue = Flood)</button>
+            <span class="filter-label">Country:</span>
+            <button class="btn active" onclick="filterCountry('ALL')">All Countries</button>
+            <button class="btn" onclick="filterCountry('India')">India (68)</button>
+            <button class="btn" onclick="filterCountry('USA')">USA (69)</button>
+            <button class="btn" onclick="filterCountry('Paraguay')">Paraguay (67)</button>
+            <button class="btn" onclick="filterCountry('Ghana')">Ghana (53)</button>
+            <button class="btn" onclick="filterCountry('Sri-Lanka')">Sri Lanka (42)</button>
+            <button class="btn" onclick="filterCountry('Pakistan')">Pakistan (28)</button>
+            <button class="btn" onclick="filterCountry('Somalia')">Somalia (26)</button>
+            <button class="btn" onclick="filterCountry('Bolivia')">Bolivia (15)</button>
+            <button class="btn" onclick="filterCountry('Spain')">Spain (24)</button>
+            <button class="btn" onclick="filterCountry('Nigeria')">Nigeria (24)</button>
+            <button class="btn" onclick="filterCountry('Mekong')">Cambodia (30)</button>
         </div>
-        <div class="legend">
-            <div class="legend-item"><div class="legend-color" style="background: #38bdf8;"></div> Flooded Area (Ground Truth)</div>
-            <div class="legend-item"><div class="legend-color" style="background: #eab308;"></div> Flooded Rice / Farmland</div>
-            <div class="legend-item"><div class="legend-color" style="background: #22c55e;"></div> Flooded Vegetation / Trees</div>
+        <div class="filter-row" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="filter-label">Layer:</span>
+                <button class="btn active" onclick="switchView('comp')">3-in-1 (Optical | Radar | Flood)</button>
+                <button class="btn" onclick="switchView('rgb')">Optical RGB</button>
+                <button class="btn" onclick="switchView('radar')">Radar VV</button>
+                <button class="btn" onclick="switchView('overlay')">Flood Overlay</button>
+            </div>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search chip name..." oninput="handleSearch()">
+        </div>
+        <div class="status-bar">
+            <span id="counterText">Showing 446 of 446 chips</span>
+            <span>Blue = Actual Floodwater | Green = Vegetation | Gray = Radar Echo</span>
         </div>
     </div>
 
@@ -423,15 +390,25 @@ def generate_html(chips_data):
 
     <script>
         const CHIPS = {data_json};
+        let currentSplit = 'ALL';
         let currentCountry = 'ALL';
-        let currentView = 'comp'; // comp, rgb, radar, overlay
+        let currentView = 'comp';
+        let searchQuery = '';
 
         function renderCards() {{
             const grid = document.getElementById('cardGrid');
             grid.innerHTML = '';
             
-            const filtered = CHIPS.filter(c => currentCountry === 'ALL' || c.event === currentCountry);
+            const filtered = CHIPS.filter(c => {{
+                const matchSplit = currentSplit === 'ALL' || c.split === currentSplit;
+                const matchCountry = currentCountry === 'ALL' || c.event === currentCountry;
+                const matchSearch = searchQuery === '' || c.id.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchSplit && matchCountry && matchSearch;
+            }});
+
+            document.getElementById('counterText').textContent = `Showing ${{filtered.length}} of ${{CHIPS.length}} chips`;
             
+            // Render first 100 instantly, then rest on demand or lazy
             filtered.forEach(chip => {{
                 let imgSrc = chip.comp_url;
                 if (currentView === 'rgb') imgSrc = chip.rgb_url;
@@ -450,20 +427,28 @@ def generate_html(chips_data):
                     <div class="card-body" onclick="openModal('${{chip.id}}', '${{imgSrc}}', '${{chip.event}}')">
                         <img class="card-img" src="${{imgSrc}}" alt="${{chip.id}}" loading="lazy">
                     </div>
-                    ${{currentView === 'comp' ? '<div class="labels-strip"><span>1. OPTICAL RGB</span><span>2. RADAR VV</span><span>3. FLOOD OVERLAY</span></div>' : ''}}
+                    ${{currentView === 'comp' ? '<div class="labels-strip"><span>OPTICAL RGB</span><span>RADAR VV</span><span>FLOOD OVERLAY</span></div>' : ''}}
                     <div class="card-footer">
-                        <div>Crop flood: <span class="stat-val">${{chip.flood_crop.toLocaleString()}} px</span></div>
-                        <div>Water flood: <span class="stat-val">${{chip.flood_water.toLocaleString()}} px</span></div>
-                        <div>Total flood: <span class="stat-val">${{chip.flood_total.toLocaleString()}} px</span></div>
+                        <div>Crops: <span class="stat-val">${{chip.flood_crop.toLocaleString()}} px</span></div>
+                        <div>Water: <span class="stat-val">${{chip.flood_water.toLocaleString()}} px</span></div>
+                        <div>Total: <span class="stat-val">${{chip.flood_total.toLocaleString()}} px</span></div>
                     </div>
                 `;
                 grid.appendChild(card);
             }});
         }}
 
+        function filterSplit(split) {{
+            currentSplit = split;
+            document.querySelectorAll('.filter-row:nth-child(1) .btn').forEach(b => {{
+                b.classList.toggle('active', b.textContent.toLowerCase().includes(split.toLowerCase()) || (split === 'ALL' && b.textContent.includes('All')));
+            }});
+            renderCards();
+        }}
+
         function filterCountry(country) {{
             currentCountry = country;
-            document.querySelectorAll('.filter-row:nth-child(1) .btn').forEach(b => {{
+            document.querySelectorAll('.filter-row:nth-child(2) .btn').forEach(b => {{
                 b.classList.toggle('active', b.textContent.includes(country) || (country === 'ALL' && b.textContent.includes('All')));
             }});
             renderCards();
@@ -471,10 +456,15 @@ def generate_html(chips_data):
 
         function switchView(view) {{
             currentView = view;
-            document.querySelectorAll('.filter-row:nth-child(2) .btn').forEach(b => {{
+            document.querySelectorAll('.filter-row:nth-child(3) .btn').forEach(b => {{
                 b.classList.remove('active');
             }});
             event.target.classList.add('active');
+            renderCards();
+        }}
+
+        function handleSearch() {{
+            searchQuery = document.getElementById('searchInput').value;
             renderCards();
         }}
 
@@ -491,7 +481,6 @@ def generate_html(chips_data):
             document.getElementById('imageModal').style.display = 'none';
         }}
 
-        // Initial render
         renderCards();
     </script>
 </body>
