@@ -1,0 +1,10 @@
+model: unet_small
+channels: [vv, vh]
+loss: dice_ce
+epochs: 30
+lr: 0.001
+batch: 8
+crop: 256
+crops_per_chip: 4
+augment: true
+seed: 0

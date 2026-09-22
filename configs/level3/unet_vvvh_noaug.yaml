@@ -1,0 +1,11 @@
+# augmentation off: rotations may be unphysical for side-looking radar
+model: unet_small
+channels: [vv, vh]
+loss: ce
+epochs: 30
+lr: 0.001
+batch: 8
+crop: 256
+crops_per_chip: 4
+augment: false
+seed: 0

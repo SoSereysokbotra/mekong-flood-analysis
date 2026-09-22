@@ -27,3 +27,8 @@ outputs/
 
 # results: keep metrics/logs/configs, drop predictions
 results/**/pred/
+results/**/pred_valid/
+results/**/pred_test/
+results/**/*.pt
+results/**/*.joblib
+results/level3/_logs/

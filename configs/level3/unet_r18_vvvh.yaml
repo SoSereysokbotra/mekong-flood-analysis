@@ -1,0 +1,12 @@
+# pretrained ResNet-18 encoder (plan step 2)
+model: unet_r18
+pretrained: true
+channels: [vv, vh]
+loss: ce
+epochs: 30
+lr: 0.0005
+batch: 8
+crop: 256
+crops_per_chip: 4
+augment: true
+seed: 0

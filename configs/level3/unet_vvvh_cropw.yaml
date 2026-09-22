@@ -1,0 +1,13 @@
+# the loss that targets the hypothesis: flood pixels on cropland / vegetation weighted x4
+model: unet_small
+channels: [vv, vh]
+loss: cropw_ce
+crop_weight: 4.0
+veg_weight: 4.0
+epochs: 30
+lr: 0.001
+batch: 8
+crop: 256
+crops_per_chip: 4
+augment: true
+seed: 0
