@@ -84,7 +84,9 @@ class ChipDataset(Dataset):
         chip = self.chips[i % len(self.chips)]
         ch, label, land, _ = raw_channels(chip)
         x = np.stack([(ch[c] - self.norm[c][0]) / self.norm[c][1] for c in self.channels]).astype(np.float32)
-        y = np.where(label < 0, IGNORE, label).astype(np.int64)
+        # cast before np.where: under NumPy 2 promotion an int8 label array would
+        # keep IGNORE=255 as int8 and wrap it to -1 (invalid class index on GPU)
+        y = np.where(label < 0, IGNORE, label.astype(np.int64))
         vh = ch["vh"].astype(np.float32)  # raw VH kept for the bright sub-strata
         if self.crop:
             H, W = y.shape
