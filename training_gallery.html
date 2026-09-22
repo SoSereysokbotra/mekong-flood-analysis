@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mekong Flood Intelligence — Training Data Gallery</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --border: #334155;
+            --primary: #38bdf8;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent-blue: #0284c7;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 24px;
+            line-height: 1.5;
+        }
+        header {
+            max-width: 1400px;
+            margin: 0 auto 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        h1 span { color: var(--primary); }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-train { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #0284c7; }
+        .badge-test { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid #ca8a04; }
+        .badge-valid { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #16a34a; }
+
+        /* Controls */
+        .controls {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .filter-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-right: 6px;
+            min-width: 70px;
+        }
+        .btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn:hover { background: var(--surface-hover); }
+        .btn.active {
+            background: var(--primary);
+            color: #0f172a;
+            font-weight: 600;
+            border-color: var(--primary);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-dim);
+            align-items: center;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+        /* Grid */
+        .grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            border-color: #475569;
+        }
+        .card-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .card-body {
+            position: relative;
+            background: #000;
+            cursor: pointer;
+            aspect-ratio: 3 / 1;
+        }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .labels-strip {
+            display: flex;
+            justify-content: space-around;
+            padding: 6px;
+            background: #111827;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            border-top: 1px solid var(--border);
+        }
+        .card-footer {
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+        }
+        .stat-val {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .modal-content {
+            max-width: 900px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            font-size: 24px;
+            color: var(--text-dim);
+            cursor: pointer;
+            z-index: 10;
+        }
+        .modal-img-wrap {
+            background: #000;
+            text-align: center;
+        }
+        .modal-img {
+            max-height: 70vh;
+            max-width: 100%;
+            display: inline-block;
+        }
+        .modal-footer {
+            padding: 16px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <div>
+                <h1>Mekong Flood Intelligence <span>Training Data Gallery</span></h1>
+                <div class="subtitle">Exploring Sen1Floods11 benchmark scenes across 8 countries & held-out test data</div>
+            </div>
+            <div>
+                <span class="badge badge-train">368 Training Chips</span>
+                <span class="badge badge-valid">48 Valid Chips</span>
+                <span class="badge badge-test">30 Held-Out Test Chips</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="controls">
+        <div class="filter-row">
+            <span class="filter-label">Country:</span>
+            <button class="btn active" onclick="filterCountry('ALL')">All Countries</button>
+            <button class="btn" onclick="filterCountry('India')">India (Train)</button>
+            <button class="btn" onclick="filterCountry('Pakistan')">Pakistan (Train)</button>
+            <button class="btn" onclick="filterCountry('USA')">USA (Train)</button>
+            <button class="btn" onclick="filterCountry('Bolivia')">Bolivia (Train)</button>
+            <button class="btn" onclick="filterCountry('Paraguay')">Paraguay (Train)</button>
+            <button class="btn" onclick="filterCountry('Ghana')">Ghana (Train)</button>
+            <button class="btn" onclick="filterCountry('Sri-Lanka')">Sri Lanka (Train)</button>
+            <button class="btn" onclick="filterCountry('Somalia')">Somalia (Train)</button>
+            <button class="btn" onclick="filterCountry('Mekong')">Cambodia (Held-out Test)</button>
+        </div>
+        <div class="filter-row">
+            <span class="filter-label">Display:</span>
+            <button class="btn active" onclick="switchView('comp')">3-in-1 Composite (Optical | Radar | Flood)</button>
+            <button class="btn" onclick="switchView('rgb')">Optical RGB Only</button>
+            <button class="btn" onclick="switchView('radar')">Radar VV Only</button>
+            <button class="btn" onclick="switchView('overlay')">Flood Overlay (Blue = Flood)</button>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #38bdf8;"></div> Flooded Area (Ground Truth)</div>
+            <div class="legend-item"><div class="legend-color" style="background: #eab308;"></div> Flooded Rice / Farmland</div>
+            <div class="legend-item"><div class="legend-color" style="background: #22c55e;"></div> Flooded Vegetation / Trees</div>
+        </div>
+    </div>
+
+    <div class="grid" id="cardGrid"></div>
+
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="closeModal()">&times;</div>
+            <div class="modal-img-wrap">
+                <img id="modalImg" class="modal-img" src="" alt="Enlarged view">
+            </div>
+            <div class="modal-footer" id="modalText"></div>
+        </div>
+    </div>
+
+    <script>
+        const CHIPS = [{"id": "India_747992", "event": "India", "split": "train", "flood_total": 117322, "flood_crop": 111898, "flood_water": 3, "flood_veg": 1492, "comp_url": "docs/gallery_assets/India_747992_comp.jpg", "rgb_url": "docs/gallery_assets/India_747992_rgb.jpg", "radar_url": "docs/gallery_assets/India_747992_radar.jpg", "overlay_url": "docs/gallery_assets/India_747992_overlay.jpg"}, {"id": "India_399883", "event": "India", "split": "train", "flood_total": 136292, "flood_crop": 15145, "flood_water": 97819, "flood_veg": 11155, "comp_url": "docs/gallery_assets/India_399883_comp.jpg", "rgb_url": "docs/gallery_assets/India_399883_rgb.jpg", "radar_url": "docs/gallery_assets/India_399883_radar.jpg", "overlay_url": "docs/gallery_assets/India_399883_overlay.jpg"}, {"id": "India_900498", "event": "India", "split": "train", "flood_total": 123953, "flood_crop": 10205, "flood_water": 100568, "flood_veg": 619, "comp_url": "docs/gallery_assets/India_900498_comp.jpg", "rgb_url": "docs/gallery_assets/India_900498_rgb.jpg", "radar_url": "docs/gallery_assets/India_900498_radar.jpg", "overlay_url": "docs/gallery_assets/India_900498_overlay.jpg"}, {"id": "India_1018317", "event": "India", "split": "train", "flood_total": 150710, "flood_crop": 3780, "flood_water": 108550, "flood_veg": 286, "comp_url": "docs/gallery_assets/India_1018317_comp.jpg", "rgb_url": "docs/gallery_assets/India_1018317_rgb.jpg", "radar_url": "docs/gallery_assets/India_1018317_radar.jpg", "overlay_url": "docs/gallery_assets/India_1018317_overlay.jpg"}, {"id": "Pakistan_849790", "event": "Pakistan", "split": "train", "flood_total": 171908, "flood_crop": 161547, "flood_water": 215, "flood_veg": 9699, "comp_url": "docs/gallery_assets/Pakistan_849790_comp.jpg", "rgb_url": "docs/gallery_assets/Pakistan_849790_rgb.jpg", "radar_url": "docs/gallery_assets/Pakistan_849790_radar.jpg", "overlay_url": "docs/gallery_assets/Pakistan_849790_overlay.jpg"}, {"id": "Pakistan_94095", "event": "Pakistan", "split": "train", "flood_total": 53566, "flood_crop": 10619, "flood_water": 30904, "flood_veg": 280, "comp_url": "docs/gallery_assets/Pakistan_94095_comp.jpg", "rgb_url": "docs/gallery_assets/Pakistan_94095_rgb.jpg", "radar_url": "docs/gallery_assets/Pakistan_94095_radar.jpg", "overlay_url": "docs/gallery_assets/Pakistan_94095_overlay.jpg"}, {"id": "Pakistan_35915", "event": "Pakistan", "split": "train", "flood_total": 52301, "flood_crop": 4352, "flood_water": 31667, "flood_veg": 93, "comp_url": "docs/gallery_assets/Pakistan_35915_comp.jpg", "rgb_url": "docs/gallery_assets/Pakistan_35915_rgb.jpg", "radar_url": "docs/gallery_assets/Pakistan_35915_radar.jpg", "overlay_url": "docs/gallery_assets/Pakistan_35915_overlay.jpg"}, {"id": "Pakistan_694942", "event": "Pakistan", "split": "train", "flood_total": 18481, "flood_crop": 18356, "flood_water": 0, "flood_veg": 27, "comp_url": "docs/gallery_assets/Pakistan_694942_comp.jpg", "rgb_url": "docs/gallery_assets/Pakistan_694942_rgb.jpg", "radar_url": "docs/gallery_assets/Pakistan_694942_radar.jpg", "overlay_url": "docs/gallery_assets/Pakistan_694942_overlay.jpg"}, {"id": "Bolivia_294583", "event": "Bolivia", "split": "train", "flood_total": 15008, "flood_crop": 0, "flood_water": 11432, "flood_veg": 2956, "comp_url": "docs/gallery_assets/Bolivia_294583_comp.jpg", "rgb_url": "docs/gallery_assets/Bolivia_294583_rgb.jpg", "radar_url": "docs/gallery_assets/Bolivia_294583_radar.jpg", "overlay_url": "docs/gallery_assets/Bolivia_294583_overlay.jpg"}, {"id": "Bolivia_23014", "event": "Bolivia", "split": "train", "flood_total": 7780, "flood_crop": 0, "flood_water": 7355, "flood_veg": 222, "comp_url": "docs/gallery_assets/Bolivia_23014_comp.jpg", "rgb_url": "docs/gallery_assets/Bolivia_23014_rgb.jpg", "radar_url": "docs/gallery_assets/Bolivia_23014_radar.jpg", "overlay_url": "docs/gallery_assets/Bolivia_23014_overlay.jpg"}, {"id": "Bolivia_242570", "event": "Bolivia", "split": "train", "flood_total": 27346, "flood_crop": 13, "flood_water": 5275, "flood_veg": 20118, "comp_url": "docs/gallery_assets/Bolivia_242570_comp.jpg", "rgb_url": "docs/gallery_assets/Bolivia_242570_rgb.jpg", "radar_url": "docs/gallery_assets/Bolivia_242570_radar.jpg", "overlay_url": "docs/gallery_assets/Bolivia_242570_overlay.jpg"}, {"id": "Bolivia_129334", "event": "Bolivia", "split": "train", "flood_total": 156067, "flood_crop": 0, "flood_water": 4573, "flood_veg": 151385, "comp_url": "docs/gallery_assets/Bolivia_129334_comp.jpg", "rgb_url": "docs/gallery_assets/Bolivia_129334_rgb.jpg", "radar_url": "docs/gallery_assets/Bolivia_129334_radar.jpg", "overlay_url": "docs/gallery_assets/Bolivia_129334_overlay.jpg"}, {"id": "Paraguay_822142", "event": "Paraguay", "split": "train", "flood_total": 80190, "flood_crop": 4430, "flood_water": 48130, "flood_veg": 21737, "comp_url": "docs/gallery_assets/Paraguay_822142_comp.jpg", "rgb_url": "docs/gallery_assets/Paraguay_822142_rgb.jpg", "radar_url": "docs/gallery_assets/Paraguay_822142_radar.jpg", "overlay_url": "docs/gallery_assets/Paraguay_822142_overlay.jpg"}, {"id": "Paraguay_24341", "event": "Paraguay", "split": "train", "flood_total": 68353, "flood_crop": 2459, "flood_water": 51467, "flood_veg": 12658, "comp_url": "docs/gallery_assets/Paraguay_24341_comp.jpg", "rgb_url": "docs/gallery_assets/Paraguay_24341_rgb.jpg", "radar_url": "docs/gallery_assets/Paraguay_24341_radar.jpg", "overlay_url": "docs/gallery_assets/Paraguay_24341_overlay.jpg"}, {"id": "Paraguay_1029042", "event": "Paraguay", "split": "train", "flood_total": 61197, "flood_crop": 1478, "flood_water": 52250, "flood_veg": 6336, "comp_url": "docs/gallery_assets/Paraguay_1029042_comp.jpg", "rgb_url": "docs/gallery_assets/Paraguay_1029042_rgb.jpg", "radar_url": "docs/gallery_assets/Paraguay_1029042_radar.jpg", "overlay_url": "docs/gallery_assets/Paraguay_1029042_overlay.jpg"}, {"id": "Paraguay_657443", "event": "Paraguay", "split": "train", "flood_total": 64974, "flood_crop": 3324, "flood_water": 42182, "flood_veg": 17613, "comp_url": "docs/gallery_assets/Paraguay_657443_comp.jpg", "rgb_url": "docs/gallery_assets/Paraguay_657443_rgb.jpg", "radar_url": "docs/gallery_assets/Paraguay_657443_radar.jpg", "overlay_url": "docs/gallery_assets/Paraguay_657443_overlay.jpg"}, {"id": "Ghana_868803", "event": "Ghana", "split": "train", "flood_total": 144051, "flood_crop": 52028, "flood_water": 11065, "flood_veg": 76491, "comp_url": "docs/gallery_assets/Ghana_868803_comp.jpg", "rgb_url": "docs/gallery_assets/Ghana_868803_rgb.jpg", "radar_url": "docs/gallery_assets/Ghana_868803_radar.jpg", "overlay_url": "docs/gallery_assets/Ghana_868803_overlay.jpg"}, {"id": "Ghana_866994", "event": "Ghana", "split": "train", "flood_total": 105971, "flood_crop": 5599, "flood_water": 84092, "flood_veg": 14855, "comp_url": "docs/gallery_assets/Ghana_866994_comp.jpg", "rgb_url": "docs/gallery_assets/Ghana_866994_rgb.jpg", "radar_url": "docs/gallery_assets/Ghana_866994_radar.jpg", "overlay_url": "docs/gallery_assets/Ghana_866994_overlay.jpg"}, {"id": "Ghana_141910", "event": "Ghana", "split": "train", "flood_total": 70650, "flood_crop": 34271, "flood_water": 6399, "flood_veg": 28401, "comp_url": "docs/gallery_assets/Ghana_141910_comp.jpg", "rgb_url": "docs/gallery_assets/Ghana_141910_rgb.jpg", "radar_url": "docs/gallery_assets/Ghana_141910_radar.jpg", "overlay_url": "docs/gallery_assets/Ghana_141910_overlay.jpg"}, {"id": "Ghana_319168", "event": "Ghana", "split": "train", "flood_total": 39521, "flood_crop": 13979, "flood_water": 98, "flood_veg": 24402, "comp_url": "docs/gallery_assets/Ghana_319168_comp.jpg", "rgb_url": "docs/gallery_assets/Ghana_319168_rgb.jpg", "radar_url": "docs/gallery_assets/Ghana_319168_radar.jpg", "overlay_url": "docs/gallery_assets/Ghana_319168_overlay.jpg"}, {"id": "Sri-Lanka_534068", "event": "Sri-Lanka", "split": "train", "flood_total": 257268, "flood_crop": 9, "flood_water": 256647, "flood_veg": 498, "comp_url": "docs/gallery_assets/Sri-Lanka_534068_comp.jpg", "rgb_url": "docs/gallery_assets/Sri-Lanka_534068_rgb.jpg", "radar_url": "docs/gallery_assets/Sri-Lanka_534068_radar.jpg", "overlay_url": "docs/gallery_assets/Sri-Lanka_534068_overlay.jpg"}, {"id": "Sri-Lanka_845821", "event": "Sri-Lanka", "split": "train", "flood_total": 234546, "flood_crop": 1, "flood_water": 233936, "flood_veg": 169, "comp_url": "docs/gallery_assets/Sri-Lanka_845821_comp.jpg", "rgb_url": "docs/gallery_assets/Sri-Lanka_845821_rgb.jpg", "radar_url": "docs/gallery_assets/Sri-Lanka_845821_radar.jpg", "overlay_url": "docs/gallery_assets/Sri-Lanka_845821_overlay.jpg"}, {"id": "Sri-Lanka_92824", "event": "Sri-Lanka", "split": "train", "flood_total": 55390, "flood_crop": 47221, "flood_water": 3611, "flood_veg": 4235, "comp_url": "docs/gallery_assets/Sri-Lanka_92824_comp.jpg", "rgb_url": "docs/gallery_assets/Sri-Lanka_92824_rgb.jpg", "radar_url": "docs/gallery_assets/Sri-Lanka_92824_radar.jpg", "overlay_url": "docs/gallery_assets/Sri-Lanka_92824_overlay.jpg"}, {"id": "Sri-Lanka_321316", "event": "Sri-Lanka", "split": "train", "flood_total": 96905, "flood_crop": 97, "flood_water": 88276, "flood_veg": 7223, "comp_url": "docs/gallery_assets/Sri-Lanka_321316_comp.jpg", "rgb_url": "docs/gallery_assets/Sri-Lanka_321316_rgb.jpg", "radar_url": "docs/gallery_assets/Sri-Lanka_321316_radar.jpg", "overlay_url": "docs/gallery_assets/Sri-Lanka_321316_overlay.jpg"}, {"id": "Somalia_322855", "event": "Somalia", "split": "train", "flood_total": 44737, "flood_crop": 38491, "flood_water": 0, "flood_veg": 6246, "comp_url": "docs/gallery_assets/Somalia_322855_comp.jpg", "rgb_url": "docs/gallery_assets/Somalia_322855_rgb.jpg", "radar_url": "docs/gallery_assets/Somalia_322855_radar.jpg", "overlay_url": "docs/gallery_assets/Somalia_322855_overlay.jpg"}, {"id": "Somalia_12849", "event": "Somalia", "split": "train", "flood_total": 37192, "flood_crop": 33910, "flood_water": 21, "flood_veg": 3226, "comp_url": "docs/gallery_assets/Somalia_12849_comp.jpg", "rgb_url": "docs/gallery_assets/Somalia_12849_rgb.jpg", "radar_url": "docs/gallery_assets/Somalia_12849_radar.jpg", "overlay_url": "docs/gallery_assets/Somalia_12849_overlay.jpg"}, {"id": "Somalia_371421", "event": "Somalia", "split": "train", "flood_total": 34678, "flood_crop": 27629, "flood_water": 0, "flood_veg": 7049, "comp_url": "docs/gallery_assets/Somalia_371421_comp.jpg", "rgb_url": "docs/gallery_assets/Somalia_371421_rgb.jpg", "radar_url": "docs/gallery_assets/Somalia_371421_radar.jpg", "overlay_url": "docs/gallery_assets/Somalia_371421_overlay.jpg"}, {"id": "Somalia_886726", "event": "Somalia", "split": "train", "flood_total": 82995, "flood_crop": 26023, "flood_water": 0, "flood_veg": 56972, "comp_url": "docs/gallery_assets/Somalia_886726_comp.jpg", "rgb_url": "docs/gallery_assets/Somalia_886726_rgb.jpg", "radar_url": "docs/gallery_assets/Somalia_886726_radar.jpg", "overlay_url": "docs/gallery_assets/Somalia_886726_overlay.jpg"}, {"id": "USA_86502", "event": "USA", "split": "train", "flood_total": 66362, "flood_crop": 52726, "flood_water": 10009, "flood_veg": 2409, "comp_url": "docs/gallery_assets/USA_86502_comp.jpg", "rgb_url": "docs/gallery_assets/USA_86502_rgb.jpg", "radar_url": "docs/gallery_assets/USA_86502_radar.jpg", "overlay_url": "docs/gallery_assets/USA_86502_overlay.jpg"}, {"id": "USA_788696", "event": "USA", "split": "train", "flood_total": 111448, "flood_crop": 563, "flood_water": 103812, "flood_veg": 6165, "comp_url": "docs/gallery_assets/USA_788696_comp.jpg", "rgb_url": "docs/gallery_assets/USA_788696_rgb.jpg", "radar_url": "docs/gallery_assets/USA_788696_radar.jpg", "overlay_url": "docs/gallery_assets/USA_788696_overlay.jpg"}, {"id": "USA_170264", "event": "USA", "split": "train", "flood_total": 43535, "flood_crop": 32577, "flood_water": 524, "flood_veg": 9136, "comp_url": "docs/gallery_assets/USA_170264_comp.jpg", "rgb_url": "docs/gallery_assets/USA_170264_rgb.jpg", "radar_url": "docs/gallery_assets/USA_170264_radar.jpg", "overlay_url": "docs/gallery_assets/USA_170264_overlay.jpg"}, {"id": "USA_217598", "event": "USA", "split": "train", "flood_total": 45251, "flood_crop": 32533, "flood_water": 544, "flood_veg": 11343, "comp_url": "docs/gallery_assets/USA_217598_comp.jpg", "rgb_url": "docs/gallery_assets/USA_217598_rgb.jpg", "radar_url": "docs/gallery_assets/USA_217598_radar.jpg", "overlay_url": "docs/gallery_assets/USA_217598_overlay.jpg"}, {"id": "Spain_7387658", "event": "Spain", "split": "valid", "flood_total": 153006, "flood_crop": 97387, "flood_water": 21543, "flood_veg": 11898, "comp_url": "docs/gallery_assets/Spain_7387658_comp.jpg", "rgb_url": "docs/gallery_assets/Spain_7387658_rgb.jpg", "radar_url": "docs/gallery_assets/Spain_7387658_radar.jpg", "overlay_url": "docs/gallery_assets/Spain_7387658_overlay.jpg"}, {"id": "Spain_5923267", "event": "Spain", "split": "valid", "flood_total": 201713, "flood_crop": 0, "flood_water": 197312, "flood_veg": 3106, "comp_url": "docs/gallery_assets/Spain_5923267_comp.jpg", "rgb_url": "docs/gallery_assets/Spain_5923267_rgb.jpg", "radar_url": "docs/gallery_assets/Spain_5923267_radar.jpg", "overlay_url": "docs/gallery_assets/Spain_5923267_overlay.jpg"}, {"id": "Nigeria_812045", "event": "Nigeria", "split": "valid", "flood_total": 119583, "flood_crop": 71516, "flood_water": 22722, "flood_veg": 6137, "comp_url": "docs/gallery_assets/Nigeria_812045_comp.jpg", "rgb_url": "docs/gallery_assets/Nigeria_812045_rgb.jpg", "radar_url": "docs/gallery_assets/Nigeria_812045_radar.jpg", "overlay_url": "docs/gallery_assets/Nigeria_812045_overlay.jpg"}, {"id": "Nigeria_984831", "event": "Nigeria", "split": "valid", "flood_total": 221680, "flood_crop": 71513, "flood_water": 15647, "flood_veg": 129319, "comp_url": "docs/gallery_assets/Nigeria_984831_comp.jpg", "rgb_url": "docs/gallery_assets/Nigeria_984831_rgb.jpg", "radar_url": "docs/gallery_assets/Nigeria_984831_radar.jpg", "overlay_url": "docs/gallery_assets/Nigeria_984831_overlay.jpg"}, {"id": "Mekong_1248200", "event": "Mekong", "split": "test", "flood_total": 204588, "flood_crop": 159441, "flood_water": 366, "flood_veg": 41269, "comp_url": "docs/gallery_assets/Mekong_1248200_comp.jpg", "rgb_url": "docs/gallery_assets/Mekong_1248200_rgb.jpg", "radar_url": "docs/gallery_assets/Mekong_1248200_radar.jpg", "overlay_url": "docs/gallery_assets/Mekong_1248200_overlay.jpg"}, {"id": "Mekong_1439641", "event": "Mekong", "split": "test", "flood_total": 197802, "flood_crop": 91683, "flood_water": 79746, "flood_veg": 17972, "comp_url": "docs/gallery_assets/Mekong_1439641_comp.jpg", "rgb_url": "docs/gallery_assets/Mekong_1439641_rgb.jpg", "radar_url": "docs/gallery_assets/Mekong_1439641_radar.jpg", "overlay_url": "docs/gallery_assets/Mekong_1439641_overlay.jpg"}, {"id": "Mekong_1396181", "event": "Mekong", "split": "test", "flood_total": 145007, "flood_crop": 84159, "flood_water": 6949, "flood_veg": 50414, "comp_url": "docs/gallery_assets/Mekong_1396181_comp.jpg", "rgb_url": "docs/gallery_assets/Mekong_1396181_rgb.jpg", "radar_url": "docs/gallery_assets/Mekong_1396181_radar.jpg", "overlay_url": "docs/gallery_assets/Mekong_1396181_overlay.jpg"}, {"id": "Mekong_1443339", "event": "Mekong", "split": "test", "flood_total": 192783, "flood_crop": 73998, "flood_water": 23123, "flood_veg": 90847, "comp_url": "docs/gallery_assets/Mekong_1443339_comp.jpg", "rgb_url": "docs/gallery_assets/Mekong_1443339_rgb.jpg", "radar_url": "docs/gallery_assets/Mekong_1443339_radar.jpg", "overlay_url": "docs/gallery_assets/Mekong_1443339_overlay.jpg"}];
+        let currentCountry = 'ALL';
+        let currentView = 'comp'; // comp, rgb, radar, overlay
+
+        function renderCards() {
+            const grid = document.getElementById('cardGrid');
+            grid.innerHTML = '';
+            
+            const filtered = CHIPS.filter(c => currentCountry === 'ALL' || c.event === currentCountry);
+            
+            filtered.forEach(chip => {
+                let imgSrc = chip.comp_url;
+                if (currentView === 'rgb') imgSrc = chip.rgb_url;
+                if (currentView === 'radar') imgSrc = chip.radar_url;
+                if (currentView === 'overlay') imgSrc = chip.overlay_url;
+                
+                const badgeClass = chip.split === 'train' ? 'badge-train' : (chip.split === 'test' ? 'badge-test' : 'badge-valid');
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-title">${chip.event} — ${chip.id}</span>
+                        <span class="badge ${badgeClass}">${chip.split.toUpperCase()}</span>
+                    </div>
+                    <div class="card-body" onclick="openModal('${chip.id}', '${imgSrc}', '${chip.event}')">
+                        <img class="card-img" src="${imgSrc}" alt="${chip.id}" loading="lazy">
+                    </div>
+                    ${currentView === 'comp' ? '<div class="labels-strip"><span>1. OPTICAL RGB</span><span>2. RADAR VV</span><span>3. FLOOD OVERLAY</span></div>' : ''}
+                    <div class="card-footer">
+                        <div>Crop flood: <span class="stat-val">${chip.flood_crop.toLocaleString()} px</span></div>
+                        <div>Water flood: <span class="stat-val">${chip.flood_water.toLocaleString()} px</span></div>
+                        <div>Total flood: <span class="stat-val">${chip.flood_total.toLocaleString()} px</span></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCountry(country) {
+            currentCountry = country;
+            document.querySelectorAll('.filter-row:nth-child(1) .btn').forEach(b => {
+                b.classList.toggle('active', b.textContent.includes(country) || (country === 'ALL' && b.textContent.includes('All')));
+            });
+            renderCards();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.filter-row:nth-child(2) .btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderCards();
+        }
+
+        function openModal(id, src, eventName) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('modalImg');
+            const txt = document.getElementById('modalText');
+            img.src = src;
+            txt.innerHTML = `<strong>${eventName} (${id})</strong> — Click outside to close`;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Initial render
+        renderCards();
+    </script>
+</body>
+</html>

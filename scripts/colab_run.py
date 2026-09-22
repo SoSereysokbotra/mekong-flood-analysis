@@ -89,12 +89,26 @@ def train_all(level_dir: str):
 
 
 def push(level_dir: str):
-    try:
-        from google.colab import userdata  # type: ignore
+    # google.colab.userdata only works inside the notebook kernel, not in a
+    # subprocess, so the launcher cell exports the token to the environment.
+    tok = os.environ.get("GITHUB_TOKEN")
+    if not tok:
+        try:
+            from google.colab import userdata  # type: ignore
 
-        tok = userdata.get("GITHUB_TOKEN")
-    except Exception:  # noqa: BLE001
-        print("no GITHUB_TOKEN secret available - skipping push")
+            tok = userdata.get("GITHUB_TOKEN")
+        except Exception:  # noqa: BLE001
+            tok = None
+    if not tok:
+        print("no GITHUB_TOKEN available - skipping push.
+"
+              "In the notebook cell (not a subprocess) do:
+"
+              "    from google.colab import userdata; import os
+"
+              "    os.environ['GITHUB_TOKEN'] = userdata.get('GITHUB_TOKEN')
+"
+              "then re-run this script.")
         return
     repo = "github.com/SoSereysokbotra/mekong-flood-analysis.git"
     sh("git config user.name 'Sobotra'")
