@@ -1,6 +1,6 @@
 # Evaluation plan — pre-registered
 
-**Status: DRAFT v0.1, 22 September 2026. Not yet frozen.**
+**Status: DRAFT v0.2, 22 September 2026. Not yet frozen.**
 Freezing = a dedicated commit titled `Freeze evaluation plan v1` that changes only this status line. No Level 3 training run may be logged before that commit exists; `scripts/level3_train.py` checks `git log` for it and refuses to start otherwise. After freezing, any change is a new version with a dated changelog entry and a written reason, and results are reported against the version that was in force when the run was made.
 
 Every number here comes from `results/experiment_log.csv` and the per-run metrics files it points to (Level 1 commit `d6f4f3a`, Level 2 commit — see git log). Nothing was taken from other projects or from any AI's expectation (plan rule 10).
@@ -42,10 +42,13 @@ Primary: recall on `cropland_bright` and `vegetation_bright`; IoU, recall and pr
 
 Candidates (architecture, inputs, loss, augmentation, epoch) are compared **only on valid**. Selection score on valid:
 
-    score = cropland_bright_recall   if cropland_precision ≥ 0.48   else −1
+    score = min(cropland_bright_recall, vegetation_bright_recall)   if cropland_precision ≥ 0.48   else −1
     tie-break: cropland IoU
 
-(0.48 = valid baseline cropland precision 0.526 minus 0.05.) The selected configuration is written to the log with `record_selection("level3", …)` and committed before the test split is scored. The test split is scored **once per selected model**, and additionally once for each of the fixed controls in §6, never for sweeps.
+(0.48 = valid baseline cropland precision 0.526 minus 0.05. The minimum of the
+two bright recalls is used so that selection and the confirmation test in §7,
+which requires both B ≥ 0.50 and V ≥ 0.50, agree: a cropland-weighted loss must
+not be able to win selection by sacrificing flooded vegetation.) The selected configuration is written to the log with `record_selection("level3", …)` and committed before the test split is scored. The test split is scored **once per selected model**, and additionally once for each of the fixed controls in §6, never for sweeps.
 
 ## 6. Controls that must be run and reported (fixed)
 
@@ -79,3 +82,4 @@ Why these values (from Level 1–2 results only):
 ## Changelog
 
 - v0.1 — 22 Sep 2026 — draft from Level 1–2 results; awaiting freeze.
+- v0.2 — 22 Sep 2026 — §5 selection score changed to min(B, V) so selection cannot pass a model that fails §7 on vegetation (independent review recommendation).
