@@ -43,8 +43,9 @@ def sample_train(chips, n_total, seed=0):
     for chip in tqdm(chips, desc="sampling train", leave=False):
         ch, label, _, _ = data.raw_channels(chip)
         f, y = features(ch), label.ravel()
+        finite = np.isfinite(f).all(1)  # RTC chips are NaN outside the slice footprint
         for cls in (0, 1):
-            idx = np.flatnonzero(y == cls)
+            idx = np.flatnonzero((y == cls) & finite)
             if idx.size == 0:
                 continue
             take = rng.choice(idx, min(per_chip // 2, idx.size), replace=False)
@@ -59,8 +60,13 @@ def evaluate(clf, scaler, chips, save_dir=None):
     conf, rows = metrics.Confusion(), []
     for chip in tqdm(chips, desc="eval", leave=False):
         ch, label, land, _ = data.raw_channels(chip)
-        p = clf.predict_proba(scaler.transform(features(ch)))[:, 1].reshape(label.shape)
-        pred = p >= 0.5
+        f = features(ch)
+        finite = np.isfinite(f).all(1)
+        prob = np.zeros(f.shape[0], np.float32)
+        if finite.any():
+            prob[finite] = clf.predict_proba(scaler.transform(f[finite]))[:, 1]
+        pred = (prob >= 0.5).reshape(label.shape)
+        label = np.where(finite.reshape(label.shape), label, -1).astype(np.int8)  # no radar -> not scorable
         c = metrics.Confusion().add(pred, label, land, vh=ch["vh"])
         conf.merge(c)
         cm = c.metrics()
