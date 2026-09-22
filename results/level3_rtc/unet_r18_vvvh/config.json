@@ -1,0 +1,39 @@
+{
+  "model": "unet_r18",
+  "pretrained": true,
+  "channels": [
+    "vv",
+    "vh"
+  ],
+  "loss": "ce",
+  "epochs": 30,
+  "lr": 0.0005,
+  "batch": 8,
+  "crop": 256,
+  "crops_per_chip": 4,
+  "augment": true,
+  "seed": 0,
+  "run_id": "unet_r18_vvvh",
+  "norm_stats": {
+    "vv": [
+      -8.974710464477539,
+      3.549070404602051
+    ],
+    "vh": [
+      -15.178714752197266,
+      3.4218273626098634
+    ],
+    "ratio": [
+      6.204010486602783,
+      2.7291117177734376
+    ],
+    "slope": [
+      3.6276767253875732,
+      5.855600880218506
+    ]
+  },
+  "n_params": 14325218,
+  "device": "cuda",
+  "train_chips": 301,
+  "valid_chips": 48
+}
