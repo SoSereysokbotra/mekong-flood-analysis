@@ -26,17 +26,17 @@ def main():
     with zipfile.ZipFile(ZIP) as z:
         for name in z.namelist():
             parts = pathlib.PurePosixPath(name).parts  # <level dir>/<run>/best.pt
-            if len(parts) != 3 or parts[-1] != "best.pt":
+            if len(parts) != 3 or parts[-1] not in ("best.pt", "model.joblib"):
                 continue
             run = parts[1]
             dst_dir = experiments.RESULTS / experiments.level3_dir() / run
             if not (dst_dir / "metrics_valid.json").exists():
                 skipped.append((run, "no metrics_valid.json locally - git pull first?"))
                 continue
-            if (dst_dir / "best.pt").exists():
+            if (dst_dir / parts[-1]).exists():
                 skipped.append((run, "local checkpoint exists, kept"))
                 continue
-            with z.open(name) as src, open(dst_dir / "best.pt", "wb") as dst:
+            with z.open(name) as src, open(dst_dir / parts[-1], "wb") as dst:
                 shutil.copyfileobj(src, dst)
             placed.append(run)
     for r in placed:
