@@ -1,15 +1,13 @@
-"""Merge Level 3 results trained on Colab into the local repo.
+"""Bring Colab-trained Level 3 checkpoints into the local run directories.
 
-Expects data/colab/level3_colab_results.zip (made by notebooks/colab_level3.ipynb),
-containing experiment_log.csv and results/level3/<run>/ directories.
+Metrics, configs, histories and experiment-log rows arrive through `git pull`
+(the Colab notebook commits and pushes them). Checkpoints are git-ignored, so
+they come as data/colab/level3_checkpoints.zip from Google Drive.
 
-- Copies each run directory that does not already exist locally (never
-  overwrites a local run: local runs were trained here and are canonical).
-- Appends experiment-log rows from Colab that are not already present
-  (keyed on timestamp + level + run_id + split), tagging the note with
-  "trained on Colab".
+For each level3/<run>/best.pt in the zip: copy it into results/level3/<run>/
+only if that run has metrics_valid.json (i.e. it is a real, finished run) and
+no local checkpoint already exists (local runs are canonical).
 """
-import csv
 import pathlib
 import shutil
 import sys
@@ -18,48 +16,34 @@ import zipfile
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments  # noqa: E402
 
-ZIP = catalog.ROOT / "data" / "colab" / "level3_colab_results.zip"
-TMP = catalog.ROOT / "data" / "colab" / "_merge"
+ZIP = catalog.ROOT / "data" / "colab" / "level3_checkpoints.zip"
 
 
 def main():
     if not ZIP.exists():
-        sys.exit(f"missing {ZIP}")
-    if TMP.exists():
-        shutil.rmtree(TMP)
+        sys.exit(f"missing {ZIP} (download from Drive: MyDrive/mfi/level3_checkpoints.zip)")
+    placed, skipped = [], []
     with zipfile.ZipFile(ZIP) as z:
-        z.extractall(TMP)
-    src_level3 = TMP / "level3"
-    copied = []
-    for d in sorted(src_level3.iterdir()):
-        if not d.is_dir() or d.name.startswith("_") or not (d / "metrics_valid.json").exists():
-            continue
-        dst = experiments.RESULTS / "level3" / d.name
-        if dst.exists() and (dst / "metrics_valid.json").exists():
-            print(f"keep local {d.name}")
-            continue
-        shutil.copytree(d, dst, dirs_exist_ok=True)
-        copied.append(d.name)
-        print(f"copied {d.name}")
-    for log in (src_level3 / "_logs").glob("*.log") if (src_level3 / "_logs").exists() else []:
-        shutil.copy(log, experiments.RESULTS / "level3" / "_logs" / log.name)
-
-    local = experiments.read_log()
-    seen = {(r["timestamp"], r["level"], r["run_id"], r["split"]) for r in local}
-    with open(TMP / "experiment_log.csv", newline="") as f:
-        remote = list(csv.DictReader(f))
-    added = 0
-    with open(experiments.LOG, "a", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=experiments.LOG_FIELDS)
-        for r in remote:
-            key = (r["timestamp"], r["level"], r["run_id"], r["split"])
-            if key in seen or r["run_id"] not in copied:
+        for name in z.namelist():
+            parts = pathlib.PurePosixPath(name).parts  # level3/<run>/best.pt
+            if len(parts) != 3 or parts[-1] != "best.pt":
                 continue
-            r["note"] = (r.get("note", "") + "; trained on Colab").strip("; ")
-            w.writerow({k: r.get(k, "") for k in experiments.LOG_FIELDS})
-            added += 1
-    shutil.rmtree(TMP)
-    print(f"done: {len(copied)} runs copied, {added} log rows appended")
+            run = parts[1]
+            dst_dir = experiments.RESULTS / "level3" / run
+            if not (dst_dir / "metrics_valid.json").exists():
+                skipped.append((run, "no metrics_valid.json locally - git pull first?"))
+                continue
+            if (dst_dir / "best.pt").exists():
+                skipped.append((run, "local checkpoint exists, kept"))
+                continue
+            with z.open(name) as src, open(dst_dir / "best.pt", "wb") as dst:
+                shutil.copyfileobj(src, dst)
+            placed.append(run)
+    for r in placed:
+        print("placed", r)
+    for r, why in skipped:
+        print("skip  ", r, "-", why)
+    print(f"done: {len(placed)} checkpoints placed")
 
 
 if __name__ == "__main__":
