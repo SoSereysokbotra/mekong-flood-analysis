@@ -1,0 +1,72 @@
+{
+  "purpose": "Tier E sanity-check figures for Banteay Meanchey, October 2020 floods (plan section 5: catch absurd results only, never a score).",
+  "compiled": "2026-09-23",
+  "province": "Banteay Meanchey",
+  "event": "October 2020 Cambodia floods (monsoon trough + Tropical Storm Linfa)",
+  "figures": [
+    {
+      "quantity": "rice fields inundated",
+      "value_ha": 28248,
+      "value_km2": 282.5,
+      "scope": "Banteay Meanchey province",
+      "source": "press reporting of NCDM / provincial agriculture department figures, October 2020",
+      "confidence": "medium",
+      "note": "Inundated, not necessarily destroyed. Date of assessment not stated precisely; likely cumulative over the event rather than a single-date extent."
+    },
+    {
+      "quantity": "cassava inundated",
+      "value_ha": 1064,
+      "scope": "Banteay Meanchey province",
+      "source": "same",
+      "confidence": "medium"
+    },
+    {
+      "quantity": "mixed crops inundated",
+      "value_ha": 107,
+      "scope": "Banteay Meanchey province",
+      "source": "same",
+      "confidence": "medium"
+    },
+    {
+      "quantity": "households affected",
+      "value": 7034,
+      "scope": "Banteay Meanchey province",
+      "source": "NCDM situation reporting, October 2020",
+      "confidence": "medium"
+    },
+    {
+      "quantity": "deaths",
+      "value": 22,
+      "scope": "Banteay Meanchey province (of 39 nationally at that report date)",
+      "source": "NCDM",
+      "confidence": "medium"
+    },
+    {
+      "quantity": "rice fields damaged",
+      "value_ha": 137160,
+      "scope": "Cambodia, national",
+      "source": "humanitarian reporting cited in the project plan",
+      "confidence": "medium"
+    },
+    {
+      "quantity": "households affected",
+      "value": 175872,
+      "scope": "Cambodia, national, 14 provinces, as of 26 Oct 2020",
+      "source": "NCDM",
+      "confidence": "medium"
+    }
+  ],
+  "province_area_km2": 6146,
+  "how_to_use": [
+    "A single-date satellite flood extent is NOT the same quantity as a cumulative event-total 'inundated area' report: the report may aggregate areas flooded at different times, and may count a whole field as inundated when only part of it was.",
+    "The check is one-sided and coarse: a detected new-water area on cropland of the same order as ~282 km2 is consistent; an area ten times larger or ten times smaller needs explaining before anything else is claimed.",
+    "Never tune a threshold, model or post-processing step to move a number toward these figures (plan rule 10, Mistake_avoidance #3)."
+  ],
+  "sources": [
+    "https://reliefweb.int/disaster/fl-2020-000212-khm",
+    "https://cambojanews.com/thousands-of-households-and-farmland-hit-by-flooding-in-northwest/",
+    "https://floodlist.com/asia/cambodia-floods-update-october-2020",
+    "https://ahacentre.org/wp-content/uploads/2020/10/FlashUpdate_04_21Oct2020-TS-NANGKA-LINFA-MEKONG.pdf",
+    "https://www.who.int/cambodia/news/detail/23-10-2020-flooding-in-19-provinces-affects-people-homes-health-facilities-schools"
+  ]
+}
