@@ -30,8 +30,10 @@ ORDER = ["unet_vvvh_ce", "unet_vv_ce", "unet_vvvh_cropw", "unet_vvvh_dice_ce",
          "unet_vvvh_focal", "unet_vvvh_slope", "unet_vvvh_noaug", "unet_r18_vvvh"]
 
 
-def sh(cmd: str, check: bool = True) -> int:
-    print(f"$ {cmd}", flush=True)
+def sh(cmd: str, check: bool = True, secret: str | None = None) -> int:
+    # never echo a credential: the remote URL carries the GitHub token
+    shown = cmd.replace(secret, "***") if secret else cmd
+    print(f"$ {shown}", flush=True)
     r = subprocess.run(cmd, shell=True)
     if check and r.returncode != 0:
         sys.exit(f"failed: {cmd}")
@@ -109,7 +111,7 @@ def push(level_dir: str):
     repo = "github.com/SoSereysokbotra/mekong-flood-analysis.git"
     sh("git config user.name 'Sobotra'")
     sh("git config user.email 'soviseth869@gmail.com'")
-    sh(f"git remote set-url origin https://x-access-token:{tok}@{repo}")
+    sh(f"git remote set-url origin https://x-access-token:{tok}@{repo}", secret=tok)
     sh("git stash --quiet --include-untracked", check=False)   # local data files must not block the pull
     sh("git pull --rebase --quiet origin main", check=False)
     sh("git stash pop --quiet", check=False)
