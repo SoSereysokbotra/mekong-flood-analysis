@@ -1,0 +1,48 @@
+{
+  "pre": "2020-09-26",
+  "peak": "2020-10-14",
+  "post": "2020-11-01",
+  "res_m": 20.0,
+  "aoi_km2": 6148.194,
+  "methods": {
+    "otsu_vh_global": {
+      "water_pre_km2": 110.70920000000001,
+      "water_peak_km2": 974.2760000000001,
+      "flood_peak_km2": 882.2424000000001,
+      "flood_peak_cropland_km2": 815.4796,
+      "flood_peak_vegetation_km2": 57.8248,
+      "flood_peak_built_km2": 0.298,
+      "flood_post_km2": 823.0724,
+      "flood_post_cropland_km2": 745.2280000000001,
+      "drained_by_post_km2": 361.02160000000003,
+      "pre_water_on_cropland_km2": 59.4632,
+      "permanent_km2": 9.562800000000001
+    },
+    "unet_vv_ce": {
+      "water_pre_km2": 69.5604,
+      "water_peak_km2": 1191.9660000000001,
+      "flood_peak_km2": 1131.2596,
+      "flood_peak_cropland_km2": 1012.7556000000001,
+      "flood_peak_vegetation_km2": 90.1764,
+      "flood_peak_built_km2": 4.912,
+      "flood_post_km2": 1108.1824000000001,
+      "flood_post_cropland_km2": 961.0476000000001,
+      "drained_by_post_km2": 370.856,
+      "pre_water_on_cropland_km2": 37.044000000000004,
+      "permanent_km2": 9.562800000000001
+    },
+    "unet_vvvh_cropw": {
+      "water_pre_km2": 230.3496,
+      "water_peak_km2": 1415.4160000000002,
+      "flood_peak_km2": 1218.28,
+      "flood_peak_cropland_km2": 1112.7368000000001,
+      "flood_peak_vegetation_km2": 87.178,
+      "flood_peak_built_km2": 2.2388,
+      "flood_post_km2": 1071.7252,
+      "flood_post_cropland_km2": 949.9112,
+      "drained_by_post_km2": 365.0708,
+      "pre_water_on_cropland_km2": 153.0624,
+      "permanent_km2": 9.562800000000001
+    }
+  }
+}

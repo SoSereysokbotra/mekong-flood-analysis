@@ -1,0 +1,913 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "protocol": "data/labels/LABELLING_PROTOCOL.md",
+  "selection_rule": "stratified by dominant land type; within stratum by land-type fraction (water: JRC permanent fraction), min separation 8 km; order shuffled with seed 0; no model output used"
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.07219546136817,
+       13.708503259318901
+      ],
+      [
+       103.09068205866424,
+       13.708646740923333
+      ],
+      [
+       103.0908280022884,
+       13.690572403707336
+      ],
+      [
+       103.07234281593988,
+       13.69042911840149
+      ],
+      [
+       103.07219546136817,
+       13.708503259318901
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_01",
+    "label_order": 1,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.08151,
+    "centre_lat": 13.69954,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.20270025243543,
+       13.564874059105128
+      ],
+      [
+       103.22117705066204,
+       13.565006411174364
+      ],
+      [
+       103.22131154280541,
+       13.546930532335429
+      ],
+      [
+       103.2028361397375,
+       13.546798363128723
+      ],
+      [
+       103.20270025243543,
+       13.564874059105128
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_WATE_02",
+    "label_order": 2,
+    "stratum": "water",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_open_water": 0.049,
+    "frac_cropland": 0.812,
+    "frac_vegetation": 0.117,
+    "frac_built": 0.0,
+    "frac_other": 0.022,
+    "jrc_permanent_frac": 0.025,
+    "centre_lon": 103.21201,
+    "centre_lat": 13.5559,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.90598597631534,
+       13.689077521026494
+      ],
+      [
+       102.92446917068038,
+       13.689233211343927
+      ],
+      [
+       102.92462758048443,
+       13.671160680656362
+      ],
+      [
+       102.90614579430213,
+       13.671005203598535
+      ],
+      [
+       102.90598597631534,
+       13.689077521026494
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_03",
+    "label_order": 3,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 102.91531,
+    "centre_lat": 13.68012,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.14557421676756,
+       13.781368282492142
+      ],
+      [
+       103.16406731206997,
+       13.781506996529105
+      ],
+      [
+       103.16420842374687,
+       13.76343200435972
+      ],
+      [
+       103.14571674786714,
+       13.763293479177605
+      ],
+      [
+       103.14557421676756,
+       13.781368282492142
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_04",
+    "label_order": 4,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.15489,
+    "centre_lat": 13.7724,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.3701018152699,
+       13.403319606475675
+      ],
+      [
+       103.3885678185969,
+       13.403438170352416
+      ],
+      [
+       103.38868815199244,
+       13.38536048734817
+      ],
+      [
+       103.37022352613126,
+       13.385242089131227
+      ],
+      [
+       103.3701018152699,
+       13.403319606475675
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_VEGE_05",
+    "label_order": 5,
+    "stratum": "vegetation",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_open_water": 0.001,
+    "frac_vegetation": 0.999,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.3794,
+    "centre_lat": 13.39434,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.57370007729726,
+       13.649903205316459
+      ],
+      [
+       102.59217598113163,
+       13.650083191512882
+      ],
+      [
+       102.59235919267688,
+       13.632014730767386
+      ],
+      [
+       102.57388469132606,
+       13.631834991709031
+      ],
+      [
+       102.57370007729726,
+       13.649903205316459
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_BUIL_06",
+    "label_order": 6,
+    "stratum": "built",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_open_water": 0.012,
+    "frac_cropland": 0.125,
+    "frac_vegetation": 0.262,
+    "frac_built": 0.426,
+    "frac_other": 0.174,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 102.58303,
+    "centre_lat": 13.64096,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.99794456560295,
+       13.744062117904287
+      ],
+      [
+       103.0164331250478,
+       13.74421152895359
+      ],
+      [
+       103.0165851508167,
+       13.72613804433077
+      ],
+      [
+       102.99809800608699,
+       13.72598883719325
+      ],
+      [
+       102.99794456560295,
+       13.744062117904287
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_07",
+    "label_order": 7,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.00727,
+    "centre_lat": 13.7351,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.99732858711513,
+       13.816354959242718
+      ],
+      [
+       103.01582282585176,
+       13.81650518624007
+      ],
+      [
+       103.01597573022957,
+       13.79843181416816
+      ],
+      [
+       102.99748291438208,
+       13.798281791203044
+      ],
+      [
+       102.99732858711513,
+       13.816354959242718
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_08",
+    "label_order": 8,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "frac_other": 0.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.00665,
+    "centre_lat": 13.80739,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.03355660867956,
+       13.907021469075616
+      ],
+      [
+       103.05205843102515,
+       13.90716991443461
+      ],
+      [
+       103.05220956898928,
+       13.889096281132968
+      ],
+      [
+       103.03370917992895,
+       13.888948036175284
+      ],
+      [
+       103.03355660867956,
+       13.907021469075616
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_09",
+    "label_order": 9,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "frac_other": 0.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.04288,
+    "centre_lat": 13.89806,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.99855699890223,
+       13.671768826709576
+      ],
+      [
+       103.01703991173342,
+       13.67191742229156
+      ],
+      [
+       103.01719106017515,
+       13.653843825670005
+      ],
+      [
+       102.998709553897,
+       13.653695433880081
+      ],
+      [
+       102.99855699890223,
+       13.671768826709576
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_10",
+    "label_order": 10,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.00787,
+    "centre_lat": 13.66281,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.34798721392437,
+       13.927430976704304
+      ],
+      [
+       103.3664938687615,
+       13.92755575952356
+      ],
+      [
+       103.36662081058785,
+       13.909479036744543
+      ],
+      [
+       103.34811559234095,
+       13.909354422183373
+      ],
+      [
+       103.34798721392437,
+       13.927430976704304
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_11",
+    "label_order": 11,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.3573,
+    "centre_lat": 13.91846,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.29299797249566,
+       13.854743881769174
+      ],
+      [
+       103.3114983376793,
+       13.854872181541213
+      ],
+      [
+       103.31162883966448,
+       13.836795857630587
+      ],
+      [
+       103.29312990266558,
+       13.83666773169272
+      ],
+      [
+       103.29299797249566,
+       13.854743881769174
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_VEGE_12",
+    "label_order": 12,
+    "stratum": "vegetation",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_open_water": 0.0,
+    "frac_vegetation": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.30231,
+    "centre_lat": 13.84577,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.70286187019474,
+       13.669204153861672
+      ],
+      [
+       102.7213409983645,
+       13.669374763082372
+      ],
+      [
+       102.72151464160216,
+       13.651304653567756
+      ],
+      [
+       102.70303691861164,
+       13.651134278324932
+      ],
+      [
+       102.70286187019474,
+       13.669204153861672
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_13",
+    "label_order": 13,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 102.71219,
+    "centre_lat": 13.66025,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.2940481193695,
+       13.710133903593528
+      ],
+      [
+       103.31253711637885,
+       13.71026081341238
+      ],
+      [
+       103.31266612284747,
+       13.692184267952156
+      ],
+      [
+       103.29417853765935,
+       13.692057531762176
+      ],
+      [
+       103.2940481193695,
+       13.710133903593528
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_14",
+    "label_order": 14,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.30336,
+    "centre_lat": 13.70116,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.29339319539244,
+       13.80051534806019
+      ],
+      [
+       103.31188928216524,
+       13.800643126407067
+      ],
+      [
+       103.31201922281822,
+       13.782566719161752
+      ],
+      [
+       103.29352455808824,
+       13.782439114571764
+      ],
+      [
+       103.29339319539244,
+       13.80051534806019
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_WATE_15",
+    "label_order": 15,
+    "stratum": "water",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_open_water": 0.805,
+    "frac_cropland": 0.128,
+    "frac_vegetation": 0.036,
+    "frac_built": 0.003,
+    "frac_other": 0.027,
+    "jrc_permanent_frac": 0.789,
+    "centre_lon": 103.30271,
+    "centre_lat": 13.79154,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.01809335181979,
+       13.545401660970493
+      ],
+      [
+       103.0365666802239,
+       13.54554746731522
+      ],
+      [
+       103.03671490402589,
+       13.527473474327731
+      ],
+      [
+       103.0182429679982,
+       13.527327869681631
+      ],
+      [
+       103.01809335181979,
+       13.545401660970493
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_BUIL_16",
+    "label_order": 16,
+    "stratum": "built",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 0.196,
+    "frac_vegetation": 0.413,
+    "frac_built": 0.369,
+    "frac_other": 0.022,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.0274,
+    "centre_lat": 13.53644,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.25532097807633,
+       13.944861656968373
+      ],
+      [
+       103.2738281335847,
+       13.944993638124155
+      ],
+      [
+       103.273962449305,
+       13.926917803600908
+      ],
+      [
+       103.25545673209187,
+       13.926786000195438
+      ],
+      [
+       103.25532097807633,
+       13.944861656968373
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_VEGE_17",
+    "label_order": 17,
+    "stratum": "vegetation",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 0.041,
+    "frac_vegetation": 0.959,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.26464,
+    "centre_lat": 13.93589,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.72340812270987,
+       13.452531580742543
+      ],
+      [
+       102.74187077371167,
+       13.452698031854467
+      ],
+      [
+       102.74204002123939,
+       13.434627351905238
+      ],
+      [
+       102.72357875111747,
+       13.434461132481651
+      ],
+      [
+       102.72340812270987,
+       13.452531580742543
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_18",
+    "label_order": 18,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 102.73272,
+    "centre_lat": 13.44358,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.25572765915426,
+       13.890634602504516
+      ],
+      [
+       103.27423050593099,
+       13.890766050489011
+      ],
+      [
+       103.27436424697824,
+       13.872690131968001
+      ],
+      [
+       103.25586283234418,
+       13.872558861654252
+      ],
+      [
+       103.25572765915426,
+       13.890634602504516
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_CROP_19",
+    "label_order": 19,
+    "stratum": "cropland",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_cropland": 1.0,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 103.26505,
+    "centre_lat": 13.88166,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       102.96221195930775,
+       13.599175420059371
+      ],
+      [
+       102.9806888142577,
+       13.599325938377754
+      ],
+      [
+       102.98084188337138,
+       13.58125263954277
+      ],
+      [
+       102.96236642666383,
+       13.581102328670118
+      ],
+      [
+       102.96221195930775,
+       13.599175420059371
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "tile_id": "BMC_BUIL_20",
+    "label_order": 20,
+    "stratum": "built",
+    "utm_epsg": 32648,
+    "size_m": 2000.0,
+    "frac_open_water": 0.007,
+    "frac_cropland": 0.021,
+    "frac_vegetation": 0.3,
+    "frac_built": 0.66,
+    "frac_other": 0.012,
+    "jrc_permanent_frac": 0.0,
+    "centre_lon": 102.97153,
+    "centre_lat": 13.59021,
+    "labeller": "",
+    "date_labelled": "",
+    "status": "todo"
+   }
+  }
+ ]
+}

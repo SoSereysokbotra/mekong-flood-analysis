@@ -32,7 +32,7 @@ from rasterio.warp import transform_bounds, transform_geom
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, strata  # noqa: E402
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from level4_cambodia import CACHE, DATES, aoi_grid  # noqa: E402
+from level4_cambodia import CACHE, DATES, MAPS, SUFFIX, aoi_grid  # noqa: E402
 
 TILE_M = 2000.0
 N_TILES = {"cropland": 12, "vegetation": 3, "built": 3, "water": 2}
@@ -44,12 +44,18 @@ def main():
     grid, inside = aoi_grid()
     z = np.load(CACHE / "ancillary.npz")
     land, jrc = z["land"], z["jrc"]
+    # Coverage comes from the flood maps: a pixel is -1 exactly where the radar
+    # was missing or the pixel is outside the province, so >= 0 on all three
+    # dates means usable everywhere. Avoids needing the multi-GB scene caches.
+    import rasterio
+
     cov = np.ones(inside.shape, bool)
     for date in DATES:
-        p = CACHE / f"s1_{date}.npz"
-        if not p.exists():
-            sys.exit(f"missing {p} - run scripts/level4_cambodia.py first")
-        cov &= np.isfinite(np.load(p)["s1_db"]).all(axis=0)
+        f = MAPS / f"otsu_vh_global_{date}{SUFFIX}.tif"
+        if not f.exists():
+            sys.exit(f"missing {f} - run scripts/level4_cambodia.py (or unzip level4_maps.zip) first")
+        with rasterio.open(f) as src:
+            cov &= src.read(1) >= 0
 
     step = int(TILE_M / (grid.transform.a))
     H, W = grid.height, grid.width
@@ -116,10 +122,13 @@ def main():
                    "features": feats}, f, indent=1)
     print(f"wrote {OUT}: {len(feats)} tiles ({TILE_M / 1000:.0f} x {TILE_M / 1000:.0f} km, "
           f"{len(feats) * (TILE_M / 1000) ** 2:.0f} km2 total)")
+    key = {"cropland": "frac_cropland", "vegetation": "frac_vegetation",
+           "built": "frac_built", "water": "frac_open_water"}
     for s in N_TILES:
         sel = [f for f in feats if f["properties"]["stratum"] == s]
-        print(f"  {s:11s} {len(sel):2d} tiles, mean {s} fraction "
-              f"{np.mean([f['properties'].get(f'frac_{s}', 0) for f in sel]):.2f}")
+        print(f"  {s:11s} {len(sel):2d} tiles, mean {key[s].removeprefix('frac_')} fraction "
+              f"{np.mean([f['properties'].get(key[s], 0) for f in sel]):.2f}"
+              + (f", mean JRC permanent {np.mean([f['properties']['jrc_permanent_frac'] for f in sel]):.2f}" if s == "water" else ""))
     print("\nlabel order:", ", ".join(f["properties"]["tile_id"] for f in feats))
 
 
