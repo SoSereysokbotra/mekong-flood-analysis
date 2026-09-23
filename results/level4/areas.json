@@ -1,0 +1,100 @@
+{
+  "res_m": 20.0,
+  "aoi_km2": 6148.194,
+  "jrc_permanent_km2": 9.562800000000001,
+  "jrc_threshold_pct": 80,
+  "dates": {
+    "2020-09-26": {
+      "role": "pre",
+      "coverage_frac_of_province": 1.0
+    },
+    "2020-10-14": {
+      "role": "peak",
+      "coverage_frac_of_province": 1.0
+    },
+    "2020-11-01": {
+      "role": "post",
+      "coverage_frac_of_province": 1.0
+    }
+  },
+  "methods": {
+    "otsu_vh_global": {
+      "2020-09-26": {
+        "water_km2": 110.70920000000001,
+        "new_water_km2": 101.3768,
+        "permanent_detected_km2": 9.3324,
+        "new_water_cropland_km2": 59.4568,
+        "new_water_vegetation_km2": 19.8936,
+        "new_water_built_km2": 0.0796
+      },
+      "2020-10-14": {
+        "water_km2": 974.2760000000001,
+        "new_water_km2": 964.8156,
+        "permanent_detected_km2": 9.4604,
+        "new_water_cropland_km2": 858.9916000000001,
+        "new_water_vegetation_km2": 76.3356,
+        "new_water_built_km2": 0.3412
+      },
+      "2020-11-01": {
+        "water_km2": 904.9168000000001,
+        "new_water_km2": 895.47,
+        "permanent_detected_km2": 9.4468,
+        "new_water_cropland_km2": 780.0136,
+        "new_water_vegetation_km2": 90.2732,
+        "new_water_built_km2": 0.1452
+      }
+    },
+    "unet_vv_ce": {
+      "2020-09-26": {
+        "water_km2": 69.5604,
+        "new_water_km2": 61.0216,
+        "permanent_detected_km2": 8.5388,
+        "new_water_cropland_km2": 37.038000000000004,
+        "new_water_vegetation_km2": 7.1008000000000004,
+        "new_water_built_km2": 0.0852
+      },
+      "2020-10-14": {
+        "water_km2": 1191.9660000000001,
+        "new_water_km2": 1182.444,
+        "permanent_detected_km2": 9.522,
+        "new_water_cropland_km2": 1041.5832,
+        "new_water_vegetation_km2": 96.94640000000001,
+        "new_water_built_km2": 4.9888
+      },
+      "2020-11-01": {
+        "water_km2": 1165.5596,
+        "new_water_km2": 1156.076,
+        "permanent_detected_km2": 9.483600000000001,
+        "new_water_cropland_km2": 987.7436,
+        "new_water_vegetation_km2": 131.26160000000002,
+        "new_water_built_km2": 2.612
+      }
+    },
+    "unet_vvvh_cropw": {
+      "2020-09-26": {
+        "water_km2": 230.3496,
+        "new_water_km2": 220.8296,
+        "permanent_detected_km2": 9.52,
+        "new_water_cropland_km2": 153.0432,
+        "new_water_vegetation_km2": 36.9048,
+        "new_water_built_km2": 0.272
+      },
+      "2020-10-14": {
+        "water_km2": 1415.4160000000002,
+        "new_water_km2": 1405.8716000000002,
+        "permanent_detected_km2": 9.544400000000001,
+        "new_water_cropland_km2": 1235.9816,
+        "new_water_vegetation_km2": 122.50200000000001,
+        "new_water_built_km2": 2.4644
+      },
+      "2020-11-01": {
+        "water_km2": 1251.2308,
+        "new_water_km2": 1242.8108,
+        "permanent_detected_km2": 8.42,
+        "new_water_cropland_km2": 1059.1372000000001,
+        "new_water_vegetation_km2": 141.964,
+        "new_water_built_km2": 1.4452
+      }
+    }
+  }
+}
