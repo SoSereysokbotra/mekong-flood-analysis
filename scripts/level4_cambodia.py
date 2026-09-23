@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import pathlib
 import sys
 
@@ -38,9 +39,12 @@ from mfi import catalog, experiments, infer, io, rtc, strata  # noqa: E402
 
 DATES = {"2020-09-26": "pre", "2020-10-14": "peak", "2020-11-01": "post"}
 METHODS = ["otsu_vh_global", "unet_vv_ce", "unet_vvvh_cropw"]
-RES_M = 20.0          # 20 m grid: 2x the native 10 m, keeps the province in ~7k x 6k px
+# Grid resolution in metres. 20 m (2x the native 10 m) is the product; a
+# coarser value is a cheap preview when the link to the data is slow.
+RES_M = float(os.environ.get("MFI_LEVEL4_RES_M", "20"))
 AOI_EPSG = 32648
 CACHE = catalog.DATA / "interim" / "level4"
+SUFFIX = "" if RES_M == 20 else f"_{int(RES_M)}m"
 MAPS = experiments.RESULTS / "level4" / "maps"
 JRC_PERMANENT = 80    # JRC occurrence >= 80% of observations -> permanent water
 
@@ -70,7 +74,7 @@ def aoi_grid() -> tuple[io.Grid, np.ndarray]:
 
 def s1_on_aoi(date: str, grid: io.Grid) -> np.ndarray:
     """(2, H, W) dB VV/VH for one date, cached."""
-    p = CACHE / f"s1_{date}.npz"
+    p = CACHE / f"s1_{date}{SUFFIX}.npz"
     if p.exists():
         return np.load(p)["s1_db"]
     items = rtc.rtc_items(catalog.aoi_bbox(), date, date,
@@ -86,7 +90,7 @@ def s1_on_aoi(date: str, grid: io.Grid) -> np.ndarray:
 
 def ancillary(grid: io.Grid) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """(land type, JRC occurrence %, slope deg) on the AOI grid, cached."""
-    p = CACHE / "ancillary.npz"
+    p = CACHE / f"ancillary{SUFFIX}.npz"
     if p.exists():
         z = np.load(p)
         return z["land"], z["jrc"], z["slope"]
@@ -131,7 +135,7 @@ def main():
                 model, channels, norm, device = unets[method]
                 pred = infer.predict_unet(model, channels, norm, device, ch)
             pred[~inside] = infer.NODATA
-            write_map(MAPS / f"{method}_{date}.tif", pred, grid)
+            write_map(MAPS / f"{method}_{date}{SUFFIX}.tif", pred, grid)
             water = pred == 1
             new_water = water & ~permanent
             summary["methods"].setdefault(method, {})[date] = {
@@ -152,11 +156,11 @@ def main():
                   f"(cropland {s['new_water_cropland_km2']:6,.0f}, vegetation {s['new_water_vegetation_km2']:5,.0f}, built {s['new_water_built_km2']:4,.0f})")
 
     out = experiments.RESULTS / "level4"
-    with open(out / "areas.csv", "w", newline="") as f:
+    with open(out / f"areas{SUFFIX}.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
-    with open(out / "areas.json", "w") as f:
+    with open(out / f"areas{SUFFIX}.json", "w") as f:
         json.dump(summary, f, indent=2)
     print(f"\nwrote {out / 'areas.csv'} and areas.json; maps in {MAPS}")
 
