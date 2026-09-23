@@ -70,10 +70,12 @@ def push():
     sh("git pull --rebase --quiet origin main", check=False)
     sh("git stash pop --quiet", check=False)
     sh("git add results/level4")
-    subprocess.run(["git", "commit", "-q", "-m",
-                    "Level 4: Banteay Meanchey flood areas, Oct 2020 (Colab)\n\n"
-                    "Three models on RTC track 164 (26 Sep / 14 Oct / 1 Nov 2020), "
-                    "areas split by land type and by JRC permanent water."])
+    msg = ("Level 4: seasonal baseline across normal years 2018-2022 (Colab)"
+           if "--normal-years" in sys.argv
+           else "Level 4: Banteay Meanchey flood areas, Oct 2020 (Colab)\n\n"
+                "Three models on RTC track 164 (26 Sep / 14 Oct / 1 Nov 2020), "
+                "areas split by land type and by JRC permanent water.")
+    subprocess.run(["git", "commit", "-q", "-m", msg])
     sh("git push --quiet origin main", check=False)
     sh(f"git remote set-url origin https://{repo}")
     sh("git log --oneline | head -1", check=False)
