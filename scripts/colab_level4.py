@@ -85,11 +85,13 @@ def push():
 
 
 def main():
+    """--normal-years runs the seasonal baseline instead of the event dates."""
     os.chdir(catalog.ROOT)
     ensure_checkpoints()
-    r = subprocess.run([sys.executable, "scripts/level4_cambodia.py"])
+    script = "scripts/level4_normal_years.py" if "--normal-years" in sys.argv else "scripts/level4_cambodia.py"
+    r = subprocess.run([sys.executable, script])
     if r.returncode != 0:
-        sys.exit("level4_cambodia.py failed")
+        sys.exit(f"{script} failed")
     push()
 
 
