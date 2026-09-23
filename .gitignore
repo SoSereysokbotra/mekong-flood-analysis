@@ -33,3 +33,5 @@ results/**/*.pt
 results/**/*.joblib
 results/level3/_logs/
 data/colab/
+data/labels/*.gpkg-wal
+data/labels/*.gpkg-shm
