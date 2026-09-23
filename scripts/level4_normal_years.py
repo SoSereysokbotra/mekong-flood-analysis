@@ -58,8 +58,8 @@ def main():
         pre_s1 = s1_on_aoi(pre_date, grid)
         oct_s1 = s1_on_aoi(oct_date, grid)
         ok = np.isfinite(pre_s1).all(axis=0) & np.isfinite(oct_s1).all(axis=0) & inside
-        summary["years"][year] = {"pre_date": pre_date, "october_date": oct_date,
-                                  "gap_days": (np.datetime64(oct_date) - np.datetime64(pre_date)).astype(int),
+        summary["years"][str(year)] = {"pre_date": pre_date, "october_date": oct_date,
+                                  "gap_days": int((np.datetime64(oct_date) - np.datetime64(pre_date)).astype(int)),
                                   "coverage_frac": float(ok.sum() / inside.sum()), "methods": {}}
         for method in METHODS:
             def predict(s1):
@@ -76,15 +76,15 @@ def main():
                  "flood_km2": float(flood.sum() * px_km2),
                  "flood_cropland_km2": float((flood & (land == strata.CROPLAND)).sum() * px_km2),
                  "flood_vegetation_km2": float((flood & (land == strata.VEGETATION)).sum() * px_km2)}
-            summary["years"][year]["methods"][method] = s
-            rows.append({"year": year, "method": method, "pre_date": pre_date, "october_date": oct_date, **s})
+            summary["years"][str(year)]["methods"][method] = s
+            rows.append({"year": int(year), "method": method, "pre_date": pre_date, "october_date": oct_date, **s})
             print(f"  {method:16s} water pre {s['water_pre_km2']:6,.0f} | october {s['water_october_km2']:6,.0f} "
                   f"| flood {s['flood_km2']:6,.0f} km2 (cropland {s['flood_cropland_km2']:6,.0f})", flush=True)
 
     # the comparison this script exists for
     print(f"\n{'method':16s} " + " ".join(f"{y:>8d}" for y in YEARS) + "   excess 2020 vs median of other years")
     for method in METHODS:
-        vals = {y: summary["years"][y]["methods"][method]["flood_cropland_km2"] for y in YEARS}
+        vals = {y: summary["years"][str(y)]["methods"][method]["flood_cropland_km2"] for y in YEARS}
         others = [v for y, v in vals.items() if y != EVENT_YEAR]
         med = float(np.median(others))
         excess = vals[EVENT_YEAR] - med
