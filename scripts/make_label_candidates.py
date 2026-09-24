@@ -133,11 +133,16 @@ def main():
                          "evidence": f"CANDIDATE from NDWI>{NDWI_WATER} on S2 {date} - REVIEW",
                          "labeller": "", "date_labelled": "", "note": "candidate: confirm, fix or delete"})
             n_w += 1
-        # merge nearby cloud fragments so the labeller gets a few shapes, not dozens
+        # close small gaps only: dilating cloud swallows the clear land between
+        # clouds, and that land is exactly where the labeller can still work
         from scipy import ndimage as _nd
 
-        bad_merged = _nd.binary_closing(_nd.binary_dilation(bad, np.ones((7, 7))), np.ones((9, 9)))
-        for g in polygonise(clean(bad_merged), grid):
+        bad_merged = _nd.binary_closing(bad, np.ones((5, 5)))
+        lab, n = _nd.label(bad_merged)
+        if n:
+            sizes = _nd.sum(bad_merged, lab, range(1, n + 1))
+            bad_merged = np.isin(lab, 1 + np.flatnonzero(sizes >= 60))   # 0.6 ha
+        for g in polygonise(bad_merged, grid):
             rows.append({"geometry": g, "class": -1, "confidence": 1, "tile_id": tid,
                          "evidence": f"cloud or shadow in S2 {date} - optical unusable here",
                          "labeller": "", "date_labelled": "", "note": "uncertain: no usable optical"})
