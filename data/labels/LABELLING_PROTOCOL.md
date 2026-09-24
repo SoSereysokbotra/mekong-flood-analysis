@@ -1,6 +1,6 @@
 # Tier B labelling protocol — Banteay Meanchey, October 2020
 
-**Status: FROZEN v1.0, 23 September 2026.** Frozen before any polygon was drawn (Mistake_avoidance #7). Changes after this point require a new version with a dated changelog entry and a written reason, and any tile already labelled under the old version is re-checked.
+**Status: FROZEN v1.1, 24 September 2026.** Frozen before any polygon was drawn (Mistake_avoidance #7). Changes after this point require a new version with a dated changelog entry and a written reason, and any tile already labelled under the old version is re-checked.
 **Purpose:** hand-labelled flood extent for the anchor event, specifically capturing **flooded rice fields**, including the bright double-bounce case that radar thresholding misses. These labels are the Cambodia-specific test set (plan Section 5, Tier B). They are never used for training.
 
 ## 1. Who, when, with what
@@ -60,8 +60,9 @@ Rule of thumb for 1 vs 2: if the land cover on the pre-event optical image is cr
 
 The point of Tier B is to label the case radar gets wrong. **If you label by tracing dark radar pixels, the labels inherit the exact bias this project studies and the test is worthless.** Therefore:
 
-1. **Primary:** cloud-free optical imagery closest to 14 Oct 2020. Sentinel-2 L2A 30 Oct 2020 tile T48PUV (27 % cloud) is the nearest; also Planet / Google Earth historical imagery if available. Look at water colour, standing water between crop rows, submerged field bunds.
-2. **Primary:** pre-event optical (Sep 2020 or Dec 2019 dry season) to establish land cover and permanent water.
+1. **Primary:** the event-window Sentinel-2 clip already prepared for your tile, `data/labels/imagery/<tile_id>/optical/event_<date>_clear<pct>.tif` — mostly **15 or 20 October 2020**, within a week of the radar date. `clear<pct>` is the measured clear fraction over *that tile*, not the scene. Where a second event-window scene was usable it is saved as `event_alt_*`; clouds move, so check both. Look at water colour, standing water between crop rows, submerged field bunds.
+   Per-tile availability is in `data/labels/optical_availability.csv`: 7 tiles are ≥ 70 % clear on the event date, 10 are 30–70 %, and 3 (`BMC_CROP_04`, `BMC_CROP_08`, `BMC_CROP_14`) are under 30 %. On a cloudy tile, label what you can and mark the rest `−1 uncertain` — do not infer it from radar.
+2. **Primary:** the pre-event clip `optical/pre_<date>_clear<pct>.tif` (25 Sep 2020 for most tiles, > 90 % clear) to establish land cover and permanent water, and the post clip `optical/post_*` (9–19 Nov, near cloud-free) to see what drained.
 3. **Supporting:** elevation (Copernicus DEM) and hydrology — low-lying land adjacent to flooded rivers / Tonle Sap arms is more plausibly flooded.
 4. **Supporting:** the OCHA 4W report and news for village-level confirmation.
 5. **Last, and only to refine boundaries:** Sentinel-1 VV/VH on the event date. Use it to snap a boundary that optical has already established. **Never** use radar darkness alone to decide whether an area is flooded, and **never** mark an area dry because the radar is bright.
@@ -101,4 +102,5 @@ The classes, the evidence hierarchy, the tile list and labelling order, and the 
 ## Changelog
 
 - v0.1 — 22 Sep 2026 — draft.
+- **v1.1 — 24 Sep 2026.** §4 updated with the imagery that actually exists, now that it has been fetched and measured per tile: event-window Sentinel-2 on 15/20 Oct rather than the 30 Oct scene assumed in v1.0, with the real clear fraction over each tile and an explicit instruction for the three cloudy tiles. Classes, evidence *order*, confidence scale, procedure, tile list and labelling order are unchanged — only the description of the available evidence.
 - **v1.0 — 23 Sep 2026 — frozen.** Added the fixed tile list and labelling order (the grid was generated in the meantime), named Labeller 1, and made explicit that κ is omitted rather than faked if no second labeller is found. Classes, evidence hierarchy, confidence scale and procedure are unchanged from v0.1.

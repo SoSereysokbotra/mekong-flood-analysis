@@ -29,7 +29,18 @@ The protocol's evidence order is optical first, radar last. Add these as XYZ til
 
 These are recent imagery, not October 2020 — they establish **land cover and field boundaries**, which is what step 2a of the protocol needs. For the event date itself use Sentinel-2 (below) and the elevation/hydrology reasoning.
 
-**Sentinel-2, 30 Oct 2020 (27 % cloud, the nearest usable optical):** this needs downloading per tile. Tell me when you reach that step and I will fetch clips for the 20 tiles — it is a small download because the tiles are only 2 × 2 km.
+**The event imagery is already downloaded**, in `data/labels/imagery/<tile_id>/optical/`:
+
+| File | What it is |
+| --- | --- |
+| `pre_2020-09-25_clear*.tif` | before the flood — land cover, permanent water |
+| `event_2020-10-15_clear*.tif` or `event_2020-10-20_...` | **the flood**, within a week of the radar date |
+| `event_alt_*.tif` | a second event-window scene where one was usable |
+| `post_2020-11-09_clear*.tif` | after — what drained |
+
+`clear<pct>` in the filename is the measured clear fraction over *that tile*. `data/labels/optical_availability.csv` lists it for all 20. Three tiles (`BMC_CROP_04`, `BMC_CROP_08`, `BMC_CROP_14`) have almost no event-date optical — label what the pre/post pair and terrain support, and mark the rest `−1 uncertain`.
+
+Drag the `optical/*.tif` files for your current tile straight into QGIS.
 
 ## 3. Draw
 
