@@ -1,6 +1,6 @@
 # Tier B labelling protocol — Banteay Meanchey, October 2020
 
-**Status: FROZEN v1.1, 24 September 2026.** Frozen before any polygon was drawn (Mistake_avoidance #7). Changes after this point require a new version with a dated changelog entry and a written reason, and any tile already labelled under the old version is re-checked.
+**Status: FROZEN v1.2, 24 September 2026.** Frozen before any polygon was drawn (Mistake_avoidance #7). Changes after this point require a new version with a dated changelog entry and a written reason, and any tile already labelled under the old version is re-checked.
 **Purpose:** hand-labelled flood extent for the anchor event, specifically capturing **flooded rice fields**, including the bright double-bounce case that radar thresholding misses. These labels are the Cambodia-specific test set (plan Section 5, Tier B). They are never used for training.
 
 ## 1. Who, when, with what
@@ -79,6 +79,21 @@ Record in `evidence` which sources were decisive, e.g. `S2 2020-10-30; DEM`.
 
 Polygons with confidence 1 are scored in a sensitivity run but excluded from the primary score.
 
+## 5b. Candidate polygons (added v1.2)
+
+`scripts/make_label_candidates.py` has pre-drawn **candidates** into the `flood` layer so the work is *review and correction* rather than digitising from scratch: 116 water candidates and 80 uncertain (cloud) areas across the 20 tiles.
+
+- Water candidates come from **NDWI > 0 on the event-date Sentinel-2 scene**, with cloud and cloud shadow removed using the scene classification band, specks under 0.12 ha dropped, and the pixel staircase simplified to 15 m. **No radar and no model output is involved**, so the labels cannot inherit the radar bias the project exists to measure.
+- Cloud and cloud-shadow areas are written as class −1 automatically: NDWI is unreliable there, and shadow in particular mimics water.
+- `class` is seeded from ESA WorldCover (cropland/vegetation → 2, open water → 3, else 1). That is a starting point only.
+- **Every candidate is written with `confidence = 1`, which §5 excludes from the primary score.** A candidate becomes a label only when a human raises its confidence to 2 or 3. Untouched candidates are therefore never counted.
+
+**The risk this introduces, stated plainly:** a labeller shown a pre-drawn shape is more likely to accept it than to draw a different one (anchoring). The labels will be closer to an NDWI threshold than fully independent labels would be. Mitigations, all required:
+1. Work from the false-colour image, not from the candidate outlines — check each one against what you can see.
+2. Delete candidates that are wrong. A tile where nothing was deleted or edited should be treated as suspicious.
+3. Add polygons for water the candidates missed — NDWI misses water under dense canopy, which is exactly the case the project cares about.
+4. `scripts/level4_label_agreement.py` reports how many candidates were accepted unchanged, edited and deleted, and that is published with the results.
+
 ## 6. Procedure
 
 1. Read this protocol in full. Open QGIS project `data/labels/tierB.qgz` (layers pre-loaded and styled; radar layer *off* by default).
@@ -102,5 +117,6 @@ The classes, the evidence hierarchy, the tile list and labelling order, and the 
 ## Changelog
 
 - v0.1 — 22 Sep 2026 — draft.
+- **v1.2 — 24 Sep 2026.** Added §5b: candidate polygons pre-drawn from NDWI for the labeller to review, with the anchoring risk and four required mitigations. Reason: digitising 20 tiles from scratch was not practical for the single available labeller, and an unlabelled Tier B is worth less than a reviewed one with its bias documented. Classes, evidence hierarchy, confidence scale, tiles and order unchanged; candidates carry confidence 1 and so are excluded from the primary score until a human confirms them.
 - **v1.1 — 24 Sep 2026.** §4 updated with the imagery that actually exists, now that it has been fetched and measured per tile: event-window Sentinel-2 on 15/20 Oct rather than the 30 Oct scene assumed in v1.0, with the real clear fraction over each tile and an explicit instruction for the three cloudy tiles. Classes, evidence *order*, confidence scale, procedure, tile list and labelling order are unchanged — only the description of the available evidence.
 - **v1.0 — 23 Sep 2026 — frozen.** Added the fixed tile list and labelling order (the grid was generated in the meantime), named Labeller 1, and made explicit that κ is omitted rather than faked if no second labeller is found. Classes, evidence hierarchy, confidence scale and procedure are unchanged from v0.1.
