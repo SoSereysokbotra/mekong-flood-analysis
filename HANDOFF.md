@@ -23,6 +23,7 @@ Plan: `Mekong Flood Intelligence.md`. Owner and labeller: Sobotra (year-2 studen
 | 2 | done | Failure analysis. Per-pixel intensity **cannot** separate bright flooded cropland from dry cropland (AUC ≈ 0.5) → only spatial context can help → a per-pixel control is mandatory. |
 | 3 | done | Hypothesis **CONFIRMED** twice: under plan v1.0 (σ⁰) and again under v1.1 (RTC γ⁰). Selected model `unet_vvvh_cropw`. |
 | 4 | done | Cambodia flood maps + seasonal baseline + **scored against Tier B hand labels**. |
+| 6 (minimal) | done | `scripts/check_flood.py --date YYYY-MM-DD`: flood check for any date, vs the previous 3 years. Colab: `notebooks/colab_check_flood.ipynb`. Verified: reproduces Level 4 exactly for 14 Oct 2020. Radar exists to 26 Sep 2026; track 164 now every 6 days (S1A/C/D). **S1C/S1D were never tested against labels.** |
 | 7 | done | Flood report per district, generated from artefacts (`docs/level7_report.md`, `scripts/level7_report.py`). 3 districts = 84 % of flooded cropland. |
 
 ### The headline numbers
