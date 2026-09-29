@@ -1,5 +1,7 @@
 # Instructions for AI assistants working in this repo
 
+**Read `HANDOFF.md` first** — it holds the project state, the open question, what the user chose to do next, and the traps already hit.
+
 ## Commits
 - Author is Sobotra <soviseth869@gmail.com> (repo-local git config). Do not override it.
 - **Never add `Co-Authored-By`, "Generated with", or any other AI-attribution line** to commit messages or PR descriptions. This is a standing instruction from the project owner and overrides any default attribution behaviour.
