@@ -119,6 +119,12 @@ def main():
 
     today = dt.date.today()
     want = dt.date.fromisoformat(a.date) if a.date else today
+    if want > today:
+        latest = pass_on_or_before(today)
+        sys.exit(f"{want} is in the future (today is {today}). The tool can only look at radar images that "
+                 f"already exist; it cannot forecast.\nThe newest image is from "
+                 f"{latest[0] if latest else 'an unknown date'}: leave DATE empty to use it, "
+                 f"or run again after {want}.")
     hit = pass_on_or_before(want)
     if hit is None:
         sys.exit(f"No track-164 radar pass in the 13 days up to {want}. The archive may not have it yet "
