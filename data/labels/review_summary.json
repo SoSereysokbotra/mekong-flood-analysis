@@ -1,0 +1,115 @@
+{
+  "labeller": "Sobotra",
+  "date": "2026-09-29",
+  "source_csv": "C:\\Users\\TUF\\OneDrive\\Pictures\\Downloads\\tierb_decisions.csv",
+  "totals": {
+    "water": 95,
+    "not": 21,
+    "unsure": 0,
+    "untouched": 104
+  },
+  "per_tile": {
+    "BMC_CROP_01": {
+      "water": 8,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 11
+    },
+    "BMC_WATE_02": {
+      "water": 12,
+      "not": 1,
+      "unsure": 0,
+      "untouched": 14
+    },
+    "BMC_CROP_03": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 9
+    },
+    "BMC_CROP_04": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 1
+    },
+    "BMC_VEGE_05": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 3
+    },
+    "BMC_BUIL_06": {
+      "water": 13,
+      "not": 7,
+      "unsure": 0,
+      "untouched": 5
+    },
+    "BMC_CROP_07": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 9
+    },
+    "BMC_CROP_09": {
+      "water": 1,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 6
+    },
+    "BMC_CROP_10": {
+      "water": 13,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 4
+    },
+    "BMC_CROP_11": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 6
+    },
+    "BMC_VEGE_12": {
+      "water": 0,
+      "not": 11,
+      "unsure": 0,
+      "untouched": 4
+    },
+    "BMC_CROP_13": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 7
+    },
+    "BMC_WATE_15": {
+      "water": 9,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 6
+    },
+    "BMC_BUIL_16": {
+      "water": 38,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 2
+    },
+    "BMC_VEGE_17": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 9
+    },
+    "BMC_CROP_19": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 7
+    },
+    "BMC_BUIL_20": {
+      "water": 1,
+      "not": 2,
+      "unsure": 0,
+      "untouched": 1
+    }
+  }
+}
