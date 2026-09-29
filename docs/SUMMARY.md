@@ -28,7 +28,7 @@ Every score is reported per land type (cropland, vegetation, open water, built-u
 
 ### 1. Per-pixel brightness cannot find bright flooded rice. Spatial context can.
 
-At Level 2, bright flooded cropland could not be told apart from dry cropland by any single radar value: AUC ≈ 0.5 on VV, on VH and on their ratio. That made a per-pixel control mandatory. Without it, a gain from the U-Net could not be attributed to spatial context.
+At Level 2, on the training events, bright flooded cropland could not be told apart from dry cropland by any single radar value: AUC ≈ 0.5 on VV, on VH and on their ratio. (On the Cambodia test chips it was 0.67–0.72: better, but still weak.) That made a per-pixel control mandatory. Without it, a gain from the U-Net could not be attributed to spatial context.
 
 Result on the held-out Cambodia benchmark chips (Level 3, plan v1.1):
 
@@ -47,7 +47,7 @@ The first confirmed model (plan v1.0) collapsed from IoU 0.820 to 0.138 when it 
 
 ### 3. October 2020 was a real flood, not normal paddy water.
 
-On the peak date (14 October 2020), flood extent in the province was **882 / 1,131 / 1,218 km²** (threshold / VV-only U-Net / selected U-Net). The same track and dates in 2018, 2019, 2021 and 2022 give a median several times smaller. The 2020 flood on cropland is **3.9–6.0× a normal year**.
+On the peak date (14 October 2020), flood extent in the province was **882 / 1,131 / 1,218 km²** (threshold / VV-only U-Net / selected U-Net). The same track and dates in 2018, 2019, 2021 and 2022 give a median several times smaller. The 2020 flood on cropland is **3.9–6.0× the median of those four years**. One exception: the VV-only U-Net finds 2022 about as large as 2020 (1,070 vs 1,013 km²), so the size of the anomaly is uncertain even though its existence is not.
 
 ![Flood map](figures/level4_flood_map.png)
 
@@ -61,12 +61,14 @@ Scored against 95 water polygons that the author confirmed by hand on the flood 
 | Recall | 0.553 | 0.669 | **0.801** |
 | Precision | 0.835 | 0.879 | 0.867 |
 
-The selected model finds **about 45 % more of the flooded cropland** than the threshold at the same precision. The model was chosen on other countries' floods under criteria fixed in advance, and it transferred to a different country, season and crop stage.
+Other land types, same comparison: open water IoU is 0.95 for all three methods (5,953 labelled pixels). On vegetation, 2–4 % of what the methods mapped could be confirmed, which is not usable. Built-up has only 220 labelled pixels, too few to score. Full per-land-type table: [level4_tierb_scores.md](level4_tierb_scores.md) and `results/level4/tierb_scores.json`.
+
+The selected model finds **about 45 % more of the flooded cropland** than the threshold at the same precision. The model was chosen on other countries' floods under criteria fixed in advance, and its advantage on cropland held in a different country, season and crop stage. That is shown for water visible in photos only; whether it also holds for water hidden under the canopy is limit 1 below.
 
 ## Limits
 
 1. **The Cambodian labels cannot see water hidden under the rice canopy.** They were seeded from an optical water index and then filtered by hand, and optical imagery cannot see through a closed canopy. So the Level 4 result proves that the model finds more *visible* flood water than a threshold. It does **not** yet prove that the model finds *hidden* flood water, which is the case the project was built for. Flooded-vegetation recall against these labels must not be quoted either way. This is the main open gap, and it was checked: free terrain and optical data cannot close it here (the cropland is flat to within DEM noise, and almost no field is green on the flood date but water in November). See [level4_tierb_scores.md §5](level4_tierb_scores.md).
-2. **The benchmark test scene is the wrong crop stage.** The Cambodian benchmark scene is from August 2018, when the rice is young, and only 2.3 % of its flooded cropland is bright. Level 3 therefore tests the bright case mostly on other countries' floods. Only Level 4 is on Cambodian rice near harvest.
+2. **The benchmark test scene is the wrong crop stage.** The Cambodian benchmark scene is from August 2018, when the rice is young, and only 7.6 % of its flooded cropland is above the pre-registered brightness threshold (VH ≥ −19.65 dB); 2.3 % is as bright as dry cropland. Level 3 therefore tests the bright case mostly on other countries' floods. Only Level 4 is on Cambodian rice near harvest.
 3. **The selected model over-detects outside cropland.** It has about 4× the cropland false positives of the VV-only U-Net on the benchmark, and the lowest overall precision on the Cambodian labels (0.525). **For cropland use the selected model; for a general flood map use the VV-only U-Net.**
 4. **Mapped flood area is larger than the official figure.** The reported figure is 282 km² of rice inundated. Mapped flood on cropland is 2.9–3.9× that, and the excess over a normal year is still 2.2–3.3×. The two figures probably measure different things (damage assessed per district versus water seen in every pixel on one morning), but this is not resolved.
 5. **Small evidence base.** There was one labeller (no agreement score), 17 tiles of 4 km² each, 5.8 km² of labelled water, and one training seed. Only the cropland numbers have enough pixels to quote.

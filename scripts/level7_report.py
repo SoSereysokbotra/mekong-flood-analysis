@@ -34,6 +34,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level4_cambodia import METHODS  # noqa: E402
 from level7_district_areas import DISTRICTS, OUT  # noqa: E402
 
+NAMES = {"otsu_vh_global": "the VH threshold", "unet_vv_ce": "the VV-only U-Net", "unet_vvvh_cropw": "the selected U-Net"}
+
 SEL = "unet_vvvh_cropw"      # selected at Level 3 by the frozen rule; best on Tier B cropland
 L4 = experiments.RESULTS / "level4"
 DOC = catalog.ROOT / "docs" / "level7_report.md"
@@ -105,8 +107,11 @@ def figure(rows):
 
 def main():
     cd = load(L4 / "change_detection.json")
-    ny = load(L4 / "normal_years.json")["excess_2020_cropland_km2"]
-    tb = load(L4 / "tierb_scores.json")["comparisons"]["total_water"]["methods"]
+    nyf = load(L4 / "normal_years.json")
+    ny = nyf["excess_2020_cropland_km2"]
+    # the report's areas are NEW flood (peak water minus pre-event water), so its accuracy
+    # must come from the new-flood comparison, not total water
+    tb = load(L4 / "tierb_scores.json")["comparisons"]["new_flood"]["methods"]
     hw = load(L4 / "hidden_water_feasibility.json")["summary"]
     dist = load(OUT / "districts.json")
     te = next(f for f in load(catalog.DATA / "reference" / "tier_e_reference.json")["figures"]
@@ -118,20 +123,31 @@ def main():
     rep = {
         "event": "Banteay Meanchey, October 2020", "peak": cd["peak"], "pre": cd["pre"], "post": cd["post"],
         "method_best": SEL,
-        "flood_km2": {k: round(v["flood_peak_km2"], 1) for k, v in m.items()},
-        "flood_cropland_km2": {k: round(v["flood_peak_cropland_km2"], 1) for k, v in m.items()},
-        "flood_vegetation_km2": {k: round(v["flood_peak_vegetation_km2"], 1) for k, v in m.items()},
-        "water_pre_km2": {k: round(v["water_pre_km2"], 1) for k, v in m.items()},
-        "water_peak_km2": {k: round(v["water_peak_km2"], 1) for k, v in m.items()},
-        "flood_cropland_post_km2": {k: round(v["flood_post_cropland_km2"], 1) for k, v in m.items()},
+        "flood_km2": {k: round(v["flood_peak_km2"], 3) for k, v in m.items()},
+        "flood_cropland_km2": {k: round(v["flood_peak_cropland_km2"], 3) for k, v in m.items()},
+        "flood_vegetation_km2": {k: round(v["flood_peak_vegetation_km2"], 3) for k, v in m.items()},
+        "water_pre_km2": {k: round(v["water_pre_km2"], 3) for k, v in m.items()},
+        "water_peak_km2": {k: round(v["water_peak_km2"], 3) for k, v in m.items()},
+        "flood_cropland_post_km2": {k: round(v["flood_post_cropland_km2"], 3) for k, v in m.items()},
         "province_cropland_km2": crop_total,
         "normal_year_ratio": {k: round(v["ratio"], 1) for k, v in ny.items()},
-        "normal_year_excess_km2": {k: round(v["excess_km2"], 1) for k, v in ny.items()},
+        "normal_year_excess_km2": {k: round(v["excess_km2"], 3) for k, v in ny.items()},
         "reported_rice_inundated_km2": te["value_km2"],
         "tierb_cropland": {k: {x: round(v["cropland"][x], 3) for x in ("recall", "precision")} for k, v in tb.items()},
         "tierb_vegetation_precision": {k: round(v["vegetation"]["precision"], 3) for k, v in tb.items()},
         "hidden_water": hw,
+        "unassigned_km2": dist["unassigned_km2"],
+        # of the peak flood, how much was still water on the post date, and how much is new since the peak
+        "peak_flood_persisting_km2": round(m[SEL]["flood_peak_km2"] - m[SEL]["drained_by_post_km2"], 3),
+        "flood_new_after_peak_km2": round(m[SEL]["flood_post_km2"] - (m[SEL]["flood_peak_km2"]
+                                                                     - m[SEL]["drained_by_post_km2"]), 3),
     }
+    # any normal year that one method finds nearly as flooded as 2020 must be named, not averaged away
+    rep["normal_year_exceptions"] = [
+        {"method": k, "year": y, "flood_cropland_km2": round(v["methods"][k]["flood_cropland_km2"], 1),
+         "event_km2": round(ny[k]["event"], 1)}
+        for y, v in nyf["years"].items() if y != "2020" for k in METHODS
+        if v["methods"][k]["flood_cropland_km2"] >= 0.8 * ny[k]["event"]]
     top = sorted(rows, key=lambda r: -r[f"flood_cropland_{SEL}"])
     top3 = top[:3]
     rep["top3_share"] = round(sum(r[f"flood_cropland_{SEL}"] for r in top3) / dist["totals"][f"flood_cropland_{SEL}"], 3)
@@ -156,7 +172,7 @@ def main():
         f"Change since last pass:    +{km(rep['water_peak_km2'][SEL] - rep['water_pre_km2'][SEL])} km² of water"
         f" since {day(cd['pre'])}",
         f"{'Two weeks later:':27s}{km(rep['flood_cropland_post_km2'][SEL])} km² of cropland flooded on {day(cd['post'])}",
-        f"Compared with normal:      {rep['normal_year_ratio'][SEL]}× the flooded cropland of a normal October"
+        f"Compared with normal:      {rep['normal_year_ratio'][SEL]}× the median of four other Octobers"
         f" (range {min(rep['normal_year_ratio'].values())}–{max(rep['normal_year_ratio'].values())}×)",
         "Method:                    Sentinel-1 VV+VH, U-Net (cropland-weighted)",
         f"Known limitation:          on cropland it found {100 * rec:.0f} % of the flood water that people could",
@@ -187,9 +203,12 @@ def main():
     rising = [r["district"] for r in top if r[f"flood_cropland_post_{SEL}"] > r[f"flood_cropland_{SEL}"] * 1.1]
     lines += [
         "",
-        f"On {day(cd['post'])}, {100 * rep['flood_cropland_post_km2'][SEL] / fc[SEL]:.0f} % as much cropland was flooded as at the peak. "
-        + (f"In **{' and '.join(rising)}** it was *larger* than at the peak, "
-           "so water there was still spreading or not draining. " if rising else "")
+        f"The last column is all water on {day(cd['post'])} that was not there before the flood. "
+        f"It is not the same water as at the peak: across the province, {km(rep['peak_flood_persisting_km2'])} km² "
+        f"of the peak flood was still under water, and {km(rep['flood_new_after_peak_km2'])} km² had flooded *after* "
+        "the peak. "
+        + (f"In **{' and '.join(rising)}** the flooded cropland was *larger* than at the peak, so the flood there "
+           "was still spreading. " if rising else "")
         + "The northern and western districts (Thma Puok, Svay Chek, Paoy Paet) show almost no flooding.",
         "",
         "## How far to trust these numbers",
@@ -197,14 +216,21 @@ def main():
         "| Question | Answer | Evidence |",
         "| --- | --- | --- |",
         f"| Is this a real flood, not normal wet-season paddy water? | **Yes.** Flooded cropland is "
-        f"{min(rep['normal_year_ratio'].values())}–{max(rep['normal_year_ratio'].values())}× the same date in "
-        "2018, 2019, 2021 and 2022. | [level4_cambodia.md §3b](level4_cambodia.md) |",
+        f"{min(rep['normal_year_ratio'].values())}–{max(rep['normal_year_ratio'].values())}× the median of the "
+        "same dates in 2018, 2019, 2021 and 2022"
+        + ("" if not rep["normal_year_exceptions"] else
+           ". **One exception:** " + "; ".join(
+               f"{NAMES[e['method']]} finds {e['year']} about as large ({km(e['flood_cropland_km2'])} km² vs "
+               f"{km(e['event_km2'])} km² in 2020)" for e in rep["normal_year_exceptions"])
+           + ", so treat the size of the anomaly as uncertain")
+        + ". | [level4_cambodia.md §3b](level4_cambodia.md) |",
         f"| Is the cropland number accurate? | **Mostly.** Checked against 17 hand-labelled sites: it finds "
-        f"{100 * rec:.0f} % of visible flood water on cropland; {100 * prec:.0f} % of its cropland flood is real. "
+        f"{100 * rec:.0f} % of the new flood water on cropland that people could see; {100 * prec:.0f} % of its "
+        "cropland flood is real. "
         f"A simple threshold finds only {100 * rep['tierb_cropland']['otsu_vh_global']['recall']:.0f} %. "
         "| [level4_tierb_scores.md](level4_tierb_scores.md) |",
         f"| Is the forest and grassland number accurate? | **No, do not use it.** "
-        f"{km(rep['flood_vegetation_km2'][SEL])} km² is mapped there, but on the hand-labelled sites under "
+        f"{km(rep['flood_vegetation_km2'][SEL])} km² is mapped there, but on the hand-labelled sites only "
         f"about {100 * rep['tierb_vegetation_precision'][SEL]:.0f} % of it could be confirmed. "
         "| [level4_tierb_scores.md](level4_tierb_scores.md) |",
         "| Does it find water hidden under tall rice? | **Unknown.** Photos cannot see under the canopy, and "
@@ -220,7 +246,8 @@ def main():
         "",
         "## How to use it",
         "",
-        "- **Use it to rank districts** and to see where water was still standing two weeks later. "
+        "- **Use it to rank districts**, and the last column to see where flooding was still present two weeks "
+        "later. "
         "All three methods agree on which districts are worst, so this is the most reliable part of this report.",
         "- **Use the cropland area as an upper-end estimate**, with the range beside it. Do not quote it as rice "
         "*damaged*: water on a field is not the same as a lost crop.",
@@ -233,7 +260,8 @@ def main():
         "track 164, covering 100 % of the province. Flood = water on the date that was not water before. "
         "The model was chosen on floods in other countries, under rules written down before it was trained, "
         "and then checked on Cambodian ground ([SUMMARY.md](SUMMARY.md)). District boundaries: geoBoundaries "
-        "(Open Development Cambodia, 2014, CC BY 4.0). Cropland: ESA WorldCover 2020, which does not separate "
+        f"(Open Development Cambodia, 2014, CC BY 4.0); {rep['unassigned_km2']:.0f} km² along the province edge falls "
+        "outside them and is in the province totals but not in any district. Cropland: ESA WorldCover 2020, which does not separate "
         "rice from other crops.",
         "",
     ]

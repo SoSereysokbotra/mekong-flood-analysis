@@ -51,9 +51,9 @@ SIMPLIFY_M = 15.0         # smooth the pixel staircase, keep the field shape
 SCL_BAD = {3, 8, 9, 10, 11}   # cloud shadow, cloud medium/high, cirrus, snow
 
 
-def scl_on_tile(tid, grid, date, bbox):
-    """Scene classification band for the event scene, cached per tile."""
-    p = OUT / tid / "optical" / f"scl_event_{date}.tif"
+def scl_on_tile(tid, grid, date, bbox, role="event"):
+    """Scene classification band for the `role` scene, cached per tile."""
+    p = OUT / tid / "optical" / f"scl_{role}_{date}.tif"
     if p.exists():
         with rasterio.open(p) as s:
             return s.read(1)

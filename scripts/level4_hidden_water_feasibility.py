@@ -40,6 +40,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments, io  # noqa: E402
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from fetch_tier_b_imagery import OUT, tile_grid  # noqa: E402
+from make_label_candidates import SCL_BAD, scl_on_tile  # noqa: E402
 
 GPKG = catalog.DATA / "labels" / "tierB_bmc_oct2020.gpkg"
 GREEN_NDWI = -0.3        # event-date NDWI below this = closed green canopy
@@ -110,14 +111,22 @@ def main():
             with rasterio.open(po) as s:
                 p = s.read(1)
             rec["post_date"] = avail[tid]["post_date"]
-            rec["post_water_km2"] = round(((p > 0) & ~cl).sum() * 1e-4, 3)
+            # the class -1 polygons are event-date cloud; the post scene needs its own mask
+            xs = [q[0] for q in feats[tid]["geometry"]["coordinates"][0]]
+            ys = [q[1] for q in feats[tid]["geometry"]["coordinates"][0]]
+            scl_post = scl_on_tile(tid, grid, rec["post_date"], [min(xs), min(ys), max(xs), max(ys)], role="post")
+            cl_post = np.isin(scl_post, list(SCL_BAD)) if scl_post is not None else np.zeros(shape, bool)
+            both = ~cl & ~cl_post
+            rec["post_cloud_frac"] = round(float(cl_post.mean()), 3)
+            rec["post_water_km2"] = round(((p > 0) & ~cl_post).sum() * 1e-4, 3)
             rec["event_water_km2"] = round(((e > 0) & ~cl).sum() * 1e-4, 3)
-            rec["post_water_event_not_km2"] = round(((p > 0) & (e <= 0) & ~cl).sum() * 1e-4, 3)
+            rec["post_water_event_not_km2"] = round(((p > 0) & (e <= 0) & both).sum() * 1e-4, 3)
         out["tiles"][tid] = rec
 
     t = out["tiles"].values()
     crop = [r for r in t if r["stratum"] == "cropland"]
     out["summary"] = {
+        "tiles_measured_optical": sum("post_water_km2" in r for r in t),
         "cropland_tiles": len(crop),
         "cropland_dem_spread_median_m": round(float(np.median([r["dem_spread_p5_p95_m"] for r in crop])), 2),
         "cropland_tiles_with_confirmed_water": int(sum(r["confirmed_water_km2"] > 0 for r in crop)),

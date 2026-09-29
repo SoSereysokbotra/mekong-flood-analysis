@@ -5,34 +5,34 @@
   "post": "2020-11-01",
   "method_best": "unet_vvvh_cropw",
   "flood_km2": {
-    "otsu_vh_global": 882.2,
-    "unet_vv_ce": 1131.3,
-    "unet_vvvh_cropw": 1218.3
+    "otsu_vh_global": 882.242,
+    "unet_vv_ce": 1131.26,
+    "unet_vvvh_cropw": 1218.28
   },
   "flood_cropland_km2": {
-    "otsu_vh_global": 815.5,
-    "unet_vv_ce": 1012.8,
-    "unet_vvvh_cropw": 1112.7
+    "otsu_vh_global": 815.48,
+    "unet_vv_ce": 1012.756,
+    "unet_vvvh_cropw": 1112.737
   },
   "flood_vegetation_km2": {
-    "otsu_vh_global": 57.8,
-    "unet_vv_ce": 90.2,
-    "unet_vvvh_cropw": 87.2
+    "otsu_vh_global": 57.825,
+    "unet_vv_ce": 90.176,
+    "unet_vvvh_cropw": 87.178
   },
   "water_pre_km2": {
-    "otsu_vh_global": 110.7,
-    "unet_vv_ce": 69.6,
-    "unet_vvvh_cropw": 230.3
+    "otsu_vh_global": 110.709,
+    "unet_vv_ce": 69.56,
+    "unet_vvvh_cropw": 230.35
   },
   "water_peak_km2": {
-    "otsu_vh_global": 974.3,
-    "unet_vv_ce": 1192.0,
-    "unet_vvvh_cropw": 1415.4
+    "otsu_vh_global": 974.276,
+    "unet_vv_ce": 1191.966,
+    "unet_vvvh_cropw": 1415.416
   },
   "flood_cropland_post_km2": {
-    "otsu_vh_global": 745.2,
-    "unet_vv_ce": 961.0,
-    "unet_vvvh_cropw": 949.9
+    "otsu_vh_global": 745.228,
+    "unet_vv_ce": 961.048,
+    "unet_vvvh_cropw": 949.911
   },
   "province_cropland_km2": 5269.7,
   "normal_year_ratio": {
@@ -41,36 +41,48 @@
     "unet_vvvh_cropw": 6.0
   },
   "normal_year_excess_km2": {
-    "otsu_vh_global": 608.9,
-    "unet_vv_ce": 815.7,
-    "unet_vvvh_cropw": 926.9
+    "otsu_vh_global": 608.863,
+    "unet_vv_ce": 815.667,
+    "unet_vvvh_cropw": 926.944
   },
   "reported_rice_inundated_km2": 282.5,
   "tierb_cropland": {
     "otsu_vh_global": {
-      "recall": 0.553,
-      "precision": 0.835
+      "recall": 0.533,
+      "precision": 0.839
     },
     "unet_vv_ce": {
-      "recall": 0.669,
-      "precision": 0.879
+      "recall": 0.668,
+      "precision": 0.881
     },
     "unet_vvvh_cropw": {
-      "recall": 0.801,
-      "precision": 0.867
+      "recall": 0.735,
+      "precision": 0.894
     }
   },
   "tierb_vegetation_precision": {
-    "otsu_vh_global": 0.023,
+    "otsu_vh_global": 0.018,
     "unet_vv_ce": 0.043,
-    "unet_vvvh_cropw": 0.039
+    "unet_vvvh_cropw": 0.031
   },
   "hidden_water": {
+    "tiles_measured_optical": 18,
     "cropland_tiles": 12,
     "cropland_dem_spread_median_m": 1.52,
     "cropland_tiles_with_confirmed_water": 3,
-    "post_water_event_not_km2_total": 1.157,
-    "post_water_event_not_km2_cropland": 0.001
+    "post_water_event_not_km2_total": 1.155,
+    "post_water_event_not_km2_cropland": 0.0
   },
+  "unassigned_km2": 8.18,
+  "peak_flood_persisting_km2": 853.209,
+  "flood_new_after_peak_km2": 218.516,
+  "normal_year_exceptions": [
+    {
+      "method": "unet_vv_ce",
+      "year": "2022",
+      "flood_cropland_km2": 1070.5,
+      "event_km2": 1012.8
+    }
+  ],
   "top3_share": 0.838
 }

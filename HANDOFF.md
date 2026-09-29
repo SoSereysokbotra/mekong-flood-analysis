@@ -19,7 +19,7 @@ Plan: `Mekong Flood Intelligence.md`. Owner and labeller: Sobotra (year-2 studen
 | --- | --- | --- |
 | Step 0 | done | Data access confirmed. Track **164 descending** covers the province and passes on the 14 Oct peak (orbit 26 does **not** cover it). |
 | 0 | done | Sen1Floods11 inventory. Flooded cropland is the largest flood stratum in the held-out Cambodia set (654k px, 38 %). |
-| 1 | done | Threshold baseline. `otsu_vh_global` (VH < −19.65 dB). **Bright flooded cropland is nearly absent from the Aug-2018 Cambodia labels (2.3 %)** — the test scene is vegetative-stage rice. |
+| 1 | done | Threshold baseline. `otsu_vh_global` (VH < −19.65 dB). **Bright flooded cropland is rare in the Aug-2018 Cambodia labels (7.6 % above the pre-registered VH threshold; 2.3 % as bright as dry cropland)** — the test scene is vegetative-stage rice. |
 | 2 | done | Failure analysis. Per-pixel intensity **cannot** separate bright flooded cropland from dry cropland (AUC ≈ 0.5) → only spatial context can help → a per-pixel control is mandatory. |
 | 3 | done | Hypothesis **CONFIRMED** twice: under plan v1.0 (σ⁰) and again under v1.1 (RTC γ⁰). Selected model `unet_vvvh_cropw`. |
 | 4 | done | Cambodia flood maps + seasonal baseline + **scored against Tier B hand labels**. |
