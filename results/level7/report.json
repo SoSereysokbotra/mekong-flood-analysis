@@ -1,0 +1,76 @@
+{
+  "event": "Banteay Meanchey, October 2020",
+  "peak": "2020-10-14",
+  "pre": "2020-09-26",
+  "post": "2020-11-01",
+  "method_best": "unet_vvvh_cropw",
+  "flood_km2": {
+    "otsu_vh_global": 882.2,
+    "unet_vv_ce": 1131.3,
+    "unet_vvvh_cropw": 1218.3
+  },
+  "flood_cropland_km2": {
+    "otsu_vh_global": 815.5,
+    "unet_vv_ce": 1012.8,
+    "unet_vvvh_cropw": 1112.7
+  },
+  "flood_vegetation_km2": {
+    "otsu_vh_global": 57.8,
+    "unet_vv_ce": 90.2,
+    "unet_vvvh_cropw": 87.2
+  },
+  "water_pre_km2": {
+    "otsu_vh_global": 110.7,
+    "unet_vv_ce": 69.6,
+    "unet_vvvh_cropw": 230.3
+  },
+  "water_peak_km2": {
+    "otsu_vh_global": 974.3,
+    "unet_vv_ce": 1192.0,
+    "unet_vvvh_cropw": 1415.4
+  },
+  "flood_cropland_post_km2": {
+    "otsu_vh_global": 745.2,
+    "unet_vv_ce": 961.0,
+    "unet_vvvh_cropw": 949.9
+  },
+  "province_cropland_km2": 5269.7,
+  "normal_year_ratio": {
+    "otsu_vh_global": 3.9,
+    "unet_vv_ce": 5.1,
+    "unet_vvvh_cropw": 6.0
+  },
+  "normal_year_excess_km2": {
+    "otsu_vh_global": 608.9,
+    "unet_vv_ce": 815.7,
+    "unet_vvvh_cropw": 926.9
+  },
+  "reported_rice_inundated_km2": 282.5,
+  "tierb_cropland": {
+    "otsu_vh_global": {
+      "recall": 0.553,
+      "precision": 0.835
+    },
+    "unet_vv_ce": {
+      "recall": 0.669,
+      "precision": 0.879
+    },
+    "unet_vvvh_cropw": {
+      "recall": 0.801,
+      "precision": 0.867
+    }
+  },
+  "tierb_vegetation_precision": {
+    "otsu_vh_global": 0.023,
+    "unet_vv_ce": 0.043,
+    "unet_vvvh_cropw": 0.039
+  },
+  "hidden_water": {
+    "cropland_tiles": 12,
+    "cropland_dem_spread_median_m": 1.52,
+    "cropland_tiles_with_confirmed_water": 3,
+    "post_water_event_not_km2_total": 1.157,
+    "post_water_event_not_km2_cropland": 0.001
+  },
+  "top3_share": 0.838
+}

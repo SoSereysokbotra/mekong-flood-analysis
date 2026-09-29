@@ -80,8 +80,11 @@ The selected model finds **about 45 % more of the flooded cropland** than the th
 - Every number is generated from code, and every figure is generated from a results file.
 - An independent reviewer (a second AI) audited the work at several stages and found real bugs, which were fixed.
 
+## The decision-ready output
+
+[level7_report.md](level7_report.md) is the flood report for a non-technical reader: flooded area and cropland per district, with a range across the three methods and its limits stated in the report itself. Three districts (Mongkol Borei, Preah Netr Preah, Serei Saophoan) hold 84 % of the flooded cropland, and all three methods agree on that.
+
 ## What would strengthen it next
 
 1. **Independent evidence of hidden water**, e.g. L-band radar (ALOS-2), which sees through the canopy, or field reports located to the field. This is the only way to close limit 1. Free terrain and optical data were measured and are not enough.
 2. A second labeller on 5 tiles, to measure agreement between labellers.
-3. A decision-ready flood report for the province (plan Level 7) that states limits 1 and 4 alongside the areas.

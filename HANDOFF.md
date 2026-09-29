@@ -23,6 +23,7 @@ Plan: `Mekong Flood Intelligence.md`. Owner and labeller: Sobotra (year-2 studen
 | 2 | done | Failure analysis. Per-pixel intensity **cannot** separate bright flooded cropland from dry cropland (AUC ≈ 0.5) → only spatial context can help → a per-pixel control is mandatory. |
 | 3 | done | Hypothesis **CONFIRMED** twice: under plan v1.0 (σ⁰) and again under v1.1 (RTC γ⁰). Selected model `unet_vvvh_cropw`. |
 | 4 | done | Cambodia flood maps + seasonal baseline + **scored against Tier B hand labels**. |
+| 7 | done | Flood report per district, generated from artefacts (`docs/level7_report.md`, `scripts/level7_report.py`). 3 districts = 84 % of flooded cropland. |
 
 ### The headline numbers
 
@@ -52,7 +53,7 @@ Offered four options; they were about to choose when the session ended:
 - **C. Close the gap in §3** — hardest, most valuable scientifically, needs hours of the user's judgement.
 - **D. Level 6 automation** — the plan calls this a separate software project.
 
-**Option A chosen and done (29 Sep 2026): `docs/SUMMARY.md`.** Option C was attempted and found not feasible with free data (see §3). The user approved going on to B (Level 7 report). Do not assume.
+**Option A chosen and done (29 Sep 2026): `docs/SUMMARY.md`.** Option C was attempted and found not feasible with free data (see §3). B (Level 7 report) is done: `docs/level7_report.md`. Remaining: D (Level 6 automation), or independent hidden-water evidence. Ask before starting either. Do not assume.
 
 ## 5. How to work in this repo
 
@@ -90,6 +91,7 @@ evaluation_plan.md             FROZEN v1.1 — the pre-registered criteria
 CLAUDE.md                      commit conventions and standing rules
 HANDOFF.md                     this file
 docs/SUMMARY.md                5-minute write-up of the whole project
+docs/level7_report.md          the flood report (generated; edit the script, not the file)
 
 docs/
   level0_inventory.md          dataset inventory, powered-ness of the test
