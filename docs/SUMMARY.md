@@ -65,7 +65,7 @@ The selected model finds **about 45 % more of the flooded cropland** than the th
 
 ## Limits
 
-1. **The Cambodian labels cannot see water hidden under the rice canopy.** They were seeded from an optical water index and then filtered by hand, and optical imagery cannot see through a closed canopy. So the Level 4 result proves that the model finds more *visible* flood water than a threshold. It does **not** yet prove that the model finds *hidden* flood water, which is the case the project was built for. Flooded-vegetation recall against these labels must not be quoted either way. This is the main open gap.
+1. **The Cambodian labels cannot see water hidden under the rice canopy.** They were seeded from an optical water index and then filtered by hand, and optical imagery cannot see through a closed canopy. So the Level 4 result proves that the model finds more *visible* flood water than a threshold. It does **not** yet prove that the model finds *hidden* flood water, which is the case the project was built for. Flooded-vegetation recall against these labels must not be quoted either way. This is the main open gap, and it was checked: free terrain and optical data cannot close it here (the cropland is flat to within DEM noise, and almost no field is green on the flood date but water in November). See [level4_tierb_scores.md §5](level4_tierb_scores.md).
 2. **The benchmark test scene is the wrong crop stage.** The Cambodian benchmark scene is from August 2018, when the rice is young, and only 2.3 % of its flooded cropland is bright. Level 3 therefore tests the bright case mostly on other countries' floods. Only Level 4 is on Cambodian rice near harvest.
 3. **The selected model over-detects outside cropland.** It has about 4× the cropland false positives of the VV-only U-Net on the benchmark, and the lowest overall precision on the Cambodian labels (0.525). **For cropland use the selected model; for a general flood map use the VV-only U-Net.**
 4. **Mapped flood area is larger than the official figure.** The reported figure is 282 km² of rice inundated. Mapped flood on cropland is 2.9–3.9× that, and the excess over a normal year is still 2.2–3.3×. The two figures probably measure different things (damage assessed per district versus water seen in every pixel on one morning), but this is not resolved.
@@ -82,6 +82,6 @@ The selected model finds **about 45 % more of the flooded cropland** than the th
 
 ## What would strengthen it next
 
-1. **Labels for hidden water.** Polygons drawn from terrain and hydrology (low ground next to confirmed water) rather than from optical imagery. This closes limit 1 and is the single most valuable next step.
+1. **Independent evidence of hidden water**, e.g. L-band radar (ALOS-2), which sees through the canopy, or field reports located to the field. This is the only way to close limit 1. Free terrain and optical data were measured and are not enough.
 2. A second labeller on 5 tiles, to measure agreement between labellers.
 3. A decision-ready flood report for the province (plan Level 7) that states limits 1 and 4 alongside the areas.

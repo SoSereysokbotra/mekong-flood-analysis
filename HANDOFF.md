@@ -41,6 +41,8 @@ The Tier B labels were seeded from an **optical** water index (NDWI) and human-f
 
 Closing this needs a labeller adding polygons where they believe water exists under canopy, from terrain and hydrology rather than from the image. That is the single most valuable remaining piece of science.
 
+**Checked 29 Sep 2026 (`docs/level4_tierb_scores.md` §5): not closable with free data here.** The cropland is flat to within DEM noise (median 1.5 m spread per tile), and post-event optical shows almost no green-then-water fields (0.001 km² on cropland). Only independent evidence (L-band ALOS-2, field reports) could close it.
+
 ## 4. What the user chose to do next
 
 Offered four options; they were about to choose when the session ended:
@@ -50,7 +52,7 @@ Offered four options; they were about to choose when the session ended:
 - **C. Close the gap in §3** — hardest, most valuable scientifically, needs hours of the user's judgement.
 - **D. Level 6 automation** — the plan calls this a separate software project.
 
-**Option A chosen and done (29 Sep 2026): `docs/SUMMARY.md`.** For the next step, ask which of B, C or D. Do not assume.
+**Option A chosen and done (29 Sep 2026): `docs/SUMMARY.md`.** Option C was attempted and found not feasible with free data (see §3). The user approved going on to B (Level 7 report). Do not assume.
 
 ## 5. How to work in this repo
 

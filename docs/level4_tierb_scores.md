@@ -54,3 +54,20 @@ What would strengthen it, in order of value:
 1. **Labels that are not optically seeded** — a labeller adding polygons where they believe water exists under canopy, using terrain and hydrology, would let the flooded-vegetation recall be tested honestly. This is the single missing piece for the project's core claim on Cambodian ground.
 2. A second labeller on 5 tiles, for κ.
 3. The three unlabelled tiles, if a clearer optical scene can be found.
+
+## 5. Can the hidden-water gap be closed with free data? Measured: no
+
+**Date:** 29 September 2026 · **Script:** `scripts/level4_hidden_water_feasibility.py` → `results/level4/hidden_water_feasibility.json`. No radar or model output is read.
+
+Before asking the labeller to add polygons for water under the canopy (§4, item 1), I checked whether any free evidence other than C-band radar could support them. There were two candidate routes, and neither works here.
+
+**Terrain.** The idea: low ground next to confirmed water is probably flooded. But the cropland tiles are almost perfectly flat. Across a 2 km tile the median elevation spread (5th to 95th percentile) is **1.52 m**, which is about the vertical noise of the Copernicus DEM. Of the green land within 300 m of confirmed water, 75–100 % sits within 0.5 m of that water in every cropland and water tile. The DEM therefore cannot separate a flooded field from a dry one next to it. A terrain rule would label *everything* near water as flooded, which is an assumption, not evidence. Also, 9 of the 12 cropland tiles have no confirmed water at all, so there is nothing to measure height against.
+
+**Post-event optical.** The idea: a field that is green on the flood date but open water in November was probably flooded under its canopy all along. Across all 20 tiles, only **1.16 km²** fits that pattern, and **0.001 km²** of it is on cropland. Almost all of it (1.04 km²) is in one vegetation tile, `BMC_VEGE_12`, where water *grew* between the dates (39 % → 63 % of the tile). That means water may have arrived after 14 October, so it cannot be read back as hidden water on the flood date.
+
+**Conclusion.** In this province, the only sensor that sees water under a rice canopy is radar, and radar is the thing being tested. Closing the gap needs independent evidence of a kind this project does not have:
+- L-band radar (ALOS-2), which penetrates the canopy. Not freely available for this date.
+- Field reports or photographs located to the field.
+- Very-high-resolution imagery on the event date.
+
+The gap in §3 item 1 is therefore recorded as **not closable with free data at this site**, not merely as "not yet done".
