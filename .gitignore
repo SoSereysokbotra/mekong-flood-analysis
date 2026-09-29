@@ -36,3 +36,4 @@ data/colab/
 data/labels/*.gpkg-wal
 data/labels/*.gpkg-shm
 data/labels/imagery/
+data/labels/review.html
