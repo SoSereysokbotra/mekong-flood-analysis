@@ -1,0 +1,133 @@
+{
+  "date": "2026-09-26",
+  "platform": "sentinel-1d",
+  "before": "2026-09-08",
+  "before_platform": "sentinel-1c",
+  "gap_days": 18,
+  "coverage": 1.0,
+  "methods": {
+    "otsu_vh_global": {
+      "water_before_km2": 220.4,
+      "water_km2": 1584.9,
+      "flood_km2": 1410.5,
+      "flood_cropland_km2": 1325.7
+    },
+    "unet_vv_ce": {
+      "water_before_km2": 212.5,
+      "water_km2": 1966.1,
+      "flood_km2": 1762.3,
+      "flood_cropland_km2": 1623.2
+    },
+    "unet_vvvh_cropw": {
+      "water_before_km2": 549.6,
+      "water_km2": 2687.7,
+      "flood_km2": 2153.8,
+      "flood_cropland_km2": 1998.3
+    }
+  },
+  "baseline": {
+    "2025": {
+      "before": "2025-09-06",
+      "date": "2025-09-24",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 757.2,
+          "water_km2": 1084.9,
+          "flood_km2": 665.1,
+          "flood_cropland_km2": 627.4
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 914.5,
+          "water_km2": 1277.4,
+          "flood_km2": 741.2,
+          "flood_cropland_km2": 667.5
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 2143.1,
+          "water_km2": 1955.1,
+          "flood_km2": 776.7,
+          "flood_cropland_km2": 722.0
+        }
+      }
+    },
+    "2024": {
+      "before": "2024-09-05",
+      "date": "2024-09-29",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 75.9,
+          "water_km2": 300.9,
+          "flood_km2": 260.7,
+          "flood_cropland_km2": 220.1
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 39.7,
+          "water_km2": 332.2,
+          "flood_km2": 295.7,
+          "flood_cropland_km2": 257.1
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 68.4,
+          "water_km2": 669.6,
+          "flood_km2": 610.8,
+          "flood_cropland_km2": 529.1
+        }
+      }
+    },
+    "2023": {
+      "before": "2023-09-11",
+      "date": "2023-09-23",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 111.6,
+          "water_km2": 240.8,
+          "flood_km2": 165.9,
+          "flood_cropland_km2": 143.0
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 80.3,
+          "water_km2": 240.1,
+          "flood_km2": 171.0,
+          "flood_cropland_km2": 151.5
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 213.4,
+          "water_km2": 504.3,
+          "flood_km2": 349.7,
+          "flood_cropland_km2": 311.5
+        }
+      }
+    }
+  },
+  "verdicts": {
+    "otsu_vh_global": {
+      "flood_cropland_km2": 1325.7,
+      "baseline_median_km2": 220.1,
+      "ratio": 6.0,
+      "verdict": "UNUSUAL FLOODING"
+    },
+    "unet_vv_ce": {
+      "flood_cropland_km2": 1623.2,
+      "baseline_median_km2": 257.1,
+      "ratio": 6.3,
+      "verdict": "UNUSUAL FLOODING"
+    },
+    "unet_vvvh_cropw": {
+      "flood_cropland_km2": 1998.3,
+      "baseline_median_km2": 529.1,
+      "ratio": 3.8,
+      "verdict": "UNUSUAL FLOODING"
+    }
+  },
+  "verdict_rule": {
+    "ratio": 2.0,
+    "min_km2": 50.0
+  },
+  "untested_platforms": [
+    "sentinel-1c",
+    "sentinel-1d"
+  ]
+}

@@ -24,6 +24,7 @@ Plan: `Mekong Flood Intelligence.md`. Owner and labeller: Sobotra (year-2 studen
 | 3 | done | Hypothesis **CONFIRMED** twice: under plan v1.0 (σ⁰) and again under v1.1 (RTC γ⁰). Selected model `unet_vvvh_cropw`. |
 | 4 | done | Cambodia flood maps + seasonal baseline + **scored against Tier B hand labels**. |
 | 6 (minimal) | done | `scripts/check_flood.py --date YYYY-MM-DD`: flood check for any date, vs the previous 3 years. Colab: `notebooks/colab_check_flood.ipynb`. Verified: reproduces Level 4 exactly for 14 Oct 2020. Radar exists to 26 Sep 2026; track 164 now every 6 days (S1A/C/D). **S1C/S1D were never tested against labels.** |
+| — | first real use | **26 Sep 2026: UNUSUAL FLOODING**, 1,998 km² flooded cropland (range 1,326–1,998), 3.8–6.3× the same dates in 2023–2025, all 3 methods agree (`results/check/2026-09-26/`). Matches the news: late-Sep 2026 floods, Banteay Meanchey among the worst-hit provinces. S1D built-up brightness is within the normal range and slightly brighter, so a calibration artefact would hide water, not invent it. Mapped area exceeds official figures (~500 km² of rice across 10 provinces, as of 28 Sep), as in 2020. |
 | 7 | done | Flood report per district, generated from artefacts (`docs/level7_report.md`, `scripts/level7_report.py`). 3 districts = 84 % of flooded cropland. |
 
 ### The headline numbers
