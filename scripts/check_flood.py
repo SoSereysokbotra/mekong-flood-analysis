@@ -93,10 +93,23 @@ class Predictor:
         return infer.predict_unet(model, channels, norm, device, ch)
 
 
+def s1_retry(date, grid, tries: int = 3):
+    """s1_on_aoi, retried: on a slow link a remote tile sometimes arrives truncated."""
+    import rasterio.errors
+
+    for k in range(tries):
+        try:
+            return s1_on_aoi(date, grid)
+        except rasterio.errors.RasterioIOError as e:
+            if k == tries - 1:
+                raise
+            print(f"  {date}: read failed ({str(e)[:60]}...), retrying", flush=True)
+
+
 def flood_pair(pred, grid, inside, land, pre_date, date):
     """Per method: flood map and areas for one (before, date) pair."""
     px = abs(grid.transform.a) ** 2 / 1e6
-    pre_s1, s1 = s1_on_aoi(pre_date, grid), s1_on_aoi(date, grid)
+    pre_s1, s1 = s1_retry(pre_date, grid), s1_retry(date, grid)
     ok = np.isfinite(pre_s1).all(axis=0) & np.isfinite(s1).all(axis=0) & inside
     out = {"coverage": float(ok.sum() / inside.sum()), "methods": {}, "maps": {}}
     for m in METHODS:
