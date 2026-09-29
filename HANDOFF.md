@@ -50,7 +50,7 @@ Offered four options; they were about to choose when the session ended:
 - **C. Close the gap in §3** — hardest, most valuable scientifically, needs hours of the user's judgement.
 - **D. Level 6 automation** — the plan calls this a separate software project.
 
-**Ask which one, then do it.** Do not assume.
+**Option A chosen and done (29 Sep 2026): `docs/SUMMARY.md`.** For the next step, ask which of B, C or D. Do not assume.
 
 ## 5. How to work in this repo
 
@@ -87,6 +87,7 @@ Mistake_avoidance.md           the user's 8 rules from a previous project
 evaluation_plan.md             FROZEN v1.1 — the pre-registered criteria
 CLAUDE.md                      commit conventions and standing rules
 HANDOFF.md                     this file
+docs/SUMMARY.md                5-minute write-up of the whole project
 
 docs/
   level0_inventory.md          dataset inventory, powered-ness of the test
