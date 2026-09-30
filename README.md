@@ -4,7 +4,7 @@ SAR-based flood detection for Cambodia, targeting flooded rice fields — the ca
 that operational radar flood maps are documented to miss (double-bounce makes
 flooded vegetation *bright*, inverting the "dark = water" rule).
 
-- **Start here:** [docs/SUMMARY.md](docs/SUMMARY.md) — the whole project in 5 minutes
+- **Start here:** [docs/SUMMARY.md](docs/SUMMARY.md) — the whole project in 5 minutes; [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md) — everything in one file
 - Project plan: [Mekong Flood Intelligence.md](Mekong%20Flood%20Intelligence.md)
 - Data access record (Step 0): [step0_data_access.md](step0_data_access.md)
 
