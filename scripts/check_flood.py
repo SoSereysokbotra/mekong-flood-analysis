@@ -131,7 +131,10 @@ def main():
     a = ap.parse_args()
 
     today = dt.date.today()
-    want = dt.date.fromisoformat(a.date) if a.date else today
+    try:    # strptime, unlike fromisoformat, also takes 2026-9-29
+        want = dt.datetime.strptime(a.date.strip(), "%Y-%m-%d").date() if a.date else today
+    except ValueError:
+        sys.exit(f"Cannot read the date '{a.date}'. Write it as year-month-day, e.g. 2026-09-29.")
     if want > today:
         latest = pass_on_or_before(today)
         sys.exit(f"{want} is in the future (today is {today}). The tool can only look at radar images that "
