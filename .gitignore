@@ -40,3 +40,5 @@ data/labels/review.html
 
 # auditor scratch files
 scratch_*.py
+data/labels/2026/imagery/
+data/labels/2026/review.html

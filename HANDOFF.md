@@ -35,6 +35,14 @@ Plan: `Mekong Flood Intelligence.md`. Owner and labeller: Sobotra (year-2 studen
 
 **Level 4 scored on Sobotra's own labels (`docs/level4_tierb_scores.md`) — the project's payoff:** on cropland, total water IoU **0.713** (selected) vs 0.498 (threshold), recall **0.801** vs 0.553, at the same precision. The benchmark ranking of the three methods transfers to Cambodia.
 
+## 2b. In progress: scoring the September 2026 flood (user chose this, 1 Oct 2026)
+
+Rules fixed in advance: `data/labels/LABELLING_PROTOCOL.md` §9 (v1.3). Steps, all in `scripts/tierb2026.py`:
+1. `status`: rerun every 2-3 days until it prints **SELECTED** (≥ 10 of 20 tiles ≥ 50 % clear, radar pass within 3 days). On 29 Sep only 3 of 20 were clear. Deadline 31 Oct 2026; if none qualifies, record "no usable optical". Do not lower the rule.
+2. `check_flood.py --date <selected radar date>` if that check does not exist yet.
+3. `prepare` → the user reviews `data/labels/2026/review.html` and downloads `tierb_decisions_2026.csv` → `apply` → `score`.
+All four steps were tested end to end on 1 Oct with a fake decision file; every test output was deleted.
+
 ## 3. The one open scientific gap
 
 The Tier B labels were seeded from an **optical** water index (NDWI) and human-filtered. Optical cannot see water under a closed rice canopy — **which is exactly the case the project is about**. So:
