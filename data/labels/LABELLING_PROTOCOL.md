@@ -1,6 +1,6 @@
 # Tier B labelling protocol — Banteay Meanchey, October 2020
 
-**Status: FROZEN v1.2, 24 September 2026.** Frozen before any polygon was drawn (Mistake_avoidance #7). Changes after this point require a new version with a dated changelog entry and a written reason, and any tile already labelled under the old version is re-checked.
+**Status: FROZEN v1.3, 1 October 2026** (v1.2 of 24 September 2026 governs the 2020 labels; v1.3 only adds §9 for 2026). Frozen before any polygon was drawn (Mistake_avoidance #7). Changes after this point require a new version with a dated changelog entry and a written reason, and any tile already labelled under the old version is re-checked.
 **Purpose:** hand-labelled flood extent for the anchor event, specifically capturing **flooded rice fields**, including the bright double-bounce case that radar thresholding misses. These labels are the Cambodia-specific test set (plan Section 5, Tier B). They are never used for training.
 
 ## 1. Who, when, with what
@@ -114,7 +114,20 @@ Wet-season rice in north-west Cambodia is transplanted June–August and harvest
 
 The classes, the evidence hierarchy, the tile list and labelling order, and the rule that the primary score uses Labeller 1 with confidence ≥ 2. Changes after labelling starts are recorded as a new protocol version with a dated changelog below, and any tiles labelled under the old version are re-checked.
 
+## 9. Second event: the September 2026 flood (added v1.3)
+
+The flood check (`scripts/check_flood.py`) found unusual flooding on 26 Sep 2026. To measure its accuracy on that event, the same 20 tiles are labelled again under this protocol, unchanged except as stated here. Everything in this section is fixed **before any 2026 optical image has been viewed or any 2026 label drawn**; only per-tile cloud fractions had been measured (`data/labels/2026/optical_status.csv`: 3 of 20 tiles clear on 29 Sep).
+
+1. **Which scene.** The first Sentinel-2 date on or after 24 Sep 2026 where **at least 10 of the 20 tiles are ≥ 50 % clear** (scene classification band, `scripts/tierb2026.py status`) **and** a track-164 radar pass exists within 3 days. If that date has not come by **31 Oct 2026**, the 2026 labelling is abandoned and recorded as "no usable optical", not lowered to a weaker rule.
+2. **Which map is scored.** The flood check run for the radar pass nearest that optical date (ties: the earlier pass), with its default settings (18-day "before" gap). Nothing in `check_flood.py` is changed after this commit except bug fixes, each recorded.
+3. **Pre-event scene.** The clearest Sentinel-2 scene between 1 and 20 Sep 2026, for land cover and water already present.
+4. **Labels.** Candidates from NDWI on the event scene, reviewed in a browser page, exactly as §5b. Output: `data/labels/tierB_bmc_sep2026.gpkg`. The review page uses its own storage key, so 2020 and 2026 decisions cannot mix.
+5. **Scores reported.** As for 2020: total water and new flood, per land type, all three methods. The cropland numbers are the headline; the same limits (§5b anchoring, one labeller, optical cannot see under canopy) apply and are stated with the result.
+6. **What this adds.** The first accuracy measurement on Sentinel-1C/1D, which the models were never tested on.
+
 ## Changelog
+
+- **v1.3 — 1 Oct 2026.** Added §9: rules for labelling the September 2026 flood on the same tiles, fixed before any 2026 scene was examined. Reason: the flood check detected a new event and its accuracy on Sentinel-1C/1D is unmeasured. Nothing about the 2020 labels changes.
 
 - v0.1 — 22 Sep 2026 — draft.
 - **v1.2 — 24 Sep 2026.** Added §5b: candidate polygons pre-drawn from NDWI for the labeller to review, with the anchoring risk and four required mitigations. Reason: digitising 20 tiles from scratch was not practical for the single available labeller, and an unlabelled Tier B is worth less than a reviewed one with its bias documented. Classes, evidence hierarchy, confidence scale, tiles and order unchanged; candidates carry confidence 1 and so are excluded from the primary score until a human confirms them.
