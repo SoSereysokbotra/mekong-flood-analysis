@@ -1,0 +1,110 @@
+{
+  "province": "Battambang",
+  "track": "99 ascending",
+  "date": "2026-09-28",
+  "platform": "sentinel-1c",
+  "before": "2026-09-10",
+  "before_platform": "sentinel-1d",
+  "gap_days": 18,
+  "coverage": 1.0,
+  "methods": {
+    "otsu_vh_global": {
+      "water_before_km2": 685.5,
+      "water_km2": 3034.9,
+      "flood_km2": 2374.8,
+      "flood_cropland_km2": 2011.3
+    },
+    "unet_vv_ce": {
+      "water_before_km2": 765.5,
+      "water_km2": 3251.7,
+      "flood_km2": 2499.7,
+      "flood_cropland_km2": 2004.1
+    },
+    "unet_vvvh_cropw": {
+      "water_before_km2": 1306.2,
+      "water_km2": 4797.7,
+      "flood_km2": 3508.4,
+      "flood_cropland_km2": 2881.2
+    }
+  },
+  "baseline": {
+    "2025": {
+      "before": "2025-09-08",
+      "date": "2025-09-26",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 1039.3,
+          "water_km2": 1637.7,
+          "flood_km2": 822.4,
+          "flood_cropland_km2": 606.4
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 916.0,
+          "water_km2": 1267.8,
+          "flood_km2": 585.1,
+          "flood_cropland_km2": 392.8
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 2134.7,
+          "water_km2": 3205.7,
+          "flood_km2": 1322.5,
+          "flood_cropland_km2": 1000.1
+        }
+      }
+    },
+    "2024": {
+      "before": "2024-09-13",
+      "date": "2024-09-25",
+      "coverage": 0.8301946560591179,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 582.7,
+          "water_km2": 758.0,
+          "flood_km2": 248.9,
+          "flood_cropland_km2": 103.6
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 627.7,
+          "water_km2": 870.4,
+          "flood_km2": 283.4,
+          "flood_cropland_km2": 69.0
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 892.1,
+          "water_km2": 1337.6,
+          "flood_km2": 481.7,
+          "flood_cropland_km2": 237.7
+        }
+      }
+    }
+  },
+  "verdicts": {
+    "otsu_vh_global": {
+      "flood_cropland_km2": 2011.3,
+      "baseline_median_km2": 355.0,
+      "ratio": 5.7,
+      "verdict": "UNUSUAL FLOODING"
+    },
+    "unet_vv_ce": {
+      "flood_cropland_km2": 2004.1,
+      "baseline_median_km2": 230.9,
+      "ratio": 8.7,
+      "verdict": "UNUSUAL FLOODING"
+    },
+    "unet_vvvh_cropw": {
+      "flood_cropland_km2": 2881.2,
+      "baseline_median_km2": 618.9,
+      "ratio": 4.7,
+      "verdict": "UNUSUAL FLOODING"
+    }
+  },
+  "verdict_rule": {
+    "ratio": 2.0,
+    "min_km2": 50.0
+  },
+  "untested_platforms": [
+    "sentinel-1c",
+    "sentinel-1d"
+  ]
+}
