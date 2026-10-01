@@ -1,11 +1,14 @@
-"""Is Banteay Meanchey flooded on a given date? One command, any date with radar.
+"""Is a Cambodian province flooded on a given date? One command, any date with radar.
 
-    python scripts/check_flood.py --date 2026-09-26
-    python scripts/check_flood.py                    # the latest radar pass
+    python scripts/check_flood.py --date 2026-09-26                 # Banteay Meanchey
+    python scripts/check_flood.py --province Battambang             # newest radar pass
+    python scripts/check_flood.py --province Battambang --track 99  # force a track
 
 What it does, in the same way as Level 4:
-  1. finds the Sentinel-1 track-164 pass on (or just before) --date, and the
-     pass --gap days earlier as "before" (default 18, as in the 2020 study);
+  1. finds the Sentinel-1 pass on (or just before) --date, and the pass --gap
+     days earlier as "before" (default 18, as in the 2020 study). Banteay
+     Meanchey uses track 164 descending, the study track. Any other province
+     uses the track that covers most of it in the 30 days before the date;
   2. runs the three methods on both, 20 m over the whole province;
      flood = water on the date that was not water before;
   3. compares with the same dates in the --years previous years, because in
@@ -22,8 +25,13 @@ The rule was not tuned on any event. The 2020 event is 6.0x its baseline.
 Downloads ~350 MB per radar pass (2 per year compared): run it on Colab
 (notebooks/colab_check_flood.ipynb), not on a slow home connection.
 
-Outputs: results/check/<date>/{report.md, summary.json, districts.csv,
-         map.png, flood_<method>.tif}
+Province borders: geoBoundaries KHM ADM1/ADM2 (Open Development Cambodia,
+2014, CC BY 4.0) in data/aoi/. Banteay Meanchey keeps its original files and
+caches, so its results are unchanged.
+
+Outputs: results/check/<date>/ for Banteay Meanchey,
+         results/check/<province>/<date>/ for any other province:
+         report.md, summary.json, districts.csv, map.png, flood_<method>.tif
 """
 from __future__ import annotations
 
@@ -37,16 +45,18 @@ import sys
 import geopandas as gpd
 import matplotlib
 import numpy as np
-from rasterio.features import rasterize
+import rasterio
+from rasterio.features import geometry_mask, rasterize
+from rasterio.warp import transform_geom
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.colors import ListedColormap  # noqa: E402
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from mfi import catalog, experiments, infer, rtc, strata  # noqa: E402
+from mfi import catalog, experiments, infer, io, rtc, strata  # noqa: E402
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from level4_cambodia import METHODS, ancillary, aoi_grid, s1_on_aoi, write_map  # noqa: E402
+from level4_cambodia import AOI_EPSG, CACHE, METHODS, RES_M, ancillary, aoi_grid, s1_on_aoi, write_map  # noqa: E402
 from level7_district_areas import DISTRICTS  # noqa: E402
 
 SEL = "unet_vvvh_cropw"
@@ -54,13 +64,143 @@ VERDICT_RATIO = 2.0
 VERDICT_MIN_KM2 = 50.0
 MIN_COVERAGE = 0.95        # below this the province is not fully seen; say so
 OUT = experiments.RESULTS / "check"
+ADM1 = catalog.DATA / "aoi" / "khm_adm1_geoboundaries.geojson"
+ADM2 = catalog.DATA / "aoi" / "khm_adm2_geoboundaries.geojson"
 NAMES = {"otsu_vh_global": "VH threshold", "unet_vv_ce": "U-Net VV only", "unet_vvvh_cropw": "U-Net VV+VH (selected)"}
 
 
+def key(name: str) -> str:
+    return "".join(c for c in name.lower() if c.isalpha()).replace("province", "")
+
+
+class Region:
+    """Where to look: border, districts, radar track, grid and caches.
+
+    Banteay Meanchey (the default) is the study province: original border,
+    track 164, the Level 4 grid and caches, so its numbers do not change.
+    """
+
+    def __init__(self, name: str | None, track: str | None, when: dt.date):
+        if name is None or key(name) in ("banteaymeanchey", "banteymeanchey"):
+            self.name, self.slug = "Banteay Meanchey", None
+            self.geom = catalog.aoi_geometry()
+            self.bbox = catalog.aoi_bbox()
+            self.districts = gpd.read_file(DISTRICTS)[["shapeName", "geometry"]]
+            self.track = (catalog.ANCHOR_REL_ORBIT, catalog.ANCHOR_ORBIT_STATE)
+        else:
+            prov = gpd.read_file(ADM1)
+            hit = prov[prov["shapeName"].map(key) == key(name)]
+            if hit.empty:
+                sys.exit(f"Unknown province '{name}'. Known: {', '.join(sorted(prov['shapeName']))}")
+            self.name = hit["shapeName"].iloc[0].replace(" Province", "")
+            self.slug = key(self.name)
+            shp = hit.geometry.iloc[0]
+            self.geom = shp.__geo_interface__
+            self.bbox = list(shp.bounds)
+            d = gpd.read_file(ADM2)
+            self.districts = d[d.geometry.representative_point().within(shp)][["shapeName", "geometry"]]
+            self.track = None
+        if track:      # e.g. "99", "99a" (ascending) or "164d" (descending)
+            n = int("".join(c for c in track if c.isdigit()))
+            t = track.lower()
+            self.track = (n, "ascending" if t.endswith("a") else "descending" if t.endswith("d") else None)
+        if self.track is None or self.track[1] is None:
+            self.track = self.best_track(when, only=self.track[0] if self.track else None)
+
+    def best_track(self, when: dt.date, only: int | None = None):
+        """The (orbit, direction) whose passes cover most of the province in the 30 days before `when`."""
+        from shapely.geometry import shape
+        from shapely.ops import unary_union
+
+        poly = shape(self.geom)
+        items = rtc.rtc_items(self.bbox, (when - dt.timedelta(days=30)).isoformat(), when.isoformat())
+        groups = {}
+        for i in items:
+            k = (i.properties["sat:relative_orbit"], i.properties["sat:orbit_state"])
+            if only is None or k[0] == only:
+                groups.setdefault((k, i.datetime.date()), []).append(shape(i.geometry))
+        cover = {}
+        for (k, _), gs in groups.items():
+            cover[k] = max(cover.get(k, 0.0), unary_union(gs).intersection(poly).area / poly.area)
+        if not cover:
+            sys.exit(f"No radar over {self.name} in the 30 days before {when}.")
+        best = max(cover, key=cover.get)
+        print("track coverage: " + ", ".join(f"{o}{st[0]} {100 * c:.0f}%" for (o, st), c in
+                                             sorted(cover.items(), key=lambda kv: -kv[1])), flush=True)
+        return best
+
+    @property
+    def track_label(self):
+        return f"{self.track[0]} {self.track[1]}"
+
+    def grid(self):
+        if self.slug is None:
+            return aoi_grid()
+        utm = transform_geom("EPSG:4326", f"EPSG:{AOI_EPSG}", self.geom)
+
+        def walk(c):
+            if isinstance(c[0], (int, float)):
+                yield c
+            else:
+                for x in c:
+                    yield from walk(x)
+
+        pts = list(walk(utm["coordinates"]))
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        left, bottom = np.floor(min(xs) / RES_M) * RES_M, np.floor(min(ys) / RES_M) * RES_M
+        right, top = np.ceil(max(xs) / RES_M) * RES_M, np.ceil(max(ys) / RES_M) * RES_M
+        w, h = int((right - left) / RES_M), int((top - bottom) / RES_M)
+        transform = rasterio.transform.from_origin(left, top, RES_M, RES_M)
+        g = io.Grid(rasterio.crs.CRS.from_epsg(AOI_EPSG), transform, h, w)
+        return g, ~geometry_mask([utm], (h, w), transform, invert=False)
+
+    @property
+    def cache(self):
+        return CACHE if self.slug is None else catalog.DATA / "interim" / "check" / self.slug
+
+    def ancillary(self, grid):
+        """(land type, slope) on the grid, cached."""
+        if self.slug is None:
+            land, _, slope = ancillary(grid)
+            return land, slope
+        p = self.cache / "ancillary.npz"
+        if p.exists():
+            z = np.load(p)
+            return z["land"], z["slope"]
+        print("  land cover and terrain (first run for this province)...", flush=True)
+        land = strata.land_type(io.worldcover_on_grid(grid, year=2020))
+        slope = np.nan_to_num(io.slope_deg(io.dem_on_grid(grid), grid), nan=0.0)
+        self.cache.mkdir(parents=True, exist_ok=True)
+        np.savez(p, land=land, slope=slope)
+        return land, slope
+
+    def s1(self, date: str, grid) -> np.ndarray:
+        if self.slug is None:
+            return s1_on_aoi(date, grid)
+        p = self.cache / f"s1_{date}_{self.track[0]}{self.track[1][0]}.npz"
+        if p.exists():
+            return np.load(p)["s1_db"]
+        items = rtc.rtc_items(self.bbox, date, date, rel_orbit=self.track[0], orbit_state=self.track[1])
+        if not items:
+            sys.exit(f"no RTC items for {date} on track {self.track_label}")
+        print(f"  {date}: {len(items)} RTC slice(s)", flush=True)
+        s1 = rtc.rtc_db_on_grid(items, grid)
+        self.cache.mkdir(parents=True, exist_ok=True)
+        np.savez(p, s1_db=s1.astype(np.float32))
+        return s1
+
+    @property
+    def out(self):
+        return OUT if self.slug is None else OUT / self.slug
+
+
+REGION: Region | None = None      # set in main(); the pass search and the radar reader use it
+
+
 def passes(start: dt.date, end: dt.date) -> dict[str, str]:
-    """{date: platform} of track-164 descending passes between start and end."""
-    items = rtc.rtc_items(catalog.aoi_bbox(), start.isoformat(), end.isoformat(),
-                          rel_orbit=catalog.ANCHOR_REL_ORBIT, orbit_state=catalog.ANCHOR_ORBIT_STATE)
+    """{date: platform} of the region's track passes between start and end."""
+    items = rtc.rtc_items(REGION.bbox, start.isoformat(), end.isoformat(),
+                          rel_orbit=REGION.track[0], orbit_state=REGION.track[1])
     return {i.datetime.date().isoformat(): i.properties.get("platform", "?").lower() for i in items}
 
 
@@ -94,12 +234,12 @@ class Predictor:
 
 
 def s1_retry(date, grid, tries: int = 3):
-    """s1_on_aoi, retried: on a slow link a remote tile sometimes arrives truncated."""
+    """The region's radar for a date, retried: on a slow link a remote tile sometimes arrives truncated."""
     import rasterio.errors
 
     for k in range(tries):
         try:
-            return s1_on_aoi(date, grid)
+            return REGION.s1(date, grid) if REGION is not None else s1_on_aoi(date, grid)
         except rasterio.errors.RasterioIOError as e:
             if k == tries - 1:
                 raise
@@ -128,6 +268,8 @@ def main():
     ap.add_argument("--date", help="YYYY-MM-DD; default: the latest radar pass")
     ap.add_argument("--gap", type=int, default=18, help="days between 'before' and the date (default 18)")
     ap.add_argument("--years", type=int, default=3, help="previous years to compare with (default 3; 0 = none)")
+    ap.add_argument("--province", help="default Banteay Meanchey; e.g. Battambang, 'Siem Reap'")
+    ap.add_argument("--track", help="force a track, e.g. 99, 99a (ascending) or 164d (descending)")
     a = ap.parse_args()
 
     today = dt.date.today()
@@ -135,6 +277,9 @@ def main():
         want = dt.datetime.strptime(a.date.strip(), "%Y-%m-%d").date() if a.date else today
     except ValueError:
         sys.exit(f"Cannot read the date '{a.date}'. Write it as year-month-day, e.g. 2026-09-29.")
+    global REGION
+    REGION = Region(a.province, a.track, min(want, today))
+    print(f"province {REGION.name}, track {REGION.track_label}", flush=True)
     if want > today:
         latest = pass_on_or_before(today)
         sys.exit(f"{want} is in the future (today is {today}). The tool can only look at radar images that "
@@ -143,7 +288,7 @@ def main():
                  f"or run again after {want}.")
     hit = pass_on_or_before(want)
     if hit is None:
-        sys.exit(f"No track-164 radar pass in the 13 days up to {want}. The archive may not have it yet "
+        sys.exit(f"No track-{REGION.track_label} radar pass in the 13 days up to {want}. The archive may not have it yet "
                  "(it usually lags 1-3 days).")
     date, platform = hit
     before = pass_nearest(dt.date.fromisoformat(date) - dt.timedelta(days=a.gap))
@@ -152,8 +297,8 @@ def main():
     pre_date, pre_platform = before
     print(f"date   {date} ({platform})\nbefore {pre_date} ({pre_platform})", flush=True)
 
-    grid, inside = aoi_grid()
-    land, _, slope = ancillary(grid)
+    grid, inside = REGION.grid()
+    land, slope = REGION.ancillary(grid)
     pred = Predictor(slope)
     now = flood_pair(pred, grid, inside, land, pre_date, date)
 
@@ -183,7 +328,7 @@ def main():
 
     # districts, selected model
     px = abs(grid.transform.a) ** 2 / 1e6
-    dg = gpd.read_file(DISTRICTS).to_crs(grid.crs).sort_values("shapeName").reset_index(drop=True)
+    dg = REGION.districts.to_crs(grid.crs).sort_values("shapeName").reset_index(drop=True)
     dist = rasterize(((g, i + 1) for i, g in enumerate(dg.geometry)), out_shape=inside.shape,
                      transform=grid.transform, dtype="uint8")
     flood_sel = now["maps"][SEL][0]
@@ -196,7 +341,7 @@ def main():
                         for m in METHODS}})
     rows.sort(key=lambda r: -r[f"flood_cropland_{SEL}"])
 
-    out = OUT / date
+    out = REGION.out / date
     out.mkdir(parents=True, exist_ok=True)
     for m in METHODS:
         f, w_pre = now["maps"][m]
@@ -206,7 +351,7 @@ def main():
         w.writeheader()
         w.writerows(rows)
     platforms = {platform, pre_platform}
-    summary = {"date": date, "platform": platform, "before": pre_date, "before_platform": pre_platform,
+    summary = {"province": REGION.name, "track": REGION.track_label, "date": date, "platform": platform, "before": pre_date, "before_platform": pre_platform,
                "gap_days": (d0 - p0).days, "coverage": round(now["coverage"], 3), "methods": now["methods"],
                "baseline": base, "verdicts": verdicts, "verdict_rule": {"ratio": VERDICT_RATIO,
                                                                        "min_km2": VERDICT_MIN_KM2},
@@ -228,7 +373,7 @@ def main():
         p = r.geometry.representative_point()
         ax.annotate(r["shapeName"], (p.x, p.y), ha="center", fontsize=8, color="#222")
     v = verdicts[SEL]["verdict"] or "no comparison"
-    ax.set_title(f"Banteay Meanchey, {date}: {v}\n"
+    ax.set_title(f"{REGION.name}, {date}: {v}\n"
                  f"dark blue = new water since {pre_date} · light blue = water already there", loc="left", fontsize=11)
     ax.set_axis_off()
     fig.tight_layout()
@@ -238,7 +383,7 @@ def main():
     # report
     s, vs = now["methods"][SEL], verdicts[SEL]
     agree = [NAMES[m] for m in METHODS if verdicts[m]["verdict"] == vs["verdict"]]
-    L = [f"# Flood check: Banteay Meanchey, {date}", "",
+    L = [f"# Flood check: {REGION.name}, {date}", "",
          f"## {vs['verdict'] or 'No comparison with previous years'}", ""]
     if vs["verdict"]:
         L.append(f"Flooded cropland: **{s['flood_cropland_km2']:,.0f} km²**. The same dates in the previous "
@@ -260,7 +405,7 @@ def main():
         sh = 100 * r[f"flood_cropland_{SEL}"] / r["cropland_km2"] if r["cropland_km2"] else 0
         L.append(f"| {r['district']} | {r[f'flood_cropland_{SEL}']:,.0f} | {'< 1' if sh < 1 else f'{sh:.0f}'} % |")
     L += ["", "## Read before using", "",
-          f"- Radar passes: {pre_date} (before) and {date}, track 164. "
+          f"- Radar passes: {pre_date} (before) and {date}, track {REGION.track_label}. "
           f"The radar saw {100 * now['coverage']:.0f} % of the province"
           + ("." if now["coverage"] >= MIN_COVERAGE else " — **part of the province is missing; totals are too low.**"),
           "- 'Flood' = water on the date that was not water on the 'before' date. Water that was already there "
@@ -269,6 +414,12 @@ def main():
           "the flood water people could see in photos, and 89 % of what it called flood was flood. Forest and "
           "grassland numbers are not reliable. Water hidden under tall rice was not checked. See "
           "`docs/level7_report.md`."]
+    if REGION.slug is not None:
+        L.append(f"- **{REGION.name} has never been checked against hand labels.** That accuracy was measured in "
+                 "Banteay Meanchey only; here the model is used as it is, without a score.")
+    if REGION.track[1] == "ascending":
+        L.append("- This track passes in the evening (~18:20 local). The Cambodia work used the morning pass, when "
+                 "water is usually calmer; wind can roughen water and hide it from radar.")
     if summary["untested_platforms"]:
         L.append(f"- These passes include {', '.join(summary['untested_platforms'])}. The models were trained and "
                  "tested on Sentinel-1A/1B only. The newer satellites carry the same radar design, but this project "
@@ -276,7 +427,7 @@ def main():
     L.append("")
     (out / "report.md").write_text("\n".join(L), encoding="utf-8")
     print("\n" + "\n".join(L[:6]))
-    print(f"\nwrote {out}")
+    print(f"\nwrote {out}\nRESULT_DIR={out}")
 
 
 if __name__ == "__main__":

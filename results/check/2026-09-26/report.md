@@ -28,7 +28,7 @@ Flooded cropland: **1,998 km²**. The same dates in the previous 3 years had a m
 
 ## Read before using
 
-- Radar passes: 2026-09-08 (before) and 2026-09-26, track 164. The radar saw 100 % of the province.
+- Radar passes: 2026-09-08 (before) and 2026-09-26, track 164 descending. The radar saw 100 % of the province.
 - 'Flood' = water on the date that was not water on the 'before' date. Water that was already there before is not counted, so a flood that started before the 'before' date is under-counted.
 - Accuracy was measured once, on the October 2020 flood: on cropland the selected model found 74 % of the flood water people could see in photos, and 89 % of what it called flood was flood. Forest and grassland numbers are not reliable. Water hidden under tall rice was not checked. See `docs/level7_report.md`.
 - These passes include sentinel-1c, sentinel-1d. The models were trained and tested on Sentinel-1A/1B only. The newer satellites carry the same radar design, but this project has not measured them, so treat the numbers with extra caution.

@@ -11,7 +11,8 @@ flooded vegetation *bright*, inverting the "dark = water" rule).
 ## Check any date: is the province flooded?
 
 ```
-python scripts/check_flood.py --date 2026-10-15     # or no --date for the newest radar image
+python scripts/check_flood.py --date 2026-10-15                      # Banteay Meanchey
+python scripts/check_flood.py --province Battambang                   # any province, newest image
 ```
 
 Finds the Sentinel-1 pass on that date and one 18 days before, maps new water with the three methods, compares with the same dates in the previous 3 years, and writes `results/check/<date>/report.md` + `map.png`. Each pass is ~350 MB, so on a slow connection use Colab: `notebooks/colab_check_flood.ipynb` (type the date, Run all). Reproduces the Level 4 numbers exactly for 14 Oct 2020.
