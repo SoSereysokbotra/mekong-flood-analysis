@@ -297,6 +297,24 @@ def apply(csv_path: str | None, labeller: str):
 
 # ---------------------------------------------------------------- score
 
+def scored_tiles() -> list[str]:
+    """Every tile `prepare` wrote an event scene for (it skips tiles <= 5 % clear)."""
+    with open(DIR / "optical_availability.csv") as f:
+        return sorted(r["tile_id"] for r in csv.DictReader(f) if float(r["event_clear_frac"]) > 0.05)
+
+
+def tiles_with_decisions() -> list[str]:
+    """Tiles where the labeller decided at least one candidate (review_summary.json from `apply`)."""
+    with open(DIR / "review_summary.json") as f:
+        per = json.load(f)["per_tile"]
+    return sorted(t for t, v in per.items() if v["water"] + v["not"] + v["unsure"] > 0)
+
+
+def pd_concat(a, b):
+    import pandas as pd
+    return gpd.GeoDataFrame(pd.concat([a, b]), crs=a.crs)
+
+
 def score():
     from check_flood import Predictor, s1_retry
     from level4_cambodia import METHODS, ancillary, aoi_grid
@@ -317,13 +335,19 @@ def score():
     tl = gpd.GeoDataFrame.from_features(tiles(), crs="EPSG:4326").to_crs(grid.crs)
     confirmed = labels[labels["confidence"] >= MIN_CONFIDENCE]
     ignore = labels[(labels["class"] == -1) | (labels["confidence"] < MIN_CONFIDENCE)]
-    reviewed = sorted(set(confirmed["tile_id"]) | set(ignore["tile_id"]))
+    unsure = labels[labels["note"].fillna("").str.startswith("labeller unsure")]
+    # Bug fix (6 Nov 2026, found in the Gemini review): the tile set used to be "tiles that have a row in the
+    # GeoPackage", which dropped clear tiles with no candidate (BMC_CROP_13, _19) and would drop a tile whose
+    # candidates were all rejected. The protocol gives every pixel of a tile a class, so the tile set is every
+    # tile `prepare` made an event scene for; cloud stays ignored, clear pixels outside a polygon are dry.
+    scored = scored_tiles()
+    decided = tiles_with_decisions()
     burn = lambda gs: (rasterize(((g, 1) for g in gs.geometry), out_shape=shape, transform=grid.transform,  # noqa: E731
                                  dtype="uint8").astype(bool) if len(gs) else np.zeros(shape, bool))
-    in_tiles, ign = burn(tl[tl["tile_id"].isin(reviewed)]), burn(ignore)
 
-    def label_for(classes):
-        lab = burn(confirmed[confirmed["class"].isin(classes)]).astype(np.int8)
+    def label_for(classes, tile_ids, water=confirmed, ign_polys=ignore):
+        in_tiles, ign = burn(tl[tl["tile_id"].isin(tile_ids)]), burn(ign_polys)
+        lab = burn(water[water["class"].isin(classes)] if classes else water).astype(np.int8)
         return np.where(in_tiles & ~ign, lab, -1).astype(np.int8)
 
     pred = Predictor(slope)
@@ -332,23 +356,44 @@ def score():
     for m in METHODS:
         with rasterio.open(mapdir / f"flood_{m}.tif") as src:
             preds["new_flood"][m] = src.read(1) == 1
-    labs = {"total_water": label_for([1, 2, 3]), "new_flood": label_for([1, 2])}
+    labs = {"total_water": label_for([1, 2, 3], scored), "new_flood": label_for([1, 2], scored)}
+    # Sensitivity runs (total water only; not the headline):
+    #  - unsure_as_water: protocol s5 "confidence 1 is scored in a sensitivity run"; unsure areas count as water
+    #  - decided_tiles_only: only the tiles where the labeller saw at least one candidate
+    sens = {"unsure_as_water": (label_for(None, scored, pd_concat(confirmed, unsure),
+                                          ignore.drop(unsure.index)), len(scored)),
+            "decided_tiles_only": (label_for([1, 2, 3], decided), len(decided))}
 
     px = abs(grid.transform.a) ** 2 / 1e6
     out = {"optical_date": sel["optical_date"], "radar_date": radar, "min_confidence": MIN_CONFIDENCE,
-           "tiles_reviewed": reviewed, "comparisons": {}}
-    for c, lab in labs.items():
-        out["comparisons"][c] = {"water_px": int((lab == 1).sum()), "dry_px": int((lab == 0).sum()),
-                                 "water_km2": round(float((lab == 1).sum() * px), 2), "methods": {}}
+           "tiles_scored": scored, "tiles_with_decisions": decided,
+           "tile_set_rule": "every tile with an event scene (optical_availability.csv event_clear_frac > 0.05)",
+           "comparisons": {}, "sensitivity": {}}
+
+    def block(lab, pr, run, comparison, n_tiles, note):
+        res = {"water_px": int((lab == 1).sum()), "dry_px": int((lab == 0).sum()),
+               "water_km2": round(float((lab == 1).sum() * px), 2), "n_tiles": n_tiles, "methods": {}}
         for m in METHODS:
-            r = metrics.Confusion().add(preds[c][m], lab, land).metrics()
-            out["comparisons"][c]["methods"][m] = {g: {k: r[g][k] for k in ("iou", "recall", "precision", "tp", "fp",
-                                                                             "fn", "n_pos")} for g in GROUPS}
-            experiments.log_row("check2026", f"tierb2026_{c}_{m}", "tierb2026", m,
-                                {"labels": "Tier B 2026 confirmed", "comparison": c, "radar": radar,
-                                 "optical": sel["optical_date"]}, len(reviewed), r, note=f"Tier B 2026, {c}")
+            r = metrics.Confusion().add(pr[m], lab, land).metrics()
+            res["methods"][m] = {g: {k: r[g][k] for k in ("iou", "recall", "precision", "tp", "fp", "fn", "n_pos")}
+                                 for g in GROUPS}
+            experiments.log_row("check2026", f"tierb2026fix_{run}_{m}", "tierb2026", m,
+                                {"labels": "Tier B 2026", "comparison": comparison, "run": run, "radar": radar,
+                                 "optical": sel["optical_date"]}, n_tiles, r, note=note)
+        return res
+
+    for c, lab in labs.items():
+        out["comparisons"][c] = block(lab, preds[c], c, c, len(scored), f"Tier B 2026, {c}, tile-set fix")
+    for s, (lab, n) in sens.items():
+        out["sensitivity"][s] = block(lab, preds["total_water"], s, "total_water", n, f"Tier B 2026 sensitivity, {s}")
     with open(mapdir / "tierb_scores.json", "w") as f:
         json.dump(out, f, indent=2)
+    for s in out["sensitivity"]:
+        k = out["sensitivity"][s]
+        print(f"\n-- sensitivity {s} ({k['n_tiles']} tiles, {k['water_km2']} km2 water)")
+        for m in METHODS:
+            q = k["methods"][m]["cropland"]
+            print(f"{m:17s} {q['iou']:8.3f} {q['recall']:8.3f} {q['precision']:9.3f} {q['n_pos']:7d}")
     for c in labs:
         print(f"\n== {c}  ({out['comparisons'][c]['water_km2']} km2 labelled water)")
         print(f"{'method':17s} {'crop IoU':>8s} {'crop rec':>8s} {'crop prec':>9s} {'n crop':>7s}")

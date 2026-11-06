@@ -59,7 +59,7 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
 
 ## Phase 0: close the open task (do this first, ~10 min)
 
-- [ ] Run `.venv\Scripts\python scripts/tierb2026.py status` for the September 2026 flood labels.
+- [x] Run `.venv\Scripts\python scripts/tierb2026.py status` for the September 2026 flood labels.
   The deadline in `data/labels/LABELLING_PROTOCOL.md` §9 was **31 Oct 2026**.
   - A date qualified → follow HANDOFF §2b (prepare → review → apply → score).
   - No date qualified → record "no usable optical" in the protocol log and close it. Do not loosen the rule.
@@ -69,7 +69,10 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
 - [x] Flood check for radar date 2 Oct 2026 on Colab → `results/check/2026-10-02/` (NORMAL FOR THE SEASON, 1.3×).
 - [x] `apply` → `score` → `docs/level4_tierb2026_scores.md`. Ranking holds (cropland IoU 0.529 vs 0.496),
   but precision fell for all methods (~0.54 vs ~0.85 in 2020); cause not separable.
-- [ ] Gemini review of Phase 0.
+- [x] Gemini review of Phase 0 (6 Nov 2026). Accepted: tile-set bug in `score()` (fixed), doc tile counts,
+  "dry = never reviewed" made prominent, protocol §5 sensitivity run added, this box. Headline unchanged.
+- [ ] Open: the 2020 scorer `scripts/level4_score_tierb.py` uses the same tile-set rule; BMC_CROP_18
+  (62 % clear in 2020) was not scored. Re-scoring the published 2020 result needs the user's decision.
 
 ## Phase 1: reliability, prove it works (~1 week)
 
