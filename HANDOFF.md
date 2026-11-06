@@ -65,6 +65,8 @@ Offered four options; they were about to choose when the session ended:
 
 **Option A chosen and done (29 Sep 2026): `docs/SUMMARY.md`.** Option C was attempted and found not feasible with free data (see §3). B (Level 7 report) is done: `docs/level7_report.md`. Remaining: D (Level 6 automation), or independent hidden-water evidence. Ask before starting either. Do not assume.
 
+**6 Nov 2026: the user chose to make the project production-grade and scale it to all of Cambodia (this is option D, widened).** The plan, with checkboxes showing where work stopped, is `docs/ROADMAP.md`. Start there: Phase 0 (close the 2026 labelling task, deadline 31 Oct passed), then tests before any refactoring.
+
 ## 5. How to work in this repo
 
 ### Rules that are not negotiable
