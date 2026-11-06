@@ -1,0 +1,5 @@
+{
+  "optical_date": "2026-10-04",
+  "radar_date": "2026-10-02",
+  "rule": ">= 10 tiles >= 50% clear, radar within 3 d"
+}
