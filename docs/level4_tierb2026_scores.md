@@ -57,7 +57,7 @@ almost all of it is off cropland.)
 The first scoring run (commit `1a9f64c`) picked the tiles to score as "tiles that have any polygon".
 That dropped BMC_CROP_13 and BMC_CROP_19 (clear, no candidate) and would have dropped any tile whose
 candidates were all rejected. Found in the Gemini review; fixed in `scripts/tierb2026.py` (`scored_tiles()`):
-the tile set is now every tile with an event scene. Effect: threshold cropland IoU 0.496 → 0.493,
+the tile set is now every tile whose event scene has data (`tiles_to_score()`, shared with the 2020 scorer, which gives the same 17 tiles and identical 2020 scores; see `docs/level4_tierb_scores.md` §6). Effect: threshold cropland IoU 0.496 → 0.493,
 selected model unchanged (0.529). The old rows stay in `results/experiment_log.csv` (`tierb2026_*`);
 the corrected ones are `tierb2026fix_*`.
 

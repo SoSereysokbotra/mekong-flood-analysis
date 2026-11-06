@@ -71,8 +71,8 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
   but precision fell for all methods (~0.54 vs ~0.85 in 2020); cause not separable.
 - [x] Gemini review of Phase 0 (6 Nov 2026). Accepted: tile-set bug in `score()` (fixed), doc tile counts,
   "dry = never reviewed" made prominent, protocol §5 sensitivity run added, this box. Headline unchanged.
-- [ ] Open: the 2020 scorer `scripts/level4_score_tierb.py` uses the same tile-set rule; BMC_CROP_18
-  (62 % clear in 2020) was not scored. Re-scoring the published 2020 result needs the user's decision.
+- [x] 2020 scorer re-checked (user chose to fix it): BMC_CROP_18's saved 2020 scene is 98 % no data, so it was
+  rightly excluded. Both scorers share `tiles_to_score()`; 2020 and 2026 scores identical after the change.
 
 ## Phase 1: reliability, prove it works (~1 week)
 

@@ -73,3 +73,18 @@ Before asking the labeller to add polygons for water under the canopy (§4, item
 - Very-high-resolution imagery on the event date.
 
 The gap in §3 item 1 is therefore recorded as **not closable with free data at this site**, not merely as "not yet done".
+
+## 6. Re-check of which tiles were scored (6 Nov 2026)
+
+The Gemini review of the 2026 scoring found that the scorer chose tiles as "tiles with any polygon", which
+would drop a clear tile with no candidate. The 2020 scorer used the same rule, and BMC_CROP_18 (listed as
+62 % clear on 20 Oct 2020) was not scored, so this result was re-checked.
+
+Finding: the 2020 event scene saved for BMC_CROP_18 is **98 % no data** (a swath edge, not the 62 % clear
+scene), so leaving it out was correct. BMC_CROP_08 and BMC_CROP_14 had no event scene. No scored tile
+contains no-data pixels.
+
+Both scorers now use one explicit rule, `tiles_to_score()` in `scripts/level4_score_tierb.py`: a tile is
+scored if its event scene has data on at least 5 % of the tile; a scored tile with more than 1 % no data
+stops the run instead of counting those pixels as dry. Re-run with this rule, the 2020 scores are
+**identical** (same 17 tiles; `results/level4/tierb_scores.csv` unchanged byte for byte). Nothing in §1-§5 changes.

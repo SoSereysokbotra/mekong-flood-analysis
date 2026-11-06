@@ -19,6 +19,11 @@
     "BMC_WATE_02",
     "BMC_WATE_15"
   ],
+  "tiles_not_scored": {
+    "BMC_CROP_08": "no event scene",
+    "BMC_CROP_14": "no event scene",
+    "BMC_CROP_18": "event scene 98% no data"
+  },
   "comparisons": {
     "total_water": {
       "water_px": 14542,

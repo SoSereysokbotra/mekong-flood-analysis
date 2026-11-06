@@ -12,7 +12,8 @@ Scoring the flood map against labels that include permanent water would count
 every reservoir as a miss.
 
 Scoring rules, from the protocol:
-  - only inside the labelling tiles that were reviewed
+  - only inside tiles with a usable event scene (tiles_to_score(); before 6 Nov 2026 this
+    was "tiles with any polygon" -- same 17 tiles for 2020, scores unchanged)
   - a pixel is WATER if it falls in a qualifying polygon with confidence >= 2
   - a pixel is IGNORED if it falls in a class -1 polygon (cloud, or the labeller
     was unsure), or in a candidate the labeller never reached
@@ -46,6 +47,43 @@ from level5_change_detection import PEAK  # noqa: E402
 GPKG = catalog.DATA / "labels" / "tierB_bmc_oct2020.gpkg"
 MIN_CONFIDENCE = 2
 GROUPS = ("all", "cropland", "vegetation", "open_water", "built")
+MIN_VALID, MAX_PARTIAL_NODATA = 0.05, 0.01
+
+
+def tiles_to_score(scl_paths: dict[str, pathlib.Path | None]) -> tuple[list[str], dict[str, str]]:
+    """Which tiles are scored, from the event scene's scene-classification band (SCL) per tile.
+
+    Rule (6 Nov 2026, replaces "tiles that have any polygon", which dropped clear tiles with no
+    candidate and would drop a tile whose candidates were all rejected):
+      - no event SCL, or under 5 % of it has data  -> not scored ("no usable optical")
+      - otherwise scored; every clear pixel outside a confirmed polygon is DRY, cloud is ignored
+      - a scored tile with more than 1 % no-data pixels stops the run: those pixels would be
+        counted as dry, so the case must be handled explicitly rather than silently.
+    Shared by the 2020 and 2026 scorers.
+    """
+    scored, skipped = [], {}
+    for tid, p in sorted(scl_paths.items()):
+        if p is None or not p.exists():
+            skipped[tid] = "no event scene"
+            continue
+        with rasterio.open(p) as s:
+            nodata = float((s.read(1) == 0).mean())
+        if 1 - nodata < MIN_VALID:
+            skipped[tid] = f"event scene {100 * nodata:.0f}% no data"
+        elif nodata > MAX_PARTIAL_NODATA:
+            sys.exit(f"{tid}: event scene is {100 * nodata:.1f}% no data; these pixels would score as dry. "
+                     "Mask them before scoring.")
+        else:
+            scored.append(tid)
+    return scored, skipped
+
+
+def scl_paths_2020() -> dict[str, pathlib.Path | None]:
+    with open(catalog.DATA / "labels" / "optical_availability.csv") as f:
+        avail = {r["tile_id"]: r for r in csv.DictReader(f)}
+    img = catalog.DATA / "labels" / "imagery"
+    return {t: (img / t / "optical" / f"scl_event_{r['event_date']}.tif") if r.get("event_date") else None
+            for t, r in avail.items()}
 
 
 def main():
@@ -56,8 +94,9 @@ def main():
 
     confirmed = labels[labels["confidence"] >= MIN_CONFIDENCE]
     ignore = labels[(labels["class"] == -1) | (labels["confidence"] < MIN_CONFIDENCE)]
-    reviewed = sorted(set(confirmed["tile_id"]) | set(ignore["tile_id"]))
-    print(f"{len(confirmed)} confirmed polygons, {len(ignore)} ignored areas, {len(reviewed)} tiles reviewed")
+    reviewed, skipped = tiles_to_score(scl_paths_2020())
+    print(f"{len(confirmed)} confirmed polygons, {len(ignore)} ignored areas, {len(reviewed)} tiles scored; "
+          f"not scored: {skipped}")
 
     shape = (grid.height, grid.width)
     px_km2 = (abs(grid.transform.a) ** 2) / 1e6
@@ -77,7 +116,8 @@ def main():
         "new_flood": (label_for([1, 2]), lambda m: MAPS / f"flood_{m}_{PEAK}{SUFFIX}.tif"),
     }
 
-    rows, out = [], {"min_confidence": MIN_CONFIDENCE, "tiles_reviewed": reviewed, "comparisons": {}}
+    rows, out = [], {"min_confidence": MIN_CONFIDENCE, "tiles_reviewed": reviewed, "tiles_not_scored": skipped,
+                     "comparisons": {}}
     for cname, (label, path_of) in comparisons.items():
         n_pos, n_neg = int((label == 1).sum()), int((label == 0).sum())
         out["comparisons"][cname] = {"water_px": n_pos, "dry_px": n_neg,

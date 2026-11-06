@@ -298,9 +298,15 @@ def apply(csv_path: str | None, labeller: str):
 # ---------------------------------------------------------------- score
 
 def scored_tiles() -> list[str]:
-    """Every tile `prepare` wrote an event scene for (it skips tiles <= 5 % clear)."""
-    with open(DIR / "optical_availability.csv") as f:
-        return sorted(r["tile_id"] for r in csv.DictReader(f) if float(r["event_clear_frac"]) > 0.05)
+    """Tiles with a usable event scene; same rule as the 2020 scorer (level4_score_tierb.tiles_to_score)."""
+    from level4_score_tierb import tiles_to_score
+
+    date = selected()["optical_date"]
+    scored, skipped = tiles_to_score({f["properties"]["tile_id"]: IMG / f["properties"]["tile_id"] / f"scl_event_{date}.tif"
+                                      for f in tiles()})
+    if skipped:
+        print(f"not scored: {skipped}")
+    return scored
 
 
 def tiles_with_decisions() -> list[str]:
