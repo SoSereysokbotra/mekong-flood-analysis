@@ -11,6 +11,38 @@ every 6 days, without anyone running it by hand).
 (882 / 1,131 / 1,218 km² for threshold / VV-only U-Net / selected model; source:
 `results/level4/`, `docs/level4_cambodia.md`). If a change moves them, the change is wrong.
 
+**Review rule (the user's instruction, 6 Nov 2026):** Gemini is the reviewer for this roadmap.
+When Claude finishes **each task** (each checkbox), Claude ends its message with a
+**ready-to-paste prompt for Gemini**. The user pastes it into Gemini and brings the answer back.
+Claude checks each Gemini finding on merit: fix it if it is right, explain if it is wrong.
+A task is ticked `[x]` only after the Gemini review is resolved.
+
+### Gemini prompt template
+
+Claude fills in the `<...>` parts. The prompt must name exact files and commits, so Gemini can
+read them on GitHub (https://github.com/SoSereysokbotra/mekong-flood-analysis); push first.
+
+```
+You are reviewing one task in my project "Mekong Flood Intelligence"
+(Sentinel-1 radar flood detection for Cambodia).
+Repo: https://github.com/SoSereysokbotra/mekong-flood-analysis  — commit <hash>
+
+Task: <roadmap phase and checkbox text>
+What was changed: <files changed, one line each>
+What it is supposed to do: <expected behaviour>
+How it was checked: <tests run, their output, numbers compared>
+
+Please check:
+1. Is the change correct? Look for bugs, wrong logic, edge cases.
+2. Does it break any project rule? (test only on hand labels; Cambodia/Mekong chips held out;
+   every number comes from a results file; the 14 Oct 2020 numbers 882 / 1,131 / 1,218 km²
+   must not change)
+3. <task-specific question>
+4. Anything missing that this task should have done?
+
+For each problem: file, line, what is wrong, how to fix. Say "no problems found" if none.
+```
+
 ---
 
 ## Where we start (checked 6 Nov 2026)
@@ -98,3 +130,4 @@ other provinces' numbers must be described as "the model says X km²", not "X km
   no AI attribution in commits).
 - Do the phases in order: tests before refactoring, so a refactor cannot silently change results.
 - The user decides when to start each phase. Ask, do not assume.
+- After every finished task: push, then give the Gemini review prompt (template at the top).
