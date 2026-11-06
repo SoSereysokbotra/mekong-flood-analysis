@@ -1,0 +1,135 @@
+{
+  "province": "Banteay Meanchey",
+  "track": "164 descending",
+  "date": "2026-10-02",
+  "platform": "sentinel-1c",
+  "before": "2026-09-14",
+  "before_platform": "sentinel-1d",
+  "gap_days": 18,
+  "coverage": 1.0,
+  "methods": {
+    "otsu_vh_global": {
+      "water_before_km2": 364.2,
+      "water_km2": 1740.2,
+      "flood_km2": 1427.4,
+      "flood_cropland_km2": 1335.6
+    },
+    "unet_vv_ce": {
+      "water_before_km2": 484.3,
+      "water_km2": 2078.8,
+      "flood_km2": 1619.3,
+      "flood_cropland_km2": 1450.1
+    },
+    "unet_vvvh_cropw": {
+      "water_before_km2": 1061.3,
+      "water_km2": 2298.3,
+      "flood_km2": 1366.9,
+      "flood_cropland_km2": 1233.5
+    }
+  },
+  "baseline": {
+    "2025": {
+      "before": "2025-09-12",
+      "date": "2025-09-30",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 688.4,
+          "water_km2": 1610.0,
+          "flood_km2": 1034.6,
+          "flood_cropland_km2": 985.3
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 876.4,
+          "water_km2": 1775.1,
+          "flood_km2": 990.6,
+          "flood_cropland_km2": 900.3
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 1619.5,
+          "water_km2": 2367.9,
+          "flood_km2": 1014.6,
+          "flood_cropland_km2": 938.2
+        }
+      }
+    },
+    "2024": {
+      "before": "2024-09-17",
+      "date": "2024-09-29",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 103.3,
+          "water_km2": 300.9,
+          "flood_km2": 238.2,
+          "flood_cropland_km2": 201.8
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 69.3,
+          "water_km2": 332.2,
+          "flood_km2": 274.3,
+          "flood_cropland_km2": 239.6
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 235.3,
+          "water_km2": 669.6,
+          "flood_km2": 509.6,
+          "flood_cropland_km2": 446.1
+        }
+      }
+    },
+    "2023": {
+      "before": "2023-09-11",
+      "date": "2023-10-05",
+      "coverage": 1.0,
+      "methods": {
+        "otsu_vh_global": {
+          "water_before_km2": 111.6,
+          "water_km2": 640.2,
+          "flood_km2": 563.0,
+          "flood_cropland_km2": 517.2
+        },
+        "unet_vv_ce": {
+          "water_before_km2": 80.3,
+          "water_km2": 849.2,
+          "flood_km2": 779.8,
+          "flood_cropland_km2": 712.1
+        },
+        "unet_vvvh_cropw": {
+          "water_before_km2": 213.4,
+          "water_km2": 1232.6,
+          "flood_km2": 1078.1,
+          "flood_cropland_km2": 989.3
+        }
+      }
+    }
+  },
+  "verdicts": {
+    "otsu_vh_global": {
+      "flood_cropland_km2": 1335.6,
+      "baseline_median_km2": 517.2,
+      "ratio": 2.6,
+      "verdict": "UNUSUAL FLOODING"
+    },
+    "unet_vv_ce": {
+      "flood_cropland_km2": 1450.1,
+      "baseline_median_km2": 712.1,
+      "ratio": 2.0,
+      "verdict": "UNUSUAL FLOODING"
+    },
+    "unet_vvvh_cropw": {
+      "flood_cropland_km2": 1233.5,
+      "baseline_median_km2": 938.2,
+      "ratio": 1.3,
+      "verdict": "NORMAL FOR THE SEASON"
+    }
+  },
+  "verdict_rule": {
+    "ratio": 2.0,
+    "min_km2": 50.0
+  },
+  "untested_platforms": [
+    "sentinel-1c",
+    "sentinel-1d"
+  ]
+}

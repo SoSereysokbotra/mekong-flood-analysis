@@ -1,0 +1,121 @@
+{
+  "labeller": "Sobotra",
+  "date": "2026-11-06",
+  "source_csv": "C:\\Users\\TUF\\OneDrive\\Pictures\\Downloads\\tierb_decisions_2026.csv",
+  "totals": {
+    "water": 34,
+    "not": 16,
+    "unsure": 16,
+    "untouched": 34
+  },
+  "per_tile": {
+    "BMC_CROP_01": {
+      "water": 1,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 0
+    },
+    "BMC_WATE_02": {
+      "water": 4,
+      "not": 1,
+      "unsure": 0,
+      "untouched": 0
+    },
+    "BMC_CROP_03": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 2
+    },
+    "BMC_CROP_04": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 2
+    },
+    "BMC_VEGE_05": {
+      "water": 5,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 3
+    },
+    "BMC_BUIL_06": {
+      "water": 0,
+      "not": 10,
+      "unsure": 7,
+      "untouched": 7
+    },
+    "BMC_CROP_07": {
+      "water": 3,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 2
+    },
+    "BMC_CROP_08": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 5
+    },
+    "BMC_CROP_09": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 7
+    },
+    "BMC_CROP_10": {
+      "water": 1,
+      "not": 0,
+      "unsure": 3,
+      "untouched": 0
+    },
+    "BMC_CROP_11": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 2
+    },
+    "BMC_VEGE_12": {
+      "water": 0,
+      "not": 0,
+      "unsure": 1,
+      "untouched": 0
+    },
+    "BMC_CROP_14": {
+      "water": 0,
+      "not": 3,
+      "unsure": 1,
+      "untouched": 1
+    },
+    "BMC_WATE_15": {
+      "water": 4,
+      "not": 1,
+      "unsure": 0,
+      "untouched": 0
+    },
+    "BMC_BUIL_16": {
+      "water": 13,
+      "not": 1,
+      "unsure": 1,
+      "untouched": 0
+    },
+    "BMC_VEGE_17": {
+      "water": 0,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 2
+    },
+    "BMC_CROP_18": {
+      "water": 1,
+      "not": 0,
+      "unsure": 0,
+      "untouched": 0
+    },
+    "BMC_BUIL_20": {
+      "water": 2,
+      "not": 0,
+      "unsure": 3,
+      "untouched": 1
+    }
+  }
+}

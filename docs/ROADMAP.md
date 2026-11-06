@@ -65,10 +65,10 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
   - No date qualified → record "no usable optical" in the protocol log and close it. Do not loosen the rule.
   - **Result (6 Nov 2026): a date qualified.** Optical 4 Oct 2026 (17 of 20 tiles clear), radar 2 Oct 2026.
 - [x] `prepare`: 66 water candidates + 34 cloud areas → `data/labels/tierB_bmc_sep2026.gpkg`, review page built.
-- [ ] Sobotra reviews `data/labels/2026/review.html`, downloads `tierb_decisions_2026.csv`.
-- [ ] Flood check for radar date 2 Oct 2026 on Colab (`notebooks/colab_check_flood.ipynb`, DATE `2026-10-02`),
-  copy `MyDrive/mfi/check/2026-10-02/` into `results/check/2026-10-02/`.
-- [ ] `apply` → `score` → write up the 2026 scores (first accuracy measurement on Sentinel-1C/1D).
+- [x] Sobotra reviews `data/labels/2026/review.html`: 34 water, 16 not, 16 unsure.
+- [x] Flood check for radar date 2 Oct 2026 on Colab → `results/check/2026-10-02/` (NORMAL FOR THE SEASON, 1.3×).
+- [x] `apply` → `score` → `docs/level4_tierb2026_scores.md`. Ranking holds (cropland IoU 0.529 vs 0.496),
+  but precision fell for all methods (~0.54 vs ~0.85 in 2020); cause not separable.
 - [ ] Gemini review of Phase 0.
 
 ## Phase 1: reliability, prove it works (~1 week)
