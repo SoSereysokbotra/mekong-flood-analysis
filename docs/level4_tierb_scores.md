@@ -88,3 +88,18 @@ Both scorers now use one explicit rule, `tiles_to_score()` in `scripts/level4_sc
 scored if its event scene has data on at least 5 % of the tile; a scored tile with more than 1 % no data
 stops the run instead of counting those pixels as dry. Re-run with this rule, the 2020 scores are
 **identical** (same 17 tiles; `results/level4/tierb_scores.csv` unchanged byte for byte). Nothing in §1-§5 changes.
+
+**Sensitivity to the cloud mask (Gemini review, 8 Nov 2026).** The protocol's mask removes cloud and cloud
+shadow only (SCL 3/8/9/10/11). Pixels Sen2Cor did not classify confidently therefore count as dry: in 2020,
+SCL 2 "dark area" is 4.8 % and SCL 7 "unclassified" 19.7 % of the scored tiles. Re-scored with them ignored
+(`sensitivity` in `results/level4/tierb_scores.json`), cropland total water, IoU / recall / precision:
+
+| Run | VH threshold | U-Net VV | U-Net VV+VH (selected) |
+| --- | --- | --- | --- |
+| Headline (protocol mask) | 0.498 / 0.553 / 0.835 | 0.612 / 0.669 / 0.879 | 0.713 / 0.801 / 0.867 |
+| Also ignore SCL 1, 2 | 0.533 / 0.588 / 0.850 | 0.618 / 0.673 / 0.882 | 0.730 / 0.822 / 0.867 |
+| Also ignore SCL 1, 2, 7 | 0.565 / 0.608 / 0.887 | 0.654 / 0.694 / 0.919 | 0.765 / 0.824 / 0.914 |
+
+Every method scores higher and the ranking does not change, so the headline is the conservative figure.
+The headline stays on the protocol mask, which was fixed before labelling. The no-data tolerance is now 0:
+any no-data pixel in a scored tile stops the run.

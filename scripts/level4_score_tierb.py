@@ -47,7 +47,24 @@ from level5_change_detection import PEAK  # noqa: E402
 GPKG = catalog.DATA / "labels" / "tierB_bmc_oct2020.gpkg"
 MIN_CONFIDENCE = 2
 GROUPS = ("all", "cropland", "vegetation", "open_water", "built")
-MIN_VALID, MAX_PARTIAL_NODATA = 0.05, 0.01
+MIN_VALID, MAX_PARTIAL_NODATA = 0.05, 0.0   # any no-data pixel in a scored tile stops the run (Gemini review)
+# Sensitivity only (the protocol's mask is cloud + shadow, SCL 3/8/9/10/11): also ignore pixels Sen2Cor
+# did not classify confidently. 1 saturated/defective, 2 dark area, 7 unclassified.
+SCL_SENSITIVITY = {"ignore_scl_1_2": (1, 2), "ignore_scl_1_2_7": (1, 2, 7)}
+
+
+def scl_mask(scl_paths: dict, tile_ids: list[str], grid, classes) -> np.ndarray:
+    """True on the scoring grid where a tile's event SCL is in `classes` (nearest resampling)."""
+    from rasterio.warp import Resampling, reproject
+
+    out = np.zeros((grid.height, grid.width), bool)
+    for tid in tile_ids:
+        with rasterio.open(scl_paths[tid]) as s:
+            dst = np.full(out.shape, 255, np.uint8)
+            reproject(s.read(1), dst, src_transform=s.transform, src_crs=s.crs, dst_transform=grid.transform,
+                      dst_crs=grid.crs, resampling=Resampling.nearest, dst_nodata=255)
+        out |= np.isin(dst, classes)
+    return out
 
 
 def tiles_to_score(scl_paths: dict[str, pathlib.Path | None]) -> tuple[list[str], dict[str, str]]:
@@ -137,6 +154,24 @@ def main():
                                 {"labels": "Tier B confirmed", "comparison": cname,
                                  "min_confidence": MIN_CONFIDENCE, "date": PEAK},
                                 len(reviewed), m, note=f"Tier B hand labels, {cname}")
+
+    # sensitivity: total water with poorly classified SCL pixels ignored instead of counted as dry
+    out["sensitivity"] = {}
+    base = comparisons["total_water"][0]
+    for name, classes in SCL_SENSITIVITY.items():
+        label = np.where(scl_mask(scl_paths_2020(), reviewed, grid, classes), -1, base).astype(np.int8)
+        res = {"scl_classes_ignored": list(classes), "water_px": int((label == 1).sum()),
+               "dry_px": int((label == 0).sum()), "methods": {}}
+        for method in METHODS:
+            with rasterio.open(comparisons["total_water"][1](method)) as src:
+                pred = src.read(1) == 1
+            m = metrics.Confusion().add(pred, label, land).metrics()
+            res["methods"][method] = {g: {k: m[g][k] for k in ("iou", "recall", "precision", "tp", "fp", "fn",
+                                                               "n_pos")} for g in GROUPS}
+            experiments.log_row("level4", f"tierb_sens_{name}_{method}", "tierb", method,
+                                {"labels": "Tier B confirmed", "comparison": "total_water", "sensitivity": name,
+                                 "date": PEAK}, len(reviewed), m, note=f"Tier B sensitivity, {name}")
+        out["sensitivity"][name] = res
 
     d = experiments.RESULTS / "level4"
     with open(d / f"tierb_scores{SUFFIX}.csv", "w", newline="") as f:

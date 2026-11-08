@@ -301,12 +301,15 @@ def scored_tiles() -> list[str]:
     """Tiles with a usable event scene; same rule as the 2020 scorer (level4_score_tierb.tiles_to_score)."""
     from level4_score_tierb import tiles_to_score
 
-    date = selected()["optical_date"]
-    scored, skipped = tiles_to_score({f["properties"]["tile_id"]: IMG / f["properties"]["tile_id"] / f"scl_event_{date}.tif"
-                                      for f in tiles()})
+    scored, skipped = tiles_to_score(scl_paths())
     if skipped:
         print(f"not scored: {skipped}")
     return scored
+
+
+def scl_paths() -> dict[str, pathlib.Path]:
+    date = selected()["optical_date"]
+    return {f["properties"]["tile_id"]: IMG / f["properties"]["tile_id"] / f"scl_event_{date}.tif" for f in tiles()}
 
 
 def tiles_with_decisions() -> list[str]:
@@ -369,6 +372,10 @@ def score():
     sens = {"unsure_as_water": (label_for(None, scored, pd_concat(confirmed, unsure),
                                           ignore.drop(unsure.index)), len(scored)),
             "decided_tiles_only": (label_for([1, 2, 3], decided), len(decided))}
+    from level4_score_tierb import SCL_SENSITIVITY, scl_mask
+    for name, classes in SCL_SENSITIVITY.items():
+        sens[name] = (np.where(scl_mask(scl_paths(), scored, grid, classes), -1, labs["total_water"]).astype(np.int8),
+                      len(scored))
 
     px = abs(grid.transform.a) ** 2 / 1e6
     out = {"optical_date": sel["optical_date"], "radar_date": radar, "min_confidence": MIN_CONFIDENCE,

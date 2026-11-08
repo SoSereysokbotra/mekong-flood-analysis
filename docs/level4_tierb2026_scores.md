@@ -48,8 +48,10 @@ Same comparison in 2020 (Sentinel-1A, 14 Oct 2020):
 | Headline (above) | 20 | 0.529 / 0.975 / 0.536 | 0.493 / 0.853 / 0.539 |
 | "Unsure" counted as water (protocol §5) | 20 | 0.529 / 0.971 / 0.537 | 0.495 / 0.853 / 0.541 |
 | Only the 12 tiles with a decision | 12 | 0.530 / 0.975 / 0.537 | 0.505 / 0.853 / 0.553 |
+| Also ignore SCL 1, 2 (defective, dark area) | 20 | 0.529 / 0.975 / 0.536 | 0.493 / 0.853 / 0.539 |
+| Also ignore SCL 1, 2, 7 (+ unclassified) | 20 | 0.537 / 0.975 / 0.545 | 0.513 / 0.879 / 0.552 |
 
-The cropland result does not depend on these choices. (The unsure areas add 3.95 km² of water, but
+The cropland result does not depend on these choices. The 2026 scene has no SCL 2 pixels and 4 % SCL 7, so poorly classified optical pixels do not explain the low 2026 precision (in 2020 the same check raises every score; `docs/level4_tierb_scores.md` §6). (The unsure areas add 3.95 km² of water, but
 almost all of it is off cropland.)
 
 ### Correction made after review
