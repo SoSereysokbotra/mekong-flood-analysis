@@ -49,7 +49,7 @@ def selection_score(m: dict) -> tuple[float, float]:
 def evaluate(model, chips, channels, norm, device, save_pred_dir: pathlib.Path | None = None):
     """Full-chip evaluation; returns (metrics dict, per-chip rows)."""
     import rasterio
-    from mfi import io
+
 
     model.eval()
     ds = data.ChipDataset(chips, channels, norm, crop=None, augment=False)

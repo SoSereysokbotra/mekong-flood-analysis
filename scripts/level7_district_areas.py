@@ -25,6 +25,7 @@ from rasterio.features import rasterize
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments, strata  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level4_cambodia import CACHE, MAPS, METHODS, SUFFIX, aoi_grid  # noqa: E402
 from level5_change_detection import PEAK, POST  # noqa: E402

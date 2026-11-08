@@ -38,6 +38,8 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments, io, metrics, rtc, strata  # noqa: E402
+from mfi.tierb import SCL_SENSITIVITY, scl_mask, tiles_to_score  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from fetch_tier_b_imagery import clear_fraction, tile_grid, write  # noqa: E402
 
@@ -156,9 +158,7 @@ def scene_layers(item, grid, d: pathlib.Path, role: str, date: str):
 
 
 def prepare():
-    import pandas as pd
-
-    from make_label_candidates import MIN_PIXELS, NDWI_WATER, SCL_BAD, clean, polygonise
+    from make_label_candidates import NDWI_WATER, SCL_BAD, clean, polygonise
 
     sel = selected()
     date = sel["optical_date"]
@@ -299,8 +299,6 @@ def apply(csv_path: str | None, labeller: str):
 
 def scored_tiles() -> list[str]:
     """Tiles with a usable event scene; same rule as the 2020 scorer (level4_score_tierb.tiles_to_score)."""
-    from level4_score_tierb import tiles_to_score
-
     scored, skipped = tiles_to_score(scl_paths())
     if skipped:
         print(f"not scored: {skipped}")
@@ -372,7 +370,6 @@ def score():
     sens = {"unsure_as_water": (label_for(None, scored, pd_concat(confirmed, unsure),
                                           ignore.drop(unsure.index)), len(scored)),
             "decided_tiles_only": (label_for([1, 2, 3], decided), len(decided))}
-    from level4_score_tierb import SCL_SENSITIVITY, scl_mask
     for name, classes in SCL_SENSITIVITY.items():
         sens[name] = (np.where(scl_mask(scl_paths(), scored, grid, classes), -1, labs["total_water"]).astype(np.int8),
                       len(scored))

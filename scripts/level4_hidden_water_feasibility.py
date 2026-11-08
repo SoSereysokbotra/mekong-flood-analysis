@@ -38,6 +38,7 @@ from scipy import ndimage
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments, io  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from fetch_tier_b_imagery import OUT, tile_grid  # noqa: E402
 from make_label_candidates import SCL_BAD, scl_on_tile  # noqa: E402

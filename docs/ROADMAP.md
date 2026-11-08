@@ -76,14 +76,19 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
 
 ## Phase 1: reliability, prove it works (~1 week)
 
-- [ ] Create `tests/` and add `pytest` to the dev setup.
-- [ ] Unit tests for `src/mfi/metrics.py` (IoU, recall, precision on tiny hand-made arrays).
-- [ ] Unit tests for `src/mfi/strata.py` and `src/mfi/threshold.py`.
-- [ ] **Golden test:** `check_flood` on 14 Oct 2020 reproduces 882 / 1,131 / 1,218 km².
-  It is slow and needs downloads, so mark it `@pytest.mark.slow` and run it on Colab or from cache.
-- [ ] Test that `catalog.s1f11_split()` never puts a Mekong chip in train or valid.
-- [ ] Add `ruff` (linter) and fix what it finds.
-- [ ] GitHub Actions workflow `.github/workflows/ci.yml`: run ruff + fast tests on every push.
+- [x] Create `tests/` and add `pytest` to the dev setup (`[tool.pytest.ini_options]` in `pyproject.toml`).
+- [x] Unit tests for `src/mfi/metrics.py` (`tests/test_metrics.py`, 8 tests).
+- [x] Unit tests for `src/mfi/strata.py` and `src/mfi/threshold.py` (`test_strata.py`, `test_threshold.py`).
+- [x] **Golden test** (`tests/test_golden_2020.py`, marked `slow`): re-runs the three methods on the cached
+  26 Sep / 14 Oct 2020 radar and matches `results/level4/change_detection.json` (882 / 1,131 / 1,218 km²)
+  to 0.1 km². Passes locally (8 Nov 2026); skips itself where the cache or checkpoints are missing.
+- [x] Split tests (`test_split.py`): rule on a fake list, plus real data (no Mekong outside test; sizes
+  301 / 48 / 30 under v1.1, Paraguay has no RTC).
+- [x] Tier B tile rule moved to `src/mfi/tierb.py` and tested (`test_tierb.py`).
+- [x] `ruff` added with project settings; 198 findings fixed or checked. 7 × B023 checked by hand
+  (closures called in the same loop pass, harmless) and allowed per file. Long lines (E501) left for Phase 2.
+- [x] GitHub Actions `.github/workflows/ci.yml`: ruff + fast tests on every push, without PyTorch.
+- [ ] Gemini review of Phase 1.
 
 ## Phase 2: maintainability, clean structure (~1–2 weeks)
 

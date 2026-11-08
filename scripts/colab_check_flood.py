@@ -21,6 +21,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from colab_level4 import DRIVE, ensure_checkpoints  # noqa: E402
 

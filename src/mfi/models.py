@@ -20,7 +20,6 @@ import torch.nn.functional as F
 from . import strata
 from .data import IGNORE
 
-
 # --- models -----------------------------------------------------------------
 
 def _block(i, o):

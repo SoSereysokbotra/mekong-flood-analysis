@@ -40,6 +40,8 @@ from rasterio.features import rasterize
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments, metrics  # noqa: E402
+from mfi.tierb import SCL_SENSITIVITY, scl_mask, tiles_to_score  # noqa: E402,F401
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level4_cambodia import CACHE, MAPS, METHODS, SUFFIX, aoi_grid  # noqa: E402
 from level5_change_detection import PEAK  # noqa: E402
@@ -47,54 +49,6 @@ from level5_change_detection import PEAK  # noqa: E402
 GPKG = catalog.DATA / "labels" / "tierB_bmc_oct2020.gpkg"
 MIN_CONFIDENCE = 2
 GROUPS = ("all", "cropland", "vegetation", "open_water", "built")
-MIN_VALID, MAX_PARTIAL_NODATA = 0.05, 0.0   # any no-data pixel in a scored tile stops the run (Gemini review)
-# Sensitivity only (the protocol's mask is cloud + shadow, SCL 3/8/9/10/11): also ignore pixels Sen2Cor
-# did not classify confidently. 1 saturated/defective, 2 dark area, 7 unclassified.
-SCL_SENSITIVITY = {"ignore_scl_1_2": (1, 2), "ignore_scl_1_2_7": (1, 2, 7)}
-
-
-def scl_mask(scl_paths: dict, tile_ids: list[str], grid, classes) -> np.ndarray:
-    """True on the scoring grid where a tile's event SCL is in `classes` (nearest resampling)."""
-    from rasterio.warp import Resampling, reproject
-
-    out = np.zeros((grid.height, grid.width), bool)
-    for tid in tile_ids:
-        with rasterio.open(scl_paths[tid]) as s:
-            dst = np.full(out.shape, 255, np.uint8)
-            reproject(s.read(1), dst, src_transform=s.transform, src_crs=s.crs, dst_transform=grid.transform,
-                      dst_crs=grid.crs, resampling=Resampling.nearest, dst_nodata=255)
-        out |= np.isin(dst, classes)
-    return out
-
-
-def tiles_to_score(scl_paths: dict[str, pathlib.Path | None]) -> tuple[list[str], dict[str, str]]:
-    """Which tiles are scored, from the event scene's scene-classification band (SCL) per tile.
-
-    Rule (6 Nov 2026, replaces "tiles that have any polygon", which dropped clear tiles with no
-    candidate and would drop a tile whose candidates were all rejected):
-      - no event SCL, or under 5 % of it has data  -> not scored ("no usable optical")
-      - otherwise scored; every clear pixel outside a confirmed polygon is DRY, cloud is ignored
-      - a scored tile with more than 1 % no-data pixels stops the run: those pixels would be
-        counted as dry, so the case must be handled explicitly rather than silently.
-    Shared by the 2020 and 2026 scorers.
-    """
-    scored, skipped = [], {}
-    for tid, p in sorted(scl_paths.items()):
-        if p is None or not p.exists():
-            skipped[tid] = "no event scene"
-            continue
-        with rasterio.open(p) as s:
-            nodata = float((s.read(1) == 0).mean())
-        if 1 - nodata < MIN_VALID:
-            skipped[tid] = f"event scene {100 * nodata:.0f}% no data"
-        elif nodata > MAX_PARTIAL_NODATA:
-            sys.exit(f"{tid}: event scene is {100 * nodata:.1f}% no data; these pixels would score as dry. "
-                     "Mask them before scoring.")
-        else:
-            scored.append(tid)
-    return scored, skipped
-
-
 def scl_paths_2020() -> dict[str, pathlib.Path | None]:
     with open(catalog.DATA / "labels" / "optical_availability.csv") as f:
         avail = {r["tile_id"]: r for r in csv.DictReader(f)}

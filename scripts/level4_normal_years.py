@@ -32,6 +32,7 @@ import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import experiments, infer, strata  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level4_cambodia import METHODS, SUFFIX, ancillary, aoi_grid, s1_on_aoi  # noqa: E402
 

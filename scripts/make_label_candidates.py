@@ -41,6 +41,7 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, io, strata  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from fetch_tier_b_imagery import OUT, tile_grid  # noqa: E402
 

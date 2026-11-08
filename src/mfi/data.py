@@ -11,6 +11,7 @@ Reads from disk per item (memory stays flat); Windows -> num_workers=0.
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 
 import numpy as np
@@ -28,8 +29,6 @@ CHANNELS = ("vv", "vh", "ratio", "slope")
 # Sen1Floods11 chips as shipped (sigma0, GEE); v1.1 uses Planetary Computer RTC
 # (gamma0) for every split so training and Cambodia share one pipeline.
 # MFI_PIPELINE=sigma0 reproduces v1.0 results.
-import os
-
 PIPELINE = os.environ.get("MFI_PIPELINE", "rtc")
 CACHE_SIGMA0 = catalog.DATA / "interim" / "chip_cache"
 CACHE_RTC = catalog.DATA / "interim" / "chip_cache_rtc"

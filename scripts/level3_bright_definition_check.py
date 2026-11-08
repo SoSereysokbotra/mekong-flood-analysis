@@ -24,7 +24,7 @@ import rasterio
 from tqdm import tqdm
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from mfi import catalog, data, experiments, metrics, strata  # noqa: E402
+from mfi import catalog, data, experiments, metrics  # noqa: E402
 
 RUNS = ["unet_vvvh_cropw", "unet_vv_ce", "pixel_logreg", "pixel_mlp"]
 

@@ -26,6 +26,16 @@ python -m venv .venv
 .venv\Scripts\python scripts/download_sen1floods11.py      # ~1.7 GB hand-labelled benchmark
 ```
 
+## Tests
+
+```
+.venv\Scripts\python -m pytest            # all tests, incl. the golden 2020 test (needs the local radar cache)
+.venv\Scripts\python -m ruff check src tests scripts
+```
+
+The same checks run on GitHub on every push (`.github/workflows/ci.yml`); there the golden test
+skips itself because the radar cache and the models are not in the repo.
+
 ## Layout
 
 ```

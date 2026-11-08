@@ -8,13 +8,15 @@ import pathlib
 import sys
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
 import numpy as np
+from matplotlib.colors import ListedColormap
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from mfi import catalog, io, strata
+from mfi import io, strata
+
 
 def main():
     # Find a training chip from India or Pakistan with substantial flooded cropland

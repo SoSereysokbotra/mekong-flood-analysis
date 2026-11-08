@@ -82,8 +82,6 @@ def _mosaic_via_overviews(items, asset: str, grid: io.Grid) -> np.ndarray:
       footprint for every slice).
     """
     import rasterio
-    from rasterio.vrt import WarpedVRT
-    from rasterio.warp import transform_bounds
     from rasterio.windows import Window, from_bounds
 
     out = np.full((grid.height, grid.width), np.nan, np.float32)

@@ -7,12 +7,12 @@ import csv
 import json
 import pathlib
 import sys
-from collections import defaultdict
-from PIL import Image
+
 import numpy as np
+from PIL import Image
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from mfi import catalog, io, strata
+from mfi import catalog, io
 
 ROOT = catalog.ROOT
 ASSETS_DIR = ROOT / "docs" / "gallery_assets"
@@ -49,50 +49,50 @@ def create_side_by_side(rgb: np.ndarray, radar_gray: np.ndarray, overlay: np.nda
 
 def main():
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     with open(ROOT / "docs" / "level0_inventory.csv", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-        
+
     print(f"Processing ALL {len(rows)} chips across the entire dataset...")
-    
+
     chips_data = []
-    
+
     for i, meta in enumerate(rows):
         chip_id = meta["chip"]
         ev = meta["event"]
         split = meta["split"]
-        
+
         comp_path = ASSETS_DIR / f"{chip_id}_comp.jpg"
         rgb_path = ASSETS_DIR / f"{chip_id}_rgb.jpg"
         radar_path = ASSETS_DIR / f"{chip_id}_radar.jpg"
         overlay_path = ASSETS_DIR / f"{chip_id}_overlay.jpg"
-        
+
         # Check if assets already exist to speed up re-runs
         if not (comp_path.exists() and rgb_path.exists() and radar_path.exists() and overlay_path.exists()):
             try:
                 s1, label, grid = io.read_s1f11_chip(chip_id)
                 s2 = io.read_s1f11_s2(chip_id)
-                
+
                 rgb = normalize_s2_rgb(s2)
                 radar = normalize_radar_vv(s1[0])
                 overlay = create_overlay(rgb, label)
                 composite = create_side_by_side(rgb, radar, overlay)
-                
+
                 im_comp = Image.fromarray(composite).resize((768, 256), Image.Resampling.BILINEAR)
                 im_comp.save(comp_path, quality=80)
-                
+
                 Image.fromarray(rgb).save(rgb_path, quality=85)
                 Image.fromarray(radar).save(radar_path, quality=85)
                 Image.fromarray(overlay).save(overlay_path, quality=85)
             except Exception as e:
                 print(f"Error on {chip_id}: {e}")
                 continue
-                
+
         f_crop = int(meta["flood_cropland"])
         f_water = int(meta["flood_open_water"])
         f_veg = int(meta["flood_vegetation"])
         f_total = f_crop + f_water + f_veg + int(meta["flood_built"]) + int(meta["flood_other"])
-        
+
         chips_data.append({
             "id": chip_id,
             "event": ev,
@@ -108,11 +108,11 @@ def main():
         })
         if (i + 1) % 50 == 0 or (i + 1) == len(rows):
             print(f"Progress: [{i+1}/{len(rows)}] chips ready")
-            
+
     html_content = generate_html(chips_data)
     with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(html_content)
-        
+
     print(f"\nALL DONE! Complete gallery with {len(chips_data)} chips written to: {HTML_FILE}")
 
 def generate_html(chips_data):
@@ -398,7 +398,7 @@ def generate_html(chips_data):
         function renderCards() {{
             const grid = document.getElementById('cardGrid');
             grid.innerHTML = '';
-            
+
             const filtered = CHIPS.filter(c => {{
                 const matchSplit = currentSplit === 'ALL' || c.split === currentSplit;
                 const matchCountry = currentCountry === 'ALL' || c.event === currentCountry;
@@ -407,16 +407,16 @@ def generate_html(chips_data):
             }});
 
             document.getElementById('counterText').textContent = `Showing ${{filtered.length}} of ${{CHIPS.length}} chips`;
-            
+
             // Render first 100 instantly, then rest on demand or lazy
             filtered.forEach(chip => {{
                 let imgSrc = chip.comp_url;
                 if (currentView === 'rgb') imgSrc = chip.rgb_url;
                 if (currentView === 'radar') imgSrc = chip.radar_url;
                 if (currentView === 'overlay') imgSrc = chip.overlay_url;
-                
+
                 const badgeClass = chip.split === 'train' ? 'badge-train' : (chip.split === 'test' ? 'badge-test' : 'badge-valid');
-                
+
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `

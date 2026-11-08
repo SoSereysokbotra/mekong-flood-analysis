@@ -7,7 +7,6 @@ whose note says it is a backfill.
 import pathlib
 import sys
 
-import numpy as np
 import rasterio
 from tqdm import tqdm
 

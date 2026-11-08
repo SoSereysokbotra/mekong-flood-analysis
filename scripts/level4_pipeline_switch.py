@@ -29,7 +29,7 @@ import rasterio
 from tqdm import tqdm
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from mfi import catalog, data, experiments, infer, io, metrics, rtc, strata  # noqa: E402
+from mfi import catalog, data, experiments, infer, io, metrics, rtc  # noqa: E402
 
 LEVEL = "level4"
 G0_CACHE = catalog.DATA / "interim" / "chip_cache_gamma0"

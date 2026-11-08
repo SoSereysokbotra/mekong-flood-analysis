@@ -13,7 +13,6 @@ happens only through scripts/level3_test.py after a selection is recorded.
 """
 from __future__ import annotations
 
-import json
 import pathlib
 import sys
 

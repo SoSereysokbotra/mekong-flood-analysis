@@ -29,6 +29,7 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from fetch_tier_b_imagery import OUT  # noqa: E402
 
@@ -83,7 +84,7 @@ def main():
     print(f"{len(water)} water candidates to review")
 
     cards = []
-    for i, row in tqdm(water.iterrows(), total=len(water), desc="thumbnails"):
+    for _i, row in tqdm(water.iterrows(), total=len(water), desc="thumbnails"):
         tid = row["tile_id"]
         d = OUT / tid / "optical"
         ev = next(iter(sorted(d.glob("falsecolour_event_*.tif"))), None)

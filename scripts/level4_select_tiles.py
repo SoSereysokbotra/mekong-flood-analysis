@@ -26,11 +26,11 @@ import sys
 
 import numpy as np
 import rasterio
-from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds, transform_geom
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, strata  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level4_cambodia import CACHE, DATES, MAPS, SUFFIX, aoi_grid  # noqa: E402
 
@@ -47,8 +47,6 @@ def main():
     # Coverage comes from the flood maps: a pixel is -1 exactly where the radar
     # was missing or the pixel is outside the province, so >= 0 on all three
     # dates means usable everywhere. Avoids needing the multi-GB scene caches.
-    import rasterio
-
     cov = np.ones(inside.shape, bool)
     for date in DATES:
         f = MAPS / f"otsu_vh_global_{date}{SUFFIX}.tif"

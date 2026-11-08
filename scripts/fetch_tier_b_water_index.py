@@ -24,12 +24,12 @@ import pathlib
 import sys
 
 import numpy as np
-import rasterio
 from rasterio.enums import Resampling
 from tqdm import tqdm
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, io  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from fetch_tier_b_imagery import OUT, tile_grid, write  # noqa: E402
 

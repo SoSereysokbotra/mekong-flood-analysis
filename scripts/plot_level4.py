@@ -21,6 +21,7 @@ from matplotlib.patches import Rectangle  # noqa: E402
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi import catalog, experiments  # noqa: E402
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from level4_cambodia import MAPS, METHODS, SUFFIX, aoi_grid  # noqa: E402
 from level5_change_detection import PEAK, POST, PRE  # noqa: E402
