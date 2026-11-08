@@ -12,7 +12,10 @@ import pytest
 from mfi import experiments
 
 pytestmark = pytest.mark.slow
-TOL_KM2 = 0.1     # check_flood rounds to 0.1 km2
+# check_flood rounds to 0.1 km2 (up to 0.05 error) and fp16 (GPU) vs fp32 (CPU) can flip a few hundred
+# borderline pixels (~0.1 km2; Gemini review). Measured on the RTX 3050: max |diff| 0.043 km2.
+# 0.2 km2 = 500 pixels of ~15 million, still far below any real change to a model or the pipeline.
+TOL_KM2 = 0.2
 
 
 @pytest.fixture(scope="module")

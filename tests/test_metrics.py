@@ -24,6 +24,15 @@ def test_counts_and_ratios_by_hand():
     assert m["f1"] == pytest.approx(4 / 6)
 
 
+def test_precision_and_recall_are_not_swapped():
+    # FP != FN, so swapping the two formulas would fail (Gemini review: the case above has FP == FN)
+    # pred: 1 1 1 0 0 ; label: 1 1 0 1 1 -> tp 2, fp 1, fn 2
+    m = score([1, 1, 1, 0, 0], [1, 1, 0, 1, 1], [C] * 5)["cropland"]
+    assert m["precision"] == pytest.approx(2 / 3)
+    assert m["recall"] == pytest.approx(2 / 4)
+    assert m["iou"] == pytest.approx(2 / 5)
+
+
 def test_ignored_pixels_never_count():
     # the two label -1 pixels are predicted water; they must not become false positives
     m = score([1, 1, 1, 0], [1, -1, -1, 0], [C] * 4)["all"]

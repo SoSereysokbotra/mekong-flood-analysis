@@ -88,7 +88,10 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
 - [x] `ruff` added with project settings; 198 findings fixed or checked. 7 × B023 checked by hand
   (closures called in the same loop pass, harmless) and allowed per file. Long lines (E501) left for Phase 2.
 - [x] GitHub Actions `.github/workflows/ci.yml`: ruff + fast tests on every push, without PyTorch.
-- [ ] Gemini review of Phase 1.
+- [x] Gemini review of Phase 1 (8 Nov 2026). Accepted: precision/recall swap test (FP != FN), golden tolerance
+  0.1 -> 0.2 km² (rounding + fp16/fp32; GPU max diff measured 0.043), new tests for the selection guard,
+  the nearest-pass tie rule and the threshold map. Not accepted: running the 882 km² threshold golden test on
+  GitHub, because the cached radar is not in the repo. Gemini's CPU figure (1,131.4) was not re-measured.
 
 ## Phase 2: maintainability, clean structure (~1–2 weeks)
 
