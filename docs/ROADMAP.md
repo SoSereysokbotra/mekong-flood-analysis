@@ -103,7 +103,7 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
   the script becomes a few lines that call it.
 - [x] Same for the Level 7 report (`scripts/level7_report.py`, `level7_district_areas.py`).
 - [x] One command-line tool: `mfi check --date ... --province ...` (entry point in `pyproject.toml`).
-- [ ] Move settings into `configs/` (thresholds, tracks, provinces, file paths), not hard-coded.
+- [x] Move settings into `configs/` (thresholds, tracks, provinces, file paths), not hard-coded.
 - [ ] Pin library versions in a lock file (`uv lock` or `pip-tools`).
 - [ ] Type hints + docstrings on public functions.
 - [ ] Delete or move the untracked `scratch_check_*.py` files (re-checks from the Gemini audit).

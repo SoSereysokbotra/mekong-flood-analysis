@@ -43,6 +43,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from mfi.check import (  # noqa: F401
     ADM1,
     ADM2,
+    DEFAULT_GAP,
+    DEFAULT_YEARS,
     MIN_COVERAGE,
     NAMES,
     OUT,
@@ -70,8 +72,8 @@ from mfi.check import (  # noqa: F401
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--date", help="YYYY-MM-DD; default: the latest radar pass")
-    ap.add_argument("--gap", type=int, default=18, help="days between 'before' and the date (default 18)")
-    ap.add_argument("--years", type=int, default=3, help="previous years to compare with (default 3; 0 = none)")
+    ap.add_argument("--gap", type=int, default=DEFAULT_GAP, help=f"days between 'before' and the date (default {DEFAULT_GAP})")
+    ap.add_argument("--years", type=int, default=DEFAULT_YEARS, help=f"previous years to compare with (default {DEFAULT_YEARS}; 0 = none)")
     ap.add_argument("--province", help="default Banteay Meanchey; e.g. Battambang, 'Siem Reap'")
     ap.add_argument("--track", help="force a track, e.g. 99, 99a (ascending) or 164d (descending)")
     a = ap.parse_args()

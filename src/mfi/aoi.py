@@ -13,14 +13,17 @@ from rasterio.features import geometry_mask
 from rasterio.warp import transform_geom
 
 from mfi import catalog, io, rtc, strata
+from mfi.config import load_check_config
+
+_CFG = load_check_config()
 
 AOI_EPSG = 32648
 # Grid resolution in metres. 20 m (2x the native 10 m) is the product; a
 # coarser value is a cheap preview when the link to the data is slow.
-RES_M = float(os.environ.get("MFI_LEVEL4_RES_M", "20"))
+RES_M = float(os.environ.get("MFI_LEVEL4_RES_M", str(_CFG.resolution_m)))
 CACHE = catalog.DATA / "interim" / "level4"
-METHODS = ["otsu_vh_global", "unet_vv_ce", "unet_vvvh_cropw"]
-SUFFIX = "" if RES_M == 20 else f"_{int(RES_M)}m"
+METHODS = list(_CFG.methods)
+SUFFIX = "" if RES_M == _CFG.resolution_m else f"_{int(RES_M)}m"
 DISTRICTS = catalog.DATA / "aoi" / "banteay_meanchey_adm2.geojson"
 
 

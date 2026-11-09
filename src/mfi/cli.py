@@ -6,13 +6,16 @@ import sys
 from typing import Sequence
 
 from mfi.check import CheckError, check_flood
+from mfi.config import load_check_config
 from mfi.report import build_report, run_district_areas
+
+_CFG = load_check_config()
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mfi",
-        description="Mekong Flood Intelligence — Sentinel-1 radar flood detection for Cambodia.",
+        description="Mekong Flood Intelligence - Sentinel-1 radar flood detection for Cambodia.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True, help="Available sub-commands")
 
@@ -22,8 +25,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Check whether a Cambodian province is flooded on a given date vs historical baselines.",
     )
     p_check.add_argument("--date", help="YYYY-MM-DD; default: the latest radar pass")
-    p_check.add_argument("--gap", type=int, default=18, help="days between 'before' and the date (default 18)")
-    p_check.add_argument("--years", type=int, default=3, help="previous years to compare with (default 3; 0 = none)")
+    p_check.add_argument(
+        "--gap",
+        type=int,
+        default=_CFG.default_gap_days,
+        help=f"days between 'before' and the date (default {_CFG.default_gap_days})",
+    )
+    p_check.add_argument(
+        "--years",
+        type=int,
+        default=_CFG.default_comparison_years,
+        help=f"previous years to compare with (default {_CFG.default_comparison_years}; 0 = none)",
+    )
     p_check.add_argument("--province", help="default Banteay Meanchey; e.g. Battambang, 'Siem Reap'")
     p_check.add_argument("--track", help="force a track, e.g. 99, 99a (ascending) or 164d (descending)")
 

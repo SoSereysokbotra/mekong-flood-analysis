@@ -1,0 +1,29 @@
+# Mekong Flood Intelligence - Flood check configuration
+# Settings for province-level flood detection and multi-year baseline comparison.
+
+# Grid resolution in metres (20 m = 2x native 10 m Sentinel-1 resolution).
+resolution_m: 20.0
+
+# Temporal baseline settings
+default_gap_days: 18
+default_comparison_years: 3
+
+# Verdict classification rule:
+# Unusual if flooded cropland > verdict_ratio * median(previous years) AND > verdict_min_km2
+verdict_ratio: 2.0
+verdict_min_km2: 50.0
+
+# Minimum valid coverage fraction of province (below this, report warns of incomplete coverage)
+min_coverage: 0.95
+
+# Study track for Banteay Meanchey anchor analysis
+study_track:
+  rel_orbit: 164
+  orbit_state: descending
+
+# Models to evaluate and the primary selected model
+methods:
+  - otsu_vh_global
+  - unet_vv_ce
+  - unet_vvvh_cropw
+selected_method: unet_vvvh_cropw

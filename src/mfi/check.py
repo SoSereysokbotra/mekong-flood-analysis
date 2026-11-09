@@ -33,15 +33,21 @@ from mfi.aoi import (
     s1_on_aoi,
     write_map,
 )
+from mfi.config import load_check_config
 
 
 class CheckError(Exception):
     """Raised when flood check inputs or conditions are invalid."""
 
-SEL = "unet_vvvh_cropw"
-VERDICT_RATIO = 2.0
-VERDICT_MIN_KM2 = 50.0
-MIN_COVERAGE = 0.95        # below this the province is not fully seen; say so
+
+_CFG = load_check_config()
+
+SEL = _CFG.selected_method
+VERDICT_RATIO = _CFG.verdict_ratio
+VERDICT_MIN_KM2 = _CFG.verdict_min_km2
+MIN_COVERAGE = _CFG.min_coverage
+DEFAULT_GAP = _CFG.default_gap_days
+DEFAULT_YEARS = _CFG.default_comparison_years
 OUT = experiments.RESULTS / "check"
 ADM1 = catalog.DATA / "aoi" / "khm_adm1_geoboundaries.geojson"
 ADM2 = catalog.DATA / "aoi" / "khm_adm2_geoboundaries.geojson"
@@ -81,7 +87,7 @@ class Region:
             self.geom = catalog.aoi_geometry()
             self.bbox = catalog.aoi_bbox()
             self.districts = gpd.read_file(DISTRICTS)[["shapeName", "geometry"]]
-            self.track = (catalog.ANCHOR_REL_ORBIT, catalog.ANCHOR_ORBIT_STATE)
+            self.track = (_CFG.study_track.rel_orbit, _CFG.study_track.orbit_state)
         else:
             prov = gpd.read_file(ADM1)
             hit = prov[prov["shapeName"].map(key) == key(name)]
@@ -397,8 +403,8 @@ def write_outputs(region: Region, date: str, platform: str, pre_date: str, pre_p
 
 def check_flood(
     date: str | None = None,
-    gap: int = 18,
-    years: int = 3,
+    gap: int = DEFAULT_GAP,
+    years: int = DEFAULT_YEARS,
     province: str | None = None,
     track: str | None = None,
 ) -> pathlib.Path:
