@@ -102,7 +102,7 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
 - [x] Move the logic out of `scripts/check_flood.py` into the library (e.g. `src/mfi/check.py`);
   the script becomes a few lines that call it.
 - [x] Same for the Level 7 report (`scripts/level7_report.py`, `level7_district_areas.py`).
-- [ ] One command-line tool: `mfi check --date ... --province ...` (entry point in `pyproject.toml`).
+- [x] One command-line tool: `mfi check --date ... --province ...` (entry point in `pyproject.toml`).
 - [ ] Move settings into `configs/` (thresholds, tracks, provinces, file paths), not hard-coded.
 - [ ] Pin library versions in a lock file (`uv lock` or `pip-tools`).
 - [ ] Type hints + docstrings on public functions.

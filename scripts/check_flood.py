@@ -79,7 +79,8 @@ def main():
     try:
         check_flood(date=a.date, gap=a.gap, years=a.years, province=a.province, track=a.track)
     except CheckError as e:
-        sys.exit(str(e))
+        print(e, file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

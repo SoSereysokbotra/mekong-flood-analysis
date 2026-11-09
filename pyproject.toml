@@ -25,6 +25,9 @@ dependencies = [
 ml = ["torchgeo", "segmentation-models-pytorch"]
 dev = ["pytest", "ruff", "jupyter", "ipykernel"]
 
+[project.scripts]
+mfi = "mfi.cli:main"
+
 [build-system]
 requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
