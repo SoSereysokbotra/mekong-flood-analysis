@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import os
 import pathlib
-import sys
 
 import numpy as np
 import rasterio
@@ -56,7 +55,9 @@ def s1_on_aoi(date: str, grid: io.Grid) -> np.ndarray:
     items = rtc.rtc_items(catalog.aoi_bbox(), date, date,
                           rel_orbit=catalog.ANCHOR_REL_ORBIT, orbit_state=catalog.ANCHOR_ORBIT_STATE)
     if not items:
-        sys.exit(f"no RTC items for {date} on track {catalog.ANCHOR_REL_ORBIT}")
+        from mfi.check import CheckError
+
+        raise CheckError(f"no RTC items for {date} on track {catalog.ANCHOR_REL_ORBIT}")
     print(f"  {date}: {len(items)} RTC slice(s)", flush=True)
     s1 = rtc.rtc_db_on_grid(items, grid)
     CACHE.mkdir(parents=True, exist_ok=True)

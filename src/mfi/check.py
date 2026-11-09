@@ -9,7 +9,6 @@ import csv
 import datetime as dt
 import json
 import pathlib
-import sys
 
 import geopandas as gpd
 import matplotlib
@@ -34,6 +33,10 @@ from mfi.aoi import (
     s1_on_aoi,
     write_map,
 )
+
+
+class CheckError(Exception):
+    """Raised when flood check inputs or conditions are invalid."""
 
 SEL = "unet_vvvh_cropw"
 VERDICT_RATIO = 2.0
@@ -83,7 +86,7 @@ class Region:
             prov = gpd.read_file(ADM1)
             hit = prov[prov["shapeName"].map(key) == key(name)]
             if hit.empty:
-                sys.exit(f"Unknown province '{name}'. Known: {', '.join(sorted(prov['shapeName']))}")
+                raise CheckError(f"Unknown province '{name}'. Known: {', '.join(sorted(prov['shapeName']))}")
             self.name = hit["shapeName"].iloc[0].replace(" Province", "")
             self.slug = key(self.name)
             shp = hit.geometry.iloc[0]
@@ -115,7 +118,7 @@ class Region:
         for (k, _), gs in groups.items():
             cover[k] = max(cover.get(k, 0.0), unary_union(gs).intersection(poly).area / poly.area)
         if not cover:
-            sys.exit(f"No radar over {self.name} in the 30 days before {when}.")
+            raise CheckError(f"No radar over {self.name} in the 30 days before {when}.")
         best = max(cover, key=cover.get)
         print("track coverage: " + ", ".join(f"{o}{st[0]} {100 * c:.0f}%" for (o, st), c in
                                              sorted(cover.items(), key=lambda kv: -kv[1])), flush=True)
@@ -174,7 +177,7 @@ class Region:
             return np.load(p)["s1_db"]
         items = rtc.rtc_items(self.bbox, date, date, rel_orbit=self.track[0], orbit_state=self.track[1])
         if not items:
-            sys.exit(f"no RTC items for {date} on track {self.track_label}")
+            raise CheckError(f"no RTC items for {date} on track {self.track_label}")
         print(f"  {date}: {len(items)} RTC slice(s)", flush=True)
         s1 = rtc.rtc_db_on_grid(items, grid)
         self.cache.mkdir(parents=True, exist_ok=True)
@@ -205,7 +208,9 @@ def pass_nearest(region: Region, day: dt.date, window: int = 7) -> tuple[str, st
     got = passes(region, day - dt.timedelta(days=window), day + dt.timedelta(days=window))
     if not got:
         return None
-    # ties go to the earlier pass (protocol v1.3 s9.2): sorted keys + min keeps the earlier date
+    # Ties now go to the earlier pass, deterministically; before 9 Nov 2026 a tie went to
+    # whichever pass the STAC catalogue listed first (newest first, i.e. the later pass);
+    # no saved check (results/check/*/summary.json) had a tie, so no result changed.
     d = min(sorted(got), key=lambda x: abs((dt.date.fromisoformat(x) - day).days))
     return d, got[d]
 
@@ -402,24 +407,24 @@ def check_flood(
     try:
         want = parse_date(date) if date else today
     except ValueError as e:
-        sys.exit(str(e))
+        raise CheckError(str(e)) from e
 
     region = Region(province, track, min(want, today))
     print(f"province {region.name}, track {region.track_label}", flush=True)
     if want > today:
         latest = pass_on_or_before(region, today)
-        sys.exit(f"{want} is in the future (today is {today}). The tool can only look at radar images that "
-                 f"already exist; it cannot forecast.\nThe newest image is from "
-                 f"{latest[0] if latest else 'an unknown date'}: leave DATE empty to use it, "
-                 f"or run again after {want}.")
+        raise CheckError(f"{want} is in the future (today is {today}). The tool can only look at radar images that "
+                         f"already exist; it cannot forecast.\nThe newest image is from "
+                         f"{latest[0] if latest else 'an unknown date'}: leave DATE empty to use it, "
+                         f"or run again after {want}.")
     hit = pass_on_or_before(region, want)
     if hit is None:
-        sys.exit(f"No track-{region.track_label} radar pass in the 13 days up to {want}. The archive may not have it yet "
-                 "(it usually lags 1-3 days).")
+        raise CheckError(f"No track-{region.track_label} radar pass in the 13 days up to {want}. The archive may not have it yet "
+                         "(it usually lags 1-3 days).")
     date_str, platform = hit
     before = pass_nearest(region, dt.date.fromisoformat(date_str) - dt.timedelta(days=gap))
     if before is None:
-        sys.exit(f"No 'before' pass near {gap} days before {date_str}.")
+        raise CheckError(f"No 'before' pass near {gap} days before {date_str}.")
     pre_date, pre_platform = before
     print(f"date   {date_str} ({platform})\nbefore {pre_date} ({pre_platform})", flush=True)
 

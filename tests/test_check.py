@@ -7,6 +7,9 @@ import numpy as np
 import pytest
 
 from mfi.check import (
+    CheckError,
+    Region,
+    check_flood,
     compute_flood,
     compute_verdicts,
     key,
@@ -79,7 +82,7 @@ def test_pass_nearest_tie_goes_to_earlier_pass(monkeypatch):
         lambda region, start, end: {"2026-10-02": "sentinel-1a", "2026-10-06": "sentinel-1a"},
     )
     # Day Oct 4 is exactly 2 days from Oct 2 and 2 days from Oct 6.
-    # Protocol rule: ties go to the earlier pass.
+    # Ties go to the earlier pass deterministically.
     res = pass_nearest(None, dt.date(2026, 10, 4))
     assert res == ("2026-10-02", "sentinel-1a")
 
@@ -138,3 +141,23 @@ def test_compute_verdicts():
     v_nobase = compute_verdicts(now_unusual, {})
     assert v_nobase["unet_vvvh_cropw"]["verdict"] is None
     assert v_nobase["unet_vvvh_cropw"]["baseline_median_km2"] is None
+
+
+def test_check_flood_future_date_raises_check_error(monkeypatch):
+    import mfi.check
+
+    # Mock pass_on_or_before so no remote network/STAC call occurs
+    monkeypatch.setattr(mfi.check, "pass_on_or_before", lambda region, day, window=13: ("2026-10-02", "sentinel-1a"))
+    future = (dt.date.today() + dt.timedelta(days=30)).isoformat()
+    with pytest.raises(CheckError, match="is in the future"):
+        check_flood(date=future)
+
+
+def test_check_flood_invalid_date_raises_check_error():
+    with pytest.raises(CheckError, match="Cannot read the date"):
+        check_flood(date="2026-99-99")
+
+
+def test_region_unknown_province_raises_check_error():
+    with pytest.raises(CheckError, match="Unknown province"):
+        Region("Atlantis")

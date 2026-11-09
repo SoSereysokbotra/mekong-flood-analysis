@@ -49,6 +49,7 @@ from mfi.check import (  # noqa: F401
     SEL,
     VERDICT_MIN_KM2,
     VERDICT_RATIO,
+    CheckError,
     Predictor,
     Region,
     check_flood,
@@ -75,7 +76,10 @@ def main():
     ap.add_argument("--track", help="force a track, e.g. 99, 99a (ascending) or 164d (descending)")
     a = ap.parse_args()
 
-    check_flood(date=a.date, gap=a.gap, years=a.years, province=a.province, track=a.track)
+    try:
+        check_flood(date=a.date, gap=a.gap, years=a.years, province=a.province, track=a.track)
+    except CheckError as e:
+        sys.exit(str(e))
 
 
 if __name__ == "__main__":
