@@ -17,6 +17,10 @@ When Claude finishes **each task** (each checkbox), Claude ends its message with
 Claude checks each Gemini finding on merit: fix it if it is right, explain if it is wrong.
 A task is ticked `[x]` only after the Gemini review is resolved.
 
+**From Phase 2 on (user's choice, 9 Nov 2026): roles swap.** Gemini writes the code; Claude writes the task
+prompt for Gemini and then reviews Gemini's commit (correctness, project rules, tests, the 2020 numbers).
+Claude fixes nothing itself unless asked; review findings go back to Gemini as a prompt.
+
 ### Gemini prompt template
 
 Claude fills in the `<...>` parts. The prompt must name exact files and commits, so Gemini can
