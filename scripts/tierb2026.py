@@ -323,8 +323,8 @@ def pd_concat(a, b):
 
 
 def score():
-    from check_flood import Predictor, s1_retry
-    from level4_cambodia import METHODS, ancillary, aoi_grid
+    from mfi.aoi import METHODS, ancillary, aoi_grid
+    from mfi.check import Predictor, s1_retry
 
     sel = selected()
     radar = sel["radar_date"]

@@ -21,20 +21,19 @@ TOL_KM2 = 0.2
 @pytest.fixture(scope="module")
 def result():
     pytest.importorskip("torch")
-    import check_flood
-    from level4_cambodia import CACHE, METHODS, aoi_grid
     from level5_change_detection import PEAK, PRE
+
+    from mfi.aoi import CACHE, METHODS, ancillary, aoi_grid
+    from mfi.check import Predictor, flood_pair
 
     need = [CACHE / f"s1_{PRE}.npz", CACHE / f"s1_{PEAK}.npz", CACHE / "ancillary.npz"]
     need += [experiments.run_dir(experiments.level3_dir(), m) / "best.pt" for m in METHODS if m.startswith("unet")]
     missing = [str(p) for p in need if not p.exists()]
     if missing:
         pytest.skip(f"local cache or checkpoints missing: {missing}")
-    check_flood.REGION = None                        # the study province, original grid and cache
     grid, inside = aoi_grid()
-    from level4_cambodia import ancillary
     land, _, slope = ancillary(grid)
-    return check_flood.flood_pair(check_flood.Predictor(slope), grid, inside, land, PRE, PEAK)["methods"]
+    return flood_pair(Predictor(slope), grid, inside, land, PRE, PEAK)["methods"]
 
 
 @pytest.mark.parametrize("method,km2", [("otsu_vh_global", 882), ("unet_vv_ce", 1131), ("unet_vvvh_cropw", 1218)])

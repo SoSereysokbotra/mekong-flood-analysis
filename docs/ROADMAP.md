@@ -99,7 +99,7 @@ For each problem: file, line, what is wrong, how to fix. Say "no problems found"
 
 ## Phase 2: maintainability, clean structure (~1–2 weeks)
 
-- [ ] Move the logic out of `scripts/check_flood.py` into the library (e.g. `src/mfi/check.py`);
+- [x] Move the logic out of `scripts/check_flood.py` into the library (e.g. `src/mfi/check.py`);
   the script becomes a few lines that call it.
 - [ ] Same for the Level 7 report (`scripts/level7_report.py`, `level7_district_areas.py`).
 - [ ] One command-line tool: `mfi check --date ... --province ...` (entry point in `pyproject.toml`).
